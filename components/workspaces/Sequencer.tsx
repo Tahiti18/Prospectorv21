@@ -22,14 +22,33 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
       // 1. Check Dossier first (Pre-drafted by Campaign Architect)
       const dossier = dossierStorage.getByLead(lead.id);
       if (dossier && dossier.data.outreach?.emailSequence) {
-          const emails = dossier.data.outreach.emailSequence.map((e: any, i: number) => ({
-              day: (i * 2) + 1,
-              channel: 'EMAIL',
-              purpose: i === 0 ? 'Initial Hook' : 'Value Expansion',
-              subject: e.subject,
-              body: e.body
-          }));
-          setSequence(emails);
+          // Flatten all channels into a single timeline
+          const strikePlan: any[] = [];
+          
+          // Map Emails
+          dossier.data.outreach.emailSequence.forEach((e: any, i: number) => {
+              strikePlan.push({
+                  day: e.day || (i * 4) + 1, // Fallback to spacing if AI didn't provide
+                  channel: 'EMAIL',
+                  purpose: e.purpose || (i === 0 ? 'Initial Hook' : 'Value Expansion'),
+                  subject: e.subject,
+                  body: e.body
+              });
+          });
+
+          // Map LinkedIn if present
+          if (Array.isArray(dossier.data.outreach.linkedinSequence)) {
+              dossier.data.outreach.linkedinSequence.forEach((l: any) => {
+                  strikePlan.push({
+                      day: l.day || 3,
+                      channel: 'LINKEDIN',
+                      purpose: 'Social Indoctrination',
+                      body: l.message
+                  });
+              });
+          }
+
+          setSequence(strikePlan.sort((a, b) => a.day - b.day));
           setIsLoading(false);
           return;
       }
@@ -37,7 +56,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
       // 2. Otherwise Generate New
       try {
         const steps = await generateOutreachSequence(lead);
-        setSequence(steps);
+        setSequence(steps.sort((a: any, b: any) => a.day - b.day));
       } catch (e) {
         console.error(e);
         toast.error("Campaign Architect Uplink Failed.");
@@ -63,12 +82,12 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
           <h1 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none">
             ENGAGEMENT <span className="text-emerald-500 not-italic">SEQUENCE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">Multi-Channel Deployment for {lead.businessName}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">25-Day Multi-Channel Strike for {lead.businessName}</p>
         </div>
         <div className="flex gap-4">
            <div className="bg-emerald-600/10 border border-emerald-500/20 px-4 py-2 rounded-xl flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">AUTO_DRIP_ARMED</span>
+              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">STRIKE_ROADMAP_ACTIVE</span>
            </div>
         </div>
       </div>
@@ -82,7 +101,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
                 <div className="absolute inset-0 flex items-center justify-center text-2xl">✍️</div>
              </div>
              <div className="text-center space-y-2">
-                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Drafting Multi-Day Sequence...</p>
+                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Engineering 25-Day Roadmap...</p>
                 <p className="text-[9px] text-slate-600 uppercase tracking-widest italic">NEURAL COPYWRITING CORE ACTIVE</p>
              </div>
           </div>
@@ -102,7 +121,11 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
                   <div className="flex-1 space-y-6 min-w-0">
                      <div className="flex justify-between items-center">
                         <div className="flex items-center gap-4">
-                            <span className="px-4 py-1.5 bg-emerald-600/10 border border-emerald-500/20 rounded-xl text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">
+                            <span className={`px-4 py-1.5 border rounded-xl text-[9px] font-black uppercase tracking-[0.2em] ${
+                                step.channel === 'EMAIL' ? 'bg-emerald-600/10 border-emerald-500/20 text-emerald-400' :
+                                step.channel === 'LINKEDIN' ? 'bg-indigo-600/10 border-indigo-500/20 text-indigo-400' :
+                                'bg-slate-900 border-slate-800 text-slate-400'
+                            }`}>
                                {step.channel || 'EMAIL'}
                             </span>
                             <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest border-l border-slate-800 pl-4">{step.purpose || 'Strategic Outreach'}</span>
@@ -117,14 +140,14 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
                             </div>
                         )}
                         <div className="text-slate-300 text-sm leading-[1.8] italic font-medium p-8 bg-slate-950/50 rounded-[32px] border border-slate-800/60 group-hover:border-emerald-500/20 transition-colors whitespace-pre-wrap font-serif">
-                          "{step.body}"
+                          "{step.body || step.message}"
                         </div>
                      </div>
                   </div>
 
                   <div className="md:w-56 flex flex-col items-center justify-center gap-4 border-l border-slate-800/50 pl-12 shrink-0">
                      <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800">
-                        SEND TEST
+                        LAUNCH STEP
                      </button>
                      <button className="w-full bg-slate-900 border border-slate-800 text-slate-600 hover:text-white py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all">
                         EDIT COPY
