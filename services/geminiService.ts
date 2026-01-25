@@ -1,6 +1,6 @@
 
 /* =========================================================
-   OPENROUTER SERVICE – POMELLI OS V21 (GEMINI 3.0 FLASH)
+   OPENROUTER SERVICE – POMELLI OS V22 (KEY PERSISTENCE)
    ========================================================= */
 
 import { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity } from "../types";
@@ -9,6 +9,9 @@ export type { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, Engin
 
 // Definitive OpenRouter Model ID for the newest Gemini 3.0 Flash architecture
 const DEFAULT_MODEL = "google/gemini-3-flash-preview"; 
+
+const KEY_STORAGE_OR = 'pomelli_os_or_key';
+const KEY_STORAGE_KIE = 'pomelli_os_kie_key';
 
 export const SESSION_ASSETS: AssetRecord[] = [];
 export const PRODUCTION_LOGS: string[] = [];
@@ -25,6 +28,24 @@ export function pushLog(message: string) {
   PRODUCTION_LOGS.unshift(entry);
   if (PRODUCTION_LOGS.length > 200) PRODUCTION_LOGS.pop();
   logListeners.forEach(l => l([...PRODUCTION_LOGS]));
+}
+
+/* =========================================================
+   PERSISTENCE LOGIC
+   ========================================================= */
+
+export function getStoredKeys() {
+  return {
+    openRouter: localStorage.getItem(KEY_STORAGE_OR) || "",
+    kie: localStorage.getItem(KEY_STORAGE_KIE) || ""
+  };
+}
+
+export function setStoredKeys(orKey: string, kieKey: string) {
+  if (orKey) localStorage.setItem(KEY_STORAGE_OR, orKey);
+  if (kieKey) localStorage.setItem(KEY_STORAGE_KIE, kieKey);
+  pushLog("INFRASTRUCTURE_KEY_COMMIT: Keys updated and persisted.");
+  return true;
 }
 
 /* =========================================================
@@ -86,20 +107,13 @@ export function importVault(assets: AssetRecord[]) {
    OPENROUTER CORE CLIENT & PARSER
    ========================================================= */
 
-/**
- * Robustly extracts JSON from AI responses that may contain markdown or chatter.
- */
 function extractJSON(text: string): any {
   try {
-    // 1. Try direct parse
     return JSON.parse(text);
   } catch (e) {
     try {
-      // 2. Look for JSON markdown block
       const match = text.match(/```json\s*([\s\S]*?)\s*```/);
       if (match && match[1]) return JSON.parse(match[1]);
-      
-      // 3. Brute force envelope find
       const start = text.indexOf('{');
       const end = text.lastIndexOf('}');
       if (start !== -1 && end !== -1) {
@@ -114,10 +128,15 @@ function extractJSON(text: string): any {
 
 async function callOpenRouter(prompt: string, systemInstruction?: string): Promise<GeminiResult<string>> {
   try {
-    const apiKey = process.env.API_KEY;
+    const keys = getStoredKeys();
+    const apiKey = keys.openRouter || process.env.API_KEY;
     const modelId = DEFAULT_MODEL;
 
-    pushLog(`NEURAL_UPLINK: Routing to OpenRouter Gemini 3.0 Flash...`);
+    if (!apiKey) {
+        throw new Error("AUTHORIZATION_REQUIRED: Set OpenRouter key in Settings.");
+    }
+
+    pushLog(`NEURAL_UPLINK: Connecting via 3.0 Flash Architecture...`);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -130,7 +149,7 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
       body: JSON.stringify({
         model: modelId,
         messages: [
-          { role: "system", content: systemInstruction || "You are Prospector OS, powered by Gemini 3.0 Flash. Output ONLY raw JSON when requested. No conversational chatter." },
+          { role: "system", content: systemInstruction || "You are Prospector OS. Output ONLY raw JSON when requested. No chatter." },
           { role: "user", content: prompt }
         ]
       })
@@ -166,40 +185,40 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
    ========================================================= */
 
 export async function generateLeads(market: string, niche: string, count: number): Promise<EngineResult> {
-  pushLog(`RECON_INIT: Scouring Knowledge Base for ${market} businesses in ${niche} via Gemini 3.0...`);
+  pushLog(`RECON_INIT: Analyzing ${market} for ${niche} prospects...`);
   
-  const prompt = `Identify ${count} real-world, high-ticket businesses physically located in ${market} specifically within the ${niche} niche.
+  const prompt = `Identify ${count} real-world, high-ticket businesses located in ${market} specifically within the ${niche} niche.
   
   CRITICAL: You must only select businesses that exhibit identifiable Digital Deficiencies (Outdated design, no video content, poor social engagement).
   
-  Return a raw JSON object with this structure:
+  Return a raw JSON object with this EXACT structure:
   {
     "leads": [
       {
-        "businessName": "Exact Business Name",
+        "businessName": "Exact Name",
         "websiteUrl": "https://...",
         "niche": "${niche}",
         "city": "${market}",
-        "phone": "Real Phone Number",
-        "email": "Real Email or Not found",
+        "phone": "Phone Number",
+        "email": "Email or Not found",
         "leadScore": 0-100,
         "assetGrade": "A/B/C",
-        "socialGap": "Detailed description of their digital infrastructure gap",
-        "visualProof": "Brief proof of gap",
-        "bestAngle": "Strategic pitch hook",
+        "socialGap": "Description of gap",
+        "visualProof": "Brief proof",
+        "bestAngle": "Pitch hook",
         "rank": 1
       }
     ],
     "rubric": {
        "visual": "Criteria used",
-       "social": "Deficit logic",
+       "social": "Logic for gap",
        "highTicket": "Plausibility logic",
        "reachability": "Contact logic",
        "grades": { "A": "Elite", "B": "Viable", "C": "Legacy" }
     },
     "assets": {
-       "emailOpeners": ["Hook 1", "Hook 2"],
-       "fullEmail": "Email Template",
+       "emailOpeners": ["Opener 1", "Opener 2"],
+       "fullEmail": "Template",
        "callOpener": "Script",
        "voicemail": "Script",
        "smsFollowup": "Script"
@@ -212,16 +231,16 @@ export async function generateLeads(market: string, niche: string, count: number
 
   const data = extractJSON(result.text);
   if (data && data.leads) {
-    pushLog(`RECON_SUCCESS: ${data.leads.length} grounded targets synced.`);
+    pushLog(`RECON_SUCCESS: ${data.leads.length} targets synced to ledger.`);
     return data;
   } else {
-    pushLog(`PARSING_ERROR: Node returned unparseable sequence.`);
+    pushLog(`PARSING_ERROR: Response structure violation.`);
     return { leads: [], rubric: {} as any, assets: {} as any };
   }
 }
 
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
-  const prompt = `Perform strategic architecture for ${lead.businessName}. Return a complete campaign JSON with slides, executive narrative, 5-stage funnel, outreach scripts, and visual direction.`;
+  const prompt = `Perform strategic architecture for ${lead.businessName}. Return a complete campaign JSON with slides, narrative, funnel, outreach scripts, and visual direction.`;
   const result = await callOpenRouter(prompt);
   return result.ok ? extractJSON(result.text) : {};
 }
@@ -260,8 +279,6 @@ export async function generateAgencyIdentity(niche: string, region: string): Pro
 export async function fetchViralPulseData(niche: string): Promise<any[]> { return []; }
 export async function queryRealtimeAgent(prompt: string): Promise<{ text: string, sources: any[] }> { return { text: "", sources: [] }; }
 export async function testModelPerformance(model: string, prompt: string): Promise<string> { return ""; }
-export function getStoredKeys() { return { openRouter: "PLATFORM_MANAGED", kie: "PLATFORM_MANAGED" }; }
-export function setStoredKeys(orKey: string, kieKey: string) { return true; }
 export async function loggedGenerateContent(params: { module: string; contents: string | any; config?: any; }): Promise<string> { 
     const res = await callOpenRouter(params.contents);
     return res.text;
