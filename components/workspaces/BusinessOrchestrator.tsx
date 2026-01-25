@@ -24,6 +24,10 @@ interface BusinessOrchestratorProps {
 
 export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead }) => {
   const [selectedLeadId, setSelectedLeadId] = useState<string>(lockedLead?.id || '');
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [manualUrl, setManualUrl] = useState('');
+  
   const [packageData, setPackageData] = useState<any>(null);
   const [currentDossier, setCurrentDossier] = useState<StrategicDossier | null>(null);
   const [isOrchestrating, setIsOrchestrating] = useState(false);
@@ -31,7 +35,24 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [activeTab, setActiveTab] = useState<'strategy' | 'narrative' | 'content' | 'outreach' | 'visual' | 'funnel'>('strategy');
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   
-  const targetLead = leads.find(l => l.id === selectedLeadId);
+  const targetLead = useMemo(() => {
+    if (isManualMode) {
+      if (!manualName || !manualUrl) return null;
+      return {
+        id: `MANUAL-${Date.now()}`,
+        businessName: manualName,
+        websiteUrl: manualUrl,
+        niche: 'Custom Target',
+        city: 'Global',
+        rank: 0,
+        leadScore: 90,
+        assetGrade: 'A',
+        socialGap: 'Target entered via manual override protocol.',
+        status: 'cold'
+      } as Lead;
+    }
+    return leads.find(l => l.id === selectedLeadId);
+  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl]);
   
   const leadAssets = useMemo(() => {
     if (!targetLead) return [];
@@ -39,7 +60,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   }, [targetLead]);
 
   useEffect(() => {
-    if (targetLead) {
+    if (targetLead && !isManualMode) {
       const savedDossiers = dossierStorage.getAllByLead(targetLead.id);
       if (savedDossiers.length > 0) {
         setCurrentDossier(savedDossiers[0]);
@@ -49,18 +70,18 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         setPackageData(null);
       }
     }
-  }, [targetLead?.id]);
+  }, [targetLead?.id, isManualMode]);
 
   const handleOrchestrate = async () => {
     if (!targetLead) {
-        toast.info("Business selection required.");
+        toast.info(isManualMode ? "Identity and Website required." : "Business selection required.");
         return;
     }
     setIsOrchestrating(true);
     setPackageData(null); 
     
     try {
-      toast.neural("BUILDER: Initiating High-Density Strategy Synthesis...");
+      toast.neural(`BUILDER: Initiating Synthesis for ${targetLead.businessName}...`);
       const result = await orchestrateBusinessPackage(targetLead, leadAssets);
       
       const saved = dossierStorage.save(targetLead, result, leadAssets.map(a => a.id));
@@ -140,39 +161,77 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         <div className="lg:col-span-4 space-y-6">
-           <div className="bg-[#0b1021] border border-slate-800 rounded-[40px] p-10 shadow-2xl space-y-10">
-              <div className="space-y-4">
-                 <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">BUSINESS_TARGET</label>
-                 <div className="bg-[#020617] border border-slate-800 rounded-2xl p-4 shadow-inner">
-                    {targetLead ? (
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-black text-white uppercase italic tracking-tight">{targetLead.businessName}</span>
-                            <button onClick={() => setSelectedLeadId('')} className="text-slate-600 hover:text-rose-500 transition-colors">×</button>
-                        </div>
-                    ) : (
-                        <select 
-                          value={selectedLeadId}
-                          onChange={(e) => setSelectedLeadId(e.target.value)}
-                          className="w-full bg-transparent border-none text-sm font-bold text-slate-500 focus:outline-none cursor-pointer appearance-none uppercase italic"
-                        >
-                           <option value="">-- SELECT BUSINESS --</option>
-                           {leads.map(l => (
-                             <option key={l.id} value={l.id}>{l.businessName}</option>
-                           ))}
-                        </select>
-                    )}
-                 </div>
+           <div className="bg-[#0b1021] border border-slate-800 rounded-[40px] p-10 shadow-2xl space-y-8">
+              
+              {/* MODE TOGGLE */}
+              <div className="flex p-1 bg-[#020617] border border-slate-800 rounded-2xl mb-4">
+                 <button 
+                  onClick={() => setIsManualMode(false)}
+                  className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${!isManualMode ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                 >
+                   Ledger Selection
+                 </button>
+                 <button 
+                  onClick={() => setIsManualMode(true)}
+                  className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${isManualMode ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                 >
+                   Direct Entry
+                 </button>
               </div>
 
-              {targetLead && (
-                <button 
-                  onClick={handleOrchestrate}
-                  disabled={isOrchestrating}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white py-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
-                >
-                  {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
-                </button>
+              {isManualMode ? (
+                <div className="space-y-6 animate-in slide-in-from-top-2">
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">BUSINESS_IDENTITY</label>
+                      <input 
+                        value={manualName}
+                        onChange={(e) => setManualName(e.target.value)}
+                        placeholder="NAME OF COMPANY..."
+                        className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all uppercase placeholder-slate-700 shadow-inner"
+                      />
+                   </div>
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">WEBSITE_NODE</label>
+                      <input 
+                        value={manualUrl}
+                        onChange={(e) => setManualUrl(e.target.value)}
+                        placeholder="https://example.com"
+                        className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all placeholder-slate-700 shadow-inner"
+                      />
+                   </div>
+                </div>
+              ) : (
+                <div className="space-y-4 animate-in slide-in-from-bottom-2">
+                   <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">SELECT_FROM_LEDGER</label>
+                   <div className="bg-[#020617] border border-slate-800 rounded-2xl p-4 shadow-inner">
+                      {targetLead ? (
+                          <div className="flex items-center justify-between">
+                              <span className="text-sm font-black text-white uppercase italic tracking-tight">{targetLead.businessName}</span>
+                              <button onClick={() => setSelectedLeadId('')} className="text-slate-600 hover:text-rose-500 transition-colors">×</button>
+                          </div>
+                      ) : (
+                          <select 
+                            value={selectedLeadId}
+                            onChange={(e) => setSelectedLeadId(e.target.value)}
+                            className="w-full bg-transparent border-none text-sm font-bold text-slate-500 focus:outline-none cursor-pointer appearance-none uppercase italic"
+                          >
+                             <option value="">-- SELECT BUSINESS --</option>
+                             {leads.map(l => (
+                               <option key={l.id} value={l.id}>{l.businessName}</option>
+                             ))}
+                          </select>
+                      )}
+                   </div>
+                </div>
               )}
+
+              <button 
+                onClick={handleOrchestrate}
+                disabled={isOrchestrating || !targetLead}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white py-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
+              >
+                {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
+              </button>
               
               {packageData && (
                 <button 
