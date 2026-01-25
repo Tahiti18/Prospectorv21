@@ -1,6 +1,6 @@
 
 /* =========================================================
-   OPENROUTER SERVICE – POMELLI OS V24 (STRATEGIC CORE)
+   OPENROUTER SERVICE – POMELLI OS V25 (ELITE STRATEGIC CORE)
    ========================================================= */
 
 import { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity } from "../types";
@@ -108,16 +108,12 @@ export function importVault(assets: AssetRecord[]) {
 
 function extractJSON(text: string): any {
   try {
-    return JSON.parse(text);
+    const cleaned = text.replace(/```json\s*|```/gi, '').trim();
+    return JSON.parse(cleaned);
   } catch (e) {
     try {
-      const match = text.match(/```json\s*([\s\S]*?)\s*```/);
-      if (match && match[1]) return JSON.parse(match[1]);
-      const start = text.indexOf('{');
-      const end = text.lastIndexOf('}');
-      if (start !== -1 && end !== -1) {
-          return JSON.parse(text.substring(start, end + 1));
-      }
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) return JSON.parse(match[0]);
     } catch (inner) {
       console.error("JSON Extraction failed", inner);
     }
@@ -177,49 +173,65 @@ export async function generateLeads(market: string, niche: string, count: number
 }
 
 export async function architectFunnel(lead: Lead): Promise<any[]> {
-  pushLog(`FUNNEL: Mapping conversion geometry for ${lead.businessName}...`);
-  const prompt = `Architect a 6-stage High-Ticket AI Funnel for ${lead.businessName}. Return ONLY a JSON array: [ { "title": "Stage Name", "description": "Deep tactical description", "conversionGoal": "CLICK/OPT-IN/BOOK", "frictionFix": "How AI solves this stage" } ]`;
+  pushLog(`FUNNEL: Mapping 7-stage conversion geometry for ${lead.businessName}...`);
+  const prompt = `Architect a 7-stage High-Ticket AI Transformation Funnel for ${lead.businessName}. 
+  Include stages for: Discovery, Indoctrination, Proof, Commitment, Closing, Upsell, and Advocacy.
+  Return ONLY a JSON array: [ { "title": "Stage Name", "description": "Deep tactical description", "conversionGoal": "CLICK/OPT-IN/BOOK/DEPOSIT", "frictionFix": "How AI solves this stage" } ]`;
   const result = await callOpenRouter(prompt);
   const data = extractJSON(result.text);
   return Array.isArray(data) ? data : [];
 }
 
+export async function architectPitchDeck(lead: Lead): Promise<any> {
+  pushLog(`DECK: Engineering 7-slide strategic blueprint for ${lead.businessName}...`);
+  const prompt = `Create a 7-slide elite strategy deck architecture for ${lead.businessName}.
+  Slides: 1. Executive Vision, 2. The Digital Deficit (Audit), 3. Aesthetic Transformation, 4. AI-Driven Efficiency, 5. Market Competitive Edge, 6. ROI & Economic Impact, 7. Implementation Roadmap.
+  Return ONLY JSON: { "slides": [ { "title": "Slide Title", "bullets": ["Point 1", "Point 2", "Point 3"], "category": "VISION/AUDIT/DESIGN/TECH/MARKET/ROI/PLAN", "insight": "Strategic kicker" } ] }`;
+  const result = await callOpenRouter(prompt);
+  return extractJSON(result.text) || { slides: [] };
+}
+
 export async function generateProposalDraft(lead: Lead): Promise<string> {
-  pushLog(`PROPOSAL: Constructing executive blueprint for ${lead.businessName}...`);
+  pushLog(`PROPOSAL: Constructing high-density executive blueprint for ${lead.businessName}...`);
   const prompt = `Create a massive, professional high-ticket agency proposal for ${lead.businessName}. 
   You must use the following UI_BLOCKS JSON structure: 
-  { "sections": [ 
-    { "heading": "THE PROBLEM", "body": [{ "type": "p", "content": "Deep analysis" }, { "type": "bullets", "content": ["Point 1", "Point 2"] }] },
-    { "heading": "THE TRANSFORMATION", "body": [{ "type": "hero", "content": "Bold Statement" }, { "type": "p", "content": "Process detail" }] },
-    { "heading": "ECONOMIC IMPACT", "body": [{ "type": "p", "content": "ROI breakdown" }] }
+  { "format": "ui_blocks", "title": "EXECUTIVE ARCHITECTURE PLAN", "sections": [ 
+    { "heading": "THE DIGITAL DEFICIT", "body": [{ "type": "p", "content": "Deep audit" }, { "type": "bullets", "content": ["Point 1", "Point 2"] }] },
+    { "heading": "TRANSFORMATION ROADMAP", "body": [{ "type": "hero", "content": "The Vision Statement" }, { "type": "p", "content": "Detailed implementation" }] },
+    { "heading": "ECONOMIC CALCULUS", "body": [{ "type": "p", "content": "ROI logic" }] }
   ] }`;
   const result = await callOpenRouter(prompt);
   return result.text;
 }
 
 export async function generateOutreachSequence(lead: Lead): Promise<any[]> {
-  pushLog(`SEQUENCE: Drafting 5-day multi-channel strike for ${lead.businessName}...`);
-  const prompt = `Draft a 5-day engagement sequence for ${lead.businessName}. Return ONLY a JSON array: [ { "day": 1, "channel": "EMAIL", "purpose": "The Hook", "subject": "High impact", "body": "Full professional copy" }, { "day": 2, "channel": "LINKEDIN", "purpose": "Logic Lock", "message": "Direct pitch" }, { "day": 4, "channel": "EMAIL", "purpose": "The Vision", "subject": "Visual proof", "body": "Full professional copy" } ]`;
+  pushLog(`SEQUENCE: Engineering 25-day multi-channel strike (7 emails) for ${lead.businessName}...`);
+  const prompt = `Draft a 25-day engagement sequence for ${lead.businessName}. 
+  Include EXACTLY 7 high-impact emails spaced over 25 days, plus 2 LinkedIn touchpoints and 1 SMS follow-up.
+  Return ONLY a JSON array: [ { "day": 1, "channel": "EMAIL", "purpose": "The Hook", "subject": "Subject", "body": "Body" }, { "day": 3, "channel": "LINKEDIN", "message": "DM" }, ... ]`;
   const result = await callOpenRouter(prompt);
   const data = extractJSON(result.text);
   return Array.isArray(data) ? data : [];
 }
 
 export async function generatePitch(lead: Lead): Promise<string> {
-  pushLog(`PITCH: Synthesizing discovery scripts for ${lead.businessName}...`);
-  const prompt = `Generate a 3-part script set for ${lead.businessName}. 
-  Return UI_BLOCKS JSON with sections for: 
-  1. THE 30S ELEVATOR HOOK 
-  2. THE DISCOVERY SESSION SCRIPT 
-  3. THE OBJECTION REBUTTAL MATRIX.
-  Be exhaustive.`;
+  pushLog(`PITCH: Synthesizing beautiful discovery scripts for ${lead.businessName}...`);
+  const prompt = `Generate a comprehensive 3-part script set for ${lead.businessName}. 
+  Return ONLY a JSON object in UI_BLOCKS format. 
+  IMPORTANT: DO NOT include markdown text outside the JSON. 
+  Structure: 
+  { "format": "ui_blocks", "title": "PITCH ARCHITECTURE", "sections": [ 
+    { "heading": "30-SECOND ELEVATOR HOOK", "body": [{ "type": "hero", "content": "The opener" }, { "type": "p", "content": "The pitch" }] },
+    { "heading": "DISCOVERY SESSION FLOW", "body": [{ "type": "bullets", "content": ["Question 1", "Question 2", "Closing"] }] },
+    { "heading": "OBJECTION HANDLING MATRIX", "body": [{ "type": "p", "content": "Strategy" }] }
+  ] }`;
   const result = await callOpenRouter(prompt);
   return result.text;
 }
 
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
   pushLog(`FORGE: Packaging multi-dimensional blueprint for ${lead.businessName}...`);
-  const prompt = `Perform strategic architecture for ${lead.businessName}. Return comprehensive campaign JSON: { "narrative": "300 words", "presentation": { "title": "", "slides": [{ "title": "", "bullets": [], "category": "", "insight": "" }] }, "outreach": { "emailSequence": [{ "subject": "", "body": "" }], "linkedinSequence": [{ "type": "", "message": "" }], "callScript": { "opener": "", "hook": "", "closing": "" } }, "funnel": [{ "title": "", "description": "", "conversionGoal": "", "frictionFix": "" }], "contentPack": [{ "platform": "", "type": "", "caption": "", "visualDirective": "" }], "visualDirection": { "brandMood": "", "colorPalette": [{ "hex": "", "color": "" }], "typography": { "heading": "", "body": "" }, "aiImagePrompts": [{ "use_case": "", "prompt": "" }] } }`;
+  const prompt = `Perform strategic architecture for ${lead.businessName}. Return comprehensive campaign JSON with 7 slides and 7-stage funnel: { "narrative": "300 words", "presentation": { "title": "", "slides": [{ "title": "", "bullets": [], "category": "", "insight": "" }] }, "outreach": { "emailSequence": [{ "subject": "", "body": "" }], "linkedinSequence": [{ "type": "", "message": "" }], "callScript": { "opener": "", "hook": "", "closing": "" } }, "funnel": [{ "title": "", "description": "", "conversionGoal": "", "frictionFix": "" }], "contentPack": [{ "platform": "", "type": "", "caption": "", "visualDirective": "" }], "visualDirection": { "brandMood": "", "colorPalette": [{ "hex": "", "color": "" }], "typography": { "heading": "", "body": "" }, "aiImagePrompts": [{ "use_case": "", "prompt": "" }] } }`;
   const result = await callOpenRouter(prompt);
   return result.ok ? extractJSON(result.text) : null;
 }
@@ -233,7 +245,6 @@ export async function generateTaskMatrix(lead: Lead): Promise<any[]> {
         { id: '4', task: 'Execute Day 1 Outreach Strike', status: 'pending' }
     ]; 
 }
-export async function architectPitchDeck(lead: Lead): Promise<any> { return { slides: [] }; }
 export async function generateProposalDraftLegacy(lead: Lead): Promise<string> { return ""; }
 export async function generateEmailVariations(lead: Lead): Promise<{ subject: string, body: string }[]> { return []; }
 export async function groundedLeadSearch(query: string, market: string, count: number): Promise<EngineResult> { return generateLeads(market, query, count); }
