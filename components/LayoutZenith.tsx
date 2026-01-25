@@ -325,7 +325,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
       </header>
 
       {/* BODY CONTENT: Offset by header height */}
-      <div className="flex-1 flex overflow-hidden pt-20">
+      <div className="flex-1 flex overflow-hidden pt-24">
          <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
@@ -333,7 +333,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar py-6 space-y-10 pb-40">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pt-8 pb-40 space-y-10">
                {Object.entries(groups).map(([groupName, modules]) => (
                   <div key={groupName} className="mb-2">
                      {isSidebarExpanded ? (
