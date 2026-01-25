@@ -22,23 +22,25 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
       // 1. Check Dossier first (Pre-drafted by Campaign Architect)
       const dossier = dossierStorage.getByLead(lead.id);
       if (dossier && dossier.data.outreach?.emailSequence) {
-          // Spreading 7 emails over roughly 25 days if 'day' property is missing
-          const defaultSpreading = [1, 3, 7, 10, 14, 18, 25];
+          // Flatten all channels into a single timeline
+          const strikePlan: any[] = [];
           
-          const emails = dossier.data.outreach.emailSequence.map((e: any, i: number) => ({
-              day: e.day || defaultSpreading[i] || (i * 4) + 1,
-              channel: 'EMAIL',
-              purpose: e.purpose || (i === 0 ? 'Initial Hook' : 'Value Expansion'),
-              subject: e.subject,
-              body: e.body
-          }));
-          
-          // Also include LinkedIn if it exists in outreach data
-          const strikePlan = [...emails];
+          // Map Emails
+          dossier.data.outreach.emailSequence.forEach((e: any, i: number) => {
+              strikePlan.push({
+                  day: e.day || (i * 4) + 1, // Fallback to spacing if AI didn't provide
+                  channel: 'EMAIL',
+                  purpose: e.purpose || (i === 0 ? 'Initial Hook' : 'Value Expansion'),
+                  subject: e.subject,
+                  body: e.body
+              });
+          });
+
+          // Map LinkedIn if present
           if (Array.isArray(dossier.data.outreach.linkedinSequence)) {
               dossier.data.outreach.linkedinSequence.forEach((l: any) => {
                   strikePlan.push({
-                      day: l.day || 4,
+                      day: l.day || 3,
                       channel: 'LINKEDIN',
                       purpose: 'Social Indoctrination',
                       body: l.message
@@ -80,12 +82,12 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
           <h1 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none">
             ENGAGEMENT <span className="text-emerald-500 not-italic">SEQUENCE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">25-Day Strike Protocol for {lead.businessName}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">25-Day Multi-Channel Strike for {lead.businessName}</p>
         </div>
         <div className="flex gap-4">
            <div className="bg-emerald-600/10 border border-emerald-500/20 px-4 py-2 rounded-xl flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">DRIP_ROADMAP_ACTIVE</span>
+              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">STRIKE_ROADMAP_ACTIVE</span>
            </div>
         </div>
       </div>
@@ -99,7 +101,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
                 <div className="absolute inset-0 flex items-center justify-center text-2xl">✍️</div>
              </div>
              <div className="text-center space-y-2">
-                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Drafting Multi-Day Sequence...</p>
+                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Engineering 25-Day Roadmap...</p>
                 <p className="text-[9px] text-slate-600 uppercase tracking-widest italic">NEURAL COPYWRITING CORE ACTIVE</p>
              </div>
           </div>
@@ -145,7 +147,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
 
                   <div className="md:w-56 flex flex-col items-center justify-center gap-4 border-l border-slate-800/50 pl-12 shrink-0">
                      <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800">
-                        SEND TEST
+                        LAUNCH STEP
                      </button>
                      <button className="w-full bg-slate-900 border border-slate-800 text-slate-600 hover:text-white py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all">
                         EDIT COPY
