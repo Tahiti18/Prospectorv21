@@ -6,14 +6,13 @@ import { RunStatus } from '../automation/RunStatus';
 import { HyperLaunchModal } from '../automation/HyperLaunchModal';
 import { db } from '../../services/automation/db';
 import { toast } from '../../services/toastManager';
-import { Tooltip } from './Tooltip';
 
 const STATUS_FILTER_OPTIONS: (OutreachStatus | 'ALL')[] = ['ALL', 'cold', 'queued', 'sent', 'opened', 'replied', 'booked', 'won', 'lost', 'paused'];
 
 type GroupBy = 'none' | 'city' | 'niche' | 'country';
 
 export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | null, onLockLead: (id: string) => void, onInspect: (id: string) => void }> = ({ leads, lockedLeadId, onLockLead, onInspect }) => {
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Lead; direction: 'asc' | 'desc' | null }>({ key: 'rank', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Lead; direction: 'asc' | 'desc' }>({ key: 'rank', direction: 'asc' });
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<OutreachStatus | 'ALL'>('ALL');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -53,19 +52,18 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   // 4. Final Numerical and Alpha Sorting
   const sortedLeads = useMemo(() => {
-    if (!sortConfig.direction) return isolatedLeads;
     return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
       let aVal = a[sortConfig.key];
       // @ts-ignore
       let bVal = b[sortConfig.key];
       
-      // Ensure numerical sorting for Rank and LeadScore
+      // Numerical Sort for Rank and Score
       if (typeof aVal === 'number' && typeof bVal === 'number') {
           return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
       }
 
-      // Default string sorting
+      // Alpha Sort for strings
       aVal = String(aVal || '').toLowerCase();
       bVal = String(bVal || '').toLowerCase();
       if (aVal === bVal) return 0;
@@ -77,11 +75,11 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   // 5. Grouping visualization logic
   const groupedData = useMemo(() => {
     // If we are isolating a single value, don't show group headers
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE RECORDS': sortedLeads };
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
-      const key = (lead[grouping as keyof Lead] as string) || 'UNASSIGNED';
+      const key = (lead[grouping as keyof Lead] as string) || 'UNCLASSIFIED';
       const displayKey = key.toUpperCase();
       if (!groups[displayKey]) groups[displayKey] = [];
       groups[displayKey].push(lead);
@@ -90,25 +88,15 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   }, [sortedLeads, grouping, subFilterValue]);
 
   const handleSort = (key: keyof Lead) => {
-    setSortConfig(current => {
-      if (current.key !== key) return { key, direction: 'asc' };
-      if (current.direction === 'asc') return { key, direction: 'desc' };
-      return { key, direction: null };
-    });
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
 
   const handleGroupingChange = (newGrouping: GroupBy) => {
       setGrouping(newGrouping);
-      setSubFilterValue('ALL'); // Reset isolation when changing grouping mode
-  };
-
-  const handleOneClickRun = async () => {
-    try {
-      const run = await AutomationOrchestrator.getInstance().startRun();
-      setActiveRunId(run.id);
-    } catch (e: any) {
-      toast.error(e.message);
-    }
+      setSubFilterValue('ALL'); 
   };
 
   const toggleSelect = (id: string) => {
@@ -127,16 +115,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Permanently remove this target from the ledger?")) {
+    if (confirm("Permanently remove this target?")) {
         db.deleteLead(id);
         toast.info("Target removed.");
-    }
-  };
-
-  const handlePurge = () => {
-    if (confirm("CRITICAL: Wipe all leads from the ledger? This cannot be undone.")) {
-        db.saveLeads([]);
-        toast.info("Ledger purged.");
     }
   };
 
@@ -151,7 +132,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("DATABASE_EXPORTED_SUCCESSFULLY");
+    toast.success("DATABASE_EXPORTED");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,26 +144,18 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
                 const results = db.upsertLeads(imported);
-                toast.success(`DATABASE SYNC: Added ${results.added} new, Merged ${results.updated} existing.`);
-            } else {
-                toast.error("INVALID_FILE_STRUCTURE: Expected JSON array.");
+                toast.success(`SYNC: +${results.added} NEW, ${results.updated} UPDATED.`);
             }
         } catch (err) {
-            toast.error("PARSE_FAILURE: Check file for JSON errors.");
+            toast.error("INVALID JSON FILE");
         }
     };
     reader.readAsText(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleSaveAll = () => {
-    db.saveLeads(leads);
-    toast.success("DATABASE_COMMIT_SUCCESSFUL");
   };
 
   const SortIcon = ({ col }: { col: keyof Lead }) => {
-    if (sortConfig.key !== col) return <span className="opacity-20 ml-2 text-[10px]">⇅</span>;
-    return <span className="text-emerald-500 ml-2 text-[10px]">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    if (sortConfig.key !== col) return <span className="opacity-20 ml-2 text-[12px]">⇅</span>;
+    return <span className="text-emerald-500 ml-2 text-[12px] font-bold">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
   };
 
   return (
@@ -192,59 +165,57 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER ENTITY REPOSITORY // RECORDS: {leads.length}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER REPOSITORY // {leads.length} RECORDS</p>
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* GROUPING & ISOLATION RIBBON */}
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-5 py-3 flex items-center shadow-2xl gap-6">
-             <div className="flex items-center gap-3 border-r border-slate-800 pr-6">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE BY:</span>
+          {/* GROUPING RIBBON */}
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl gap-8">
+             <div className="flex items-center gap-3 border-r border-slate-800 pr-8">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE:</span>
                 <div className="flex gap-1">
                     {(['none', 'city', 'niche', 'country'] as GroupBy[]).map(g => (
                         <button 
                             key={g} 
                             onClick={() => handleGroupingChange(g)}
-                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300 bg-slate-900/50'}`}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}
                         >
-                            {g === 'none' ? 'FLAT LIST' : g}
+                            {g === 'none' ? 'FLAT' : g}
                         </button>
                     ))}
                 </div>
              </div>
 
-             {/* TARGET ISOLATION SELECTOR */}
+             {/* DYNAMIC ISOLATION FILTER - DROPDOWN FOR SPECIFIC COUNTRY/CITY/NICHE */}
              {grouping !== 'none' && (
-                <div className="flex items-center gap-4 animate-in slide-in-from-left-4 duration-500">
-                    <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse">HUB ISOLATION ACTIVE</span>
-                        <select 
-                            value={subFilterValue}
-                            onChange={(e) => setSubFilterValue(e.target.value)}
-                            className="bg-[#020617] border-2 border-emerald-500/30 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[180px] shadow-inner"
-                        >
-                            <option value="ALL">VIEW ALL {grouping.toUpperCase()}S</option>
-                            {representedValues.map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
-                        </select>
-                    </div>
+                <div className="flex items-center gap-4 animate-in slide-in-from-left-4 duration-300">
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">ISOLATE {grouping}:</span>
+                    <select 
+                        value={subFilterValue}
+                        onChange={(e) => setSubFilterValue(e.target.value)}
+                        className="bg-[#020617] border-2 border-emerald-500/30 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] shadow-inner"
+                    >
+                        <option value="ALL">VIEW ALL {grouping.toUpperCase()}S</option>
+                        {representedValues.map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
+                    </select>
                 </div>
              )}
           </div>
 
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-5 py-3 flex items-center shadow-2xl">
-             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3">PIPELINE:</span>
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl">
+             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-3">PIPELINE:</span>
              <select 
                value={statusFilter}
                onChange={(e) => setStatusFilter(e.target.value as any)}
-               className="bg-transparent text-[10px] font-bold text-white uppercase focus:outline-none py-2 cursor-pointer"
+               className="bg-transparent text-[10px] font-bold text-white uppercase focus:outline-none cursor-pointer"
              >
                {STATUS_FILTER_OPTIONS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
              </select>
           </div>
 
           {selectedIds.size > 0 && (
-             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-3 transition-all active:scale-95 border-b-4 border-emerald-800">
-               LAUNCH CAMPAIGNS ({selectedIds.size})
+             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 border-b-4 border-emerald-800">
+               LAUNCH ({selectedIds.size})
              </button>
           )}
         </div>
@@ -260,52 +231,33 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 </th>
                 <th 
                   onClick={() => handleSort('rank')} 
-                  className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none"
+                  className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none whitespace-nowrap"
                 >
-                    <div className="flex items-center gap-2">
-                        <Tooltip content="Batch Priority Index. Numerical Sort (#1 is Highest Priority)." side="top">
-                            RANK
-                        </Tooltip>
-                        <SortIcon col="rank" />
-                    </div>
+                    RANK<SortIcon col="rank" />
                 </th>
                 <th 
                   onClick={() => handleSort('businessName')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none"
                 >
-                    <div className="flex items-center gap-2">
-                        BUSINESS IDENTITY
-                        <SortIcon col="businessName" />
-                    </div>
+                    BUSINESS IDENTITY<SortIcon col="businessName" />
                 </th>
                 <th 
                   onClick={() => handleSort('status')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center hover:text-white transition-colors group select-none"
                 >
-                    <div className="flex items-center justify-center gap-2">
-                        STATUS
-                        <SortIcon col="status" />
-                    </div>
+                    STATUS<SortIcon col="status" />
                 </th>
                 <th 
                   onClick={() => handleSort('socialGap')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none"
                 >
-                    <div className="flex items-center gap-2">
-                        GROWTH OPPORTUNITY
-                        <SortIcon col="socialGap" />
-                    </div>
+                    GROWTH GAP<SortIcon col="socialGap" />
                 </th>
                 <th 
                   onClick={() => handleSort('leadScore')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white text-right group select-none"
                 >
-                    <div className="flex items-center justify-end gap-2">
-                        <Tooltip content="Fidelity Score (0-100). Higher = Better Quality Prospect." side="top">
-                            SCORE
-                        </Tooltip>
-                        <SortIcon col="leadScore" />
-                    </div>
+                    SCORE<SortIcon col="leadScore" />
                 </th>
                 <th className="w-48 px-8 py-6"></th>
               </tr>
@@ -319,8 +271,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                           <div className="flex items-center gap-4">
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">{groupName}</span>
-                             <div className="h-px bg-slate-800 flex-1 ml-4"></div>
-                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES FOUND</span>
+                             <div className="h-px bg-slate-800 flex-1 ml-4 opacity-30"></div>
+                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} TARGETS</span>
                           </div>
                        </td>
                     </tr>
@@ -377,7 +329,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               onClick={() => fileInputRef.current?.click()}
               className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <span className="group-hover:-translate-y-0.5 transition-transform text-lg">↑</span> IMPORT JSON DATA
+              <span className="group-hover:-translate-y-0.5 transition-transform text-lg">↑</span> IMPORT DATA
             </button>
             <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
             
@@ -385,19 +337,12 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               onClick={handleExport}
               className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <span className="group-hover:translate-y-0.5 transition-transform text-lg">↓</span> EXPORT DATABASE
-            </button>
-
-            <button 
-              onClick={handlePurge}
-              className="px-8 py-5 bg-rose-950/20 border-2 border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
-            >
-              PURGE LEDGER
+              <span className="group-hover:translate-y-0.5 transition-transform text-lg">↓</span> EXPORT DATA
             </button>
          </div>
 
          <button 
-            onClick={handleSaveAll}
+            onClick={() => db.saveLeads(leads)}
             className="px-12 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-emerald-600/20 active:scale-95 border-b-4 border-emerald-800 flex items-center gap-4"
          >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
