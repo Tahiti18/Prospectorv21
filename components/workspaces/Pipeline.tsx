@@ -8,8 +8,8 @@ interface PipelineProps {
 }
 
 const STAGES: { id: string; label: string; statuses: OutreachStatus[] }[] = [
-  { id: 'recon', label: 'MARKET RECON', statuses: ['cold'] },
-  { id: 'staging', label: 'INTEL STAGING', statuses: ['queued'] },
+  { id: 'recon', label: 'MARKET ANALYSIS', statuses: ['cold'] },
+  { id: 'staging', label: 'DATA STAGING', statuses: ['queued'] },
   { id: 'active', label: 'ACTIVE CAMPAIGN', statuses: ['sent', 'opened'] },
   { id: 'dialogue', label: 'NEGOTIATION', statuses: ['replied', 'booked'] },
   { id: 'closed', label: 'CLOSED / TERMINATED', statuses: ['won', 'lost', 'paused'] }
@@ -20,7 +20,7 @@ export const Pipeline: React.FC<PipelineProps> = ({ leads, onUpdateStatus }) => 
     <div className="space-y-12 py-6 animate-in fade-in duration-700 max-w-[1600px] mx-auto">
       <div className="flex justify-between items-end">
         <div className="space-y-2">
-          <h1 className="text-5xl font-bold uppercase tracking-tight text-white leading-none">SALES <span className="text-emerald-600">PIPELINE</span></h1>
+          <h1 className="text-5xl font-bold uppercase tracking-tight text-white leading-none">GROWTH <span className="text-emerald-600">PIPELINE</span></h1>
           <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.3em] flex items-center gap-3">
             DEAL STAGE VISUALIZATION
             <span className="w-5 h-5 rounded-full bg-slate-800 text-[10px] flex items-center justify-center not-italic text-slate-500 font-black">i</span>
@@ -58,7 +58,7 @@ export const Pipeline: React.FC<PipelineProps> = ({ leads, onUpdateStatus }) => 
                   return (
                     <div key={lead.id} className={`bg-slate-900 border border-slate-800 rounded-[24px] p-6 space-y-4 relative overflow-hidden transition-all hover:scale-[1.02] cursor-pointer shadow-lg group hover:border-emerald-500/40`}>
                       <div className="flex justify-between items-start">
-                         <span className={`px-2 py-0.5 rounded text-[8px] font-black border tracking-widest uppercase ${lead.assetGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                         <span className={`px-2 py-0.5 rounded text-[8px] font-black border tracking-widest uppercase ${lead.assetGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
                            {lead.assetGrade}
                          </span>
                          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{displayStatus}</span>

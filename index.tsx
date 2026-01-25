@@ -30,7 +30,6 @@ import { AutoCrawl } from './components/workspaces/AutoCrawl';
 import { Pipeline } from './components/workspaces/Pipeline';
 import { DeepLogic } from './components/workspaces/DeepLogic';
 import { IntelNode } from './components/workspaces/IntelNode';
-// Comment: Fixed missing import for BenchmarkNode
 import { BenchmarkNode } from './components/workspaces/BenchmarkNode';
 import { FunnelMap } from './components/workspaces/FunnelMap';
 import { ROICalc } from './components/workspaces/ROICalc';
@@ -65,14 +64,14 @@ import { VideoAudit } from './components/workspaces/VideoAudit';
 const App = () => {
   const [activeMode, setActiveMode] = useState<MainMode>('RESEARCH');
   const [activeModule, setActiveModule] = useState<SubModule>('EXECUTIVE_DASHBOARD');
-  const [theater, setTheater] = useState('NEW YORK, USA');
+  const [activeMarket, setActiveMarket] = useState('NEW YORK, USA');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [lockedLeadId, setLockedLeadId] = useState<string | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState('ZENITH');
 
   useEffect(() => {
-    console.log("[RUNTIME] Establishing OS Neural Sync...");
+    console.log("[RUNTIME] Establishing OS Strategic Sync...");
     const unsub = db.subscribe((updatedLeads) => {
       setLeads(updatedLeads);
     });
@@ -98,11 +97,12 @@ const App = () => {
   const renderContent = () => {
     switch (activeModule) {
       // RESEARCH
-      case 'EXECUTIVE_DASHBOARD': return <ExecutiveDashboard leads={leads} market={theater} onNavigate={handleNavigate} />;
+      case 'EXECUTIVE_DASHBOARD': return <ExecutiveDashboard leads={leads} market={activeMarket} onNavigate={handleNavigate} />;
+      case 'ENTERPRISE_DASHBOARD': return <ExecutiveDashboard leads={leads} market={activeMarket} onNavigate={handleNavigate} />;
       case 'TRANSFORMATION_BLUEPRINT': return <TransformationBlueprint onNavigate={handleNavigate} />;
       case 'USER_GUIDE': return <UserGuide onNavigate={handleNavigate} />;
-      case 'MARKET_DISCOVERY': return <MarketDiscovery market={theater} onLeadsGenerated={handleLeadsGenerated} />;
-      case 'AUTOMATED_SEARCH': return <AutoCrawl theater={theater} onNewLeads={handleLeadsGenerated} />;
+      case 'MARKET_DISCOVERY': return <MarketDiscovery market={activeMarket} onLeadsGenerated={handleLeadsGenerated} />;
+      case 'AUTOMATED_SEARCH': return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
       case 'MARKET_TRENDS': return <ViralPulse lead={lockedLead} />;
       case 'PROSPECT_DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'STRATEGY_CENTER': return <StrategyCenter lead={lockedLead} onUpdateLead={handleUpdateLead} onNavigate={handleNavigate} />;
@@ -111,7 +111,7 @@ const App = () => {
       case 'BENCHMARK': return <BenchmarkNode lead={lockedLead} />;
       case 'VISUAL_ANALYSIS': return <VisionLab lead={lockedLead} />;
       case 'STRATEGIC_REASONING': return <DeepLogic lead={lockedLead} />;
-      case 'HEATMAP': return <Heatmap leads={leads} market={theater} />;
+      case 'HEATMAP': return <Heatmap leads={leads} market={activeMarket} />;
       case 'CONTENT_ANALYSIS': return <ArticleIntel lead={lockedLead} />;
 
       // DESIGN
@@ -157,11 +157,11 @@ const App = () => {
       case 'TIMELINE': return <TimelineNode />;
       case 'NEXUS_GRAPH': return <NexusGraph leads={leads} />;
       case 'TASK_MANAGER': return <TaskManager lead={lockedLead} />;
-      case 'CALENDAR': return <ActivityLogs />; // Placeholder calendar with logs for now
+      case 'CALENDAR': return <ActivityLogs />; 
       case 'FACT_CHECK': return <FactCheck lead={lockedLead} />;
       case 'TRANSLATOR': return <TranslatorNode />;
       
-      default: return <ExecutiveDashboard leads={leads} market={theater} onNavigate={handleNavigate} />;
+      default: return <ExecutiveDashboard leads={leads} market={activeMarket} onNavigate={handleNavigate} />;
     }
   };
 
@@ -173,8 +173,8 @@ const App = () => {
         activeModule={activeModule}
         setActiveModule={setActiveModule}
         onSearchClick={() => setIsCommandPaletteOpen(true)}
-        theater={theater}
-        setTheater={setTheater}
+        theater={activeMarket}
+        setTheater={setActiveMarket}
         currentLayout={layoutMode}
         setLayoutMode={setLayoutMode}
       >

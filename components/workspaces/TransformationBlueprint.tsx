@@ -17,12 +17,12 @@ interface CapabilitySection {
 const CAPABILITIES: CapabilitySection[] = [
   {
     title: "Intelligence & Opportunity Detection",
-    subtitle: "Finding the Gaps",
+    subtitle: "Identifying Market Gaps",
     iconPaths: ["M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", "M10 7v3m0 0v3m0-3h3m-3 0H7"],
     color: "emerald",
     points: [
-      { title: "Deep-Layer Social Audit", desc: "Scans Instagram, TikTok, and Facebook feeds to identify 'Social Deficits' that kill trust." },
-      { title: "Visual Authority Analysis", desc: "Uses neural vision to grade design hierarchy, pinpointing exactly where a brand looks 'cheap'." },
+      { title: "Deep-Layer Social Audit", desc: "Scans Instagram, TikTok, and Facebook feeds to identify 'Social Deficits' that impact credibility." },
+      { title: "Visual Authority Analysis", desc: "Uses neural vision to grade design hierarchy, pinpointing exactly where a brand looks 'unprofessional'." },
       { title: "Competitor Reverse-Engineering", desc: "Deconstructs tech stacks and marketing strategies of market leaders." },
       { title: "Real-Time Trend Alignment", desc: "Monitors global news to suggest marketing angles that feel current and relevant." },
       { title: "Fact-Checking & Credibility", desc: "Verifies grounded data to ensure marketing claims build 'unshakable' trust." }
@@ -37,7 +37,7 @@ const CAPABILITIES: CapabilitySection[] = [
       { title: "Brand DNA Extraction", desc: "Instantly pulls core colors, fonts, and vibes from existing assets for 100% consistency." },
       { title: "4K Visual Studio", desc: "Generates ultra-high-fidelity commercial photography for websites and ads." },
       { title: "Photorealistic Mockups", desc: "Creates 'After' visuals—showing products or services as a finished premium brand." },
-      { title: "Creative Hook Generation", desc: "Sparks hundreds of punchy headlines designed to stop the scroll on social media." }
+      { title: "Creative Hook Generation", desc: "Sparks hundreds of punchy headlines designed to maximize engagement on social media." }
     ]
   },
   {
@@ -54,11 +54,11 @@ const CAPABILITIES: CapabilitySection[] = [
   },
   {
     title: "Automated Outreach & Sales Engine",
-    subtitle: "The Closing Protocol",
+    subtitle: "The Closing Framework",
     iconPaths: ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", "M12 8v4"],
     color: "emerald",
     points: [
-      { title: "Multi-Channel Architecture", desc: "Builds 5-day engagement sequences across Email and LinkedIn." },
+      { title: "Multi-Channel Architecture", desc: "Builds multi-day engagement sequences across Email and LinkedIn." },
       { title: "Copy Optimization", desc: "Drafts personalized, high-conversion email templates addressing specific pains." },
       { title: "Interactive Proposals", desc: "Generates beautiful, web-based proposals that replace traditional boring PDFs." },
       { title: "ROI Value Projector", desc: "Uses mathematical modeling to show exactly how much more revenue AI will generate." },
@@ -67,14 +67,14 @@ const CAPABILITIES: CapabilitySection[] = [
   },
   {
     title: "Conversion & Automation Strategy",
-    subtitle: "The Scaling Vector",
+    subtitle: "The Growth Aspect",
     iconPaths: ["M12 20V10", "M18 20V4", "M6 20v-4"],
     color: "emerald",
     points: [
-      { title: "Funnel Geometry Mapping", desc: "Visualizes the entire journey from TikTok ad to high-ticket client." },
-      { title: "Autonomous AI Concierge", desc: "Creates proof-of-concept AI chat agents to book meetings 24/7." },
+      { title: "Journey Geometry Mapping", desc: "Visualizes the entire journey from TikTok ad to high-ticket client." },
+      { title: "Autonomous AI Concierge", desc: "Creates proof-of-concept AI chat agents to handle inquiries 24/7." },
       { title: "Offer Synthesis", desc: "Re-architects service bundles into high-value, 'no-brainer' offers." },
-      { title: "Regional Market Discovery", desc: "Scans entire cities to find businesses most likely to buy transformation services." }
+      { title: "Regional Market Discovery", desc: "Scans entire regions to find businesses most likely to buy transformation services." }
     ]
   }
 ];
@@ -136,7 +136,7 @@ export const TransformationBlueprint: React.FC<TransformationBlueprintProps> = (
             {/* List side */}
             <div className="flex-1 space-y-10">
                <div className="space-y-4">
-                  <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] block">VECTOR 0{i+1}</span>
+                  <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] block">ASPECT 0{i+1}</span>
                   <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none italic">{cap.title}</h2>
                </div>
                <div className="space-y-8">
@@ -163,7 +163,7 @@ export const TransformationBlueprint: React.FC<TransformationBlueprintProps> = (
               READY TO <span className="text-emerald-500">REVAMP?</span>
             </h2>
             <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto italic font-serif">
-              Every tool mentioned above is fully operational and integrated into the Prospector OS neural core. Start your first transformation mission today.
+              Every tool mentioned above is fully operational and integrated into the Prospector OS neural core. Start your first transformation project today.
             </p>
          </div>
          <div className="flex flex-col md:flex-row justify-center items-center gap-6 relative z-10">
@@ -171,7 +171,7 @@ export const TransformationBlueprint: React.FC<TransformationBlueprintProps> = (
                onClick={() => onNavigate('RESEARCH', 'MARKET_DISCOVERY')}
                className="px-16 py-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-3xl text-[14px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-emerald-600/20 active:scale-95 transition-all border-b-4 border-emerald-800"
             >
-               Deploy Discovery Scan
+               Deploy Discovery Analysis
             </button>
             <button 
                onClick={() => onNavigate('RESEARCH', 'USER_GUIDE')}

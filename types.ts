@@ -63,7 +63,7 @@ export type SubModule =
   | 'ANALYTICS'
   | 'PROMPT_AI'
   | 'DASHBOARD'
-  | 'DOD_DASHBOARD';
+  | 'ENTERPRISE_DASHBOARD';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';
 export type OutreachChannel = 'email' | 'linkedin' | 'call' | 'sms' | 'whatsapp';
@@ -84,7 +84,6 @@ export interface Lead {
   visualProof?: string;
   bestAngle?: string;
   personalizedHook?: string;
-  // Comment: Changed status type from string to OutreachStatus to fix type mismatch in Pipeline component
   status?: OutreachStatus;
   outreachStatus?: OutreachStatus;
   notes?: string;
@@ -166,7 +165,6 @@ export interface GeminiResult<T> {
   error?: { message: string };
 }
 
-// Comment: Added missing OutreachAssets interface for OutreachSection component
 export interface OutreachAssets {
   emailOpeners: string[];
   fullEmail: string;
@@ -178,7 +176,6 @@ export interface OutreachAssets {
 export interface EngineResult {
   leads: Lead[];
   rubric: any;
-  // Comment: Fixed any type to OutreachAssets to resolve import error in OutreachSection
   assets: OutreachAssets;
   groundingSources?: any[];
 }
