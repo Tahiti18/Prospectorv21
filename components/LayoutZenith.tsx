@@ -32,7 +32,7 @@ const STRATEGIC_CITIES = [
 const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
   const cn = active ? "text-white" : "text-slate-400 group-hover:text-white";
   switch(id) {
-    case 'RESEARCH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>; 
+    case 'RESEARCH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" cy1="21" x2="16.65" y2="16.65"/></svg>; 
     case 'DESIGN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>; 
     case 'MEDIA': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>; 
     case 'OUTREACH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; 
@@ -189,7 +189,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
   const [marketExpanded, setMarketExpanded] = useState(false);
   const marketRef = useRef<HTMLDivElement>(null);
 
-  const groups = MODULE_GROUPS[activeMode];
+  const groups = MODULE_GROUPS[activeMode] || MODULE_GROUPS['RESEARCH'];
 
   const handleModeClick = (mode: MainMode) => {
     setActiveMode(mode);
@@ -204,14 +204,17 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
-      <header className="h-20 flex-none border-b z-[100] flex items-center justify-between px-8 bg-[#030712] border-slate-800">
-         <div className="flex items-center gap-4 w-80 pl-2">
+      {/* HEADER: Updated to use robust flex-distribution for categories */}
+      <header className="h-20 flex-none border-b z-[100] flex items-center bg-[#030712] border-slate-800 px-8">
+         {/* Left: Branding */}
+         <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
                PROSPECTOR <span className="text-emerald-500 italic">OS</span>
             </h1>
          </div>
 
-         <div className="absolute left-1/2 top-10 -translate-x-1/2 -translate-y-1/2 hidden xl:block pointer-events-auto">
+         {/* Center: Main Categories (Refactored to flex-distribution) */}
+         <div className="hidden lg:flex items-center justify-center flex-[2] pointer-events-auto">
             <nav className="flex items-center gap-1 p-1.5 rounded-full border shadow-2xl bg-[#0b1021] border-slate-800">
                {(Object.keys(MODULE_GROUPS) as MainMode[]).map((mode) => {
                   const isActive = activeMode === mode;
@@ -219,7 +222,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                      <button
                         key={mode}
                         onClick={() => handleModeClick(mode)}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${
+                        className={`flex items-center gap-3 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                            isActive 
                               ? 'bg-emerald-600 text-white shadow-lg' 
                               : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
@@ -233,31 +236,32 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
             </nav>
          </div>
 
-         <div className="flex items-center gap-4 w-auto justify-end">
+         {/* Right: Actions */}
+         <div className="flex-1 flex items-center gap-4 justify-end">
             <button 
                onClick={onSearchClick}
-               className="flex items-center gap-3 px-4 h-12 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
+               className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
             >
-               <span className="uppercase tracking-wider text-[10px]">COMMAND SEARCH</span>
+               <span className="uppercase tracking-wider text-[9px]">COMMAND</span>
                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">⌘K</span>
             </button>
 
-            <div ref={marketRef} className={`relative transition-all duration-300 ${marketExpanded ? 'w-64' : 'w-[120px]'}`}>
+            <div ref={marketRef} className={`relative transition-all duration-300 ${marketExpanded ? 'w-56' : 'w-[100px]'}`}>
                 <div
                    onClick={() => setMarketExpanded(true)}
-                   className="flex items-center gap-3 px-4 h-12 rounded-full border cursor-pointer bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden"
+                   className="flex items-center gap-3 px-4 h-11 rounded-full border cursor-pointer bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden"
                 >
                    {marketExpanded ? (
                        <select
                           autoFocus
                           value={theater}
                           onChange={(e) => { setTheater(e.target.value); setMarketExpanded(false); }}
-                          className="bg-transparent text-xs font-bold uppercase focus:outline-none w-full text-white"
+                          className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-white"
                        >
                           {STRATEGIC_CITIES.map(c => <option key={c.city} value={c.city} className="text-slate-900 bg-white">{c.city}</option>)}
                        </select>
                    ) : (
-                       <span className="text-[10px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">MARKET</span>
+                       <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">MARKET</span>
                    )}
                 </div>
             </div>
@@ -268,7 +272,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
-                 {isSidebarExpanded ? 'COLLAPSE INTERFACE' : 'EXPAND'}
+                 {isSidebarExpanded ? 'COLLAPSE' : 'EXPAND'}
                </button>
             </div>
 
@@ -276,7 +280,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                {Object.entries(groups).map(([groupName, modules]) => (
                   <div key={groupName} className="mb-2">
                      {isSidebarExpanded ? (
-                       <h3 className="px-6 text-[12px] font-black text-white uppercase tracking-[0.25em] mb-4 mt-2 border-b-2 border-emerald-500/30 pb-2">{groupName}</h3>
+                       <h3 className="px-6 text-[11px] font-black text-white uppercase tracking-[0.25em] mb-4 mt-2 border-b-2 border-emerald-500/30 pb-2">{groupName}</h3>
                      ) : (
                        <div className="mx-auto w-8 h-1 bg-emerald-500/20 mb-3 rounded-full"></div>
                      )}
