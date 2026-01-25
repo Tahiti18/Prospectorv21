@@ -13,6 +13,7 @@ import {
 import { dossierStorage, StrategicDossier } from '../../services/dossierStorage';
 import { OutreachModal } from './OutreachModal';
 import { toast } from '../../services/toastManager';
+import { db } from '../../services/automation/db';
 
 interface BusinessOrchestratorProps {
   leads: Lead[];
@@ -35,24 +36,30 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [activeTab, setActiveTab] = useState<'strategy' | 'narrative' | 'content' | 'outreach' | 'visual' | 'funnel'>('strategy');
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   
+  // Local target calculation
   const targetLead = useMemo(() => {
     if (isManualMode) {
       if (!manualName || !manualUrl) return null;
+      // We check if a lead with this URL already exists in our list
+      const existing = leads.find(l => l.websiteUrl === manualUrl);
+      if (existing) return existing;
+
       return {
         id: `MANUAL-${Date.now()}`,
         businessName: manualName,
         websiteUrl: manualUrl,
-        niche: 'Custom Target',
+        niche: 'Manual Entry',
         city: 'Global',
         rank: 0,
-        leadScore: 90,
+        leadScore: 95,
         assetGrade: 'A',
-        socialGap: 'Target entered via manual override protocol.',
-        status: 'cold'
+        socialGap: 'Target established via direct override protocol.',
+        status: 'cold',
+        tags: ['[MANUAL]']
       } as Lead;
     }
-    return leads.find(l => l.id === selectedLeadId);
-  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl]);
+    return leads.find(l => l.id === (selectedLeadId || lockedLead?.id));
+  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, lockedLead]);
   
   const leadAssets = useMemo(() => {
     if (!targetLead) return [];
@@ -60,7 +67,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   }, [targetLead]);
 
   useEffect(() => {
-    if (targetLead && !isManualMode) {
+    if (targetLead) {
       const savedDossiers = dossierStorage.getAllByLead(targetLead.id);
       if (savedDossiers.length > 0) {
         setCurrentDossier(savedDossiers[0]);
@@ -70,24 +77,36 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         setPackageData(null);
       }
     }
-  }, [targetLead?.id, isManualMode]);
+  }, [targetLead?.id]);
 
   const handleOrchestrate = async () => {
     if (!targetLead) {
         toast.info(isManualMode ? "Identity and Website required." : "Business selection required.");
         return;
     }
+
     setIsOrchestrating(true);
     setPackageData(null); 
     
     try {
-      toast.neural(`BUILDER: Initiating Synthesis for ${targetLead.businessName}...`);
+      // 1. If in manual mode, we MUST persist and lock this target globally so other modules function
+      if (isManualMode) {
+        toast.neural("PROTOCOL: Persisting custom business to ledger...");
+        db.upsertLeads([targetLead]);
+        onLockLead(targetLead.id); // Triggers global system lock
+        setSelectedLeadId(targetLead.id);
+        setIsManualMode(false); // Switch back to ledger mode now that it's in the DB
+      } else {
+        onLockLead(targetLead.id); // Ensure existing lead is also locked
+      }
+
+      toast.neural(`BUILDER: Initiating Neural Synthesis for ${targetLead.businessName}...`);
       const result = await orchestrateBusinessPackage(targetLead, leadAssets);
       
       const saved = dossierStorage.save(targetLead, result, leadAssets.map(a => a.id));
       setPackageData(result);
       setCurrentDossier(saved);
-      toast.success("BUILDER: Multi-Tab Intelligence Mesh Synchronized.");
+      toast.success("BUILDER: Strategic Intelligence Mesh Synchronized globally.");
     } catch (e: any) {
       console.error(e);
       toast.error(`SYSTEM_FAULT: ${e.message || "Synthesis timed out."}`);
@@ -207,12 +226,12 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                       {targetLead ? (
                           <div className="flex items-center justify-between">
                               <span className="text-sm font-black text-white uppercase italic tracking-tight">{targetLead.businessName}</span>
-                              <button onClick={() => setSelectedLeadId('')} className="text-slate-600 hover:text-rose-500 transition-colors">×</button>
+                              <button onClick={() => { setSelectedLeadId(''); onLockLead(''); }} className="text-slate-600 hover:text-rose-500 transition-colors">×</button>
                           </div>
                       ) : (
                           <select 
-                            value={selectedLeadId}
-                            onChange={(e) => setSelectedLeadId(e.target.value)}
+                            value={selectedLeadId || lockedLead?.id || ''}
+                            onChange={(e) => { setSelectedLeadId(e.target.value); onLockLead(e.target.value); }}
                             className="w-full bg-transparent border-none text-sm font-bold text-slate-500 focus:outline-none cursor-pointer appearance-none uppercase italic"
                           >
                              <option value="">-- SELECT BUSINESS --</option>
@@ -227,7 +246,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
 
               <button 
                 onClick={handleOrchestrate}
-                disabled={isOrchestrating || !targetLead}
+                disabled={isOrchestrating || (!isManualMode && !targetLead)}
                 className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white py-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
               >
                 {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
