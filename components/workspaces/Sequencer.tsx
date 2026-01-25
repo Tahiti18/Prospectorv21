@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lead } from '../../types';
 import { generateOutreachSequence } from '../../services/geminiService';
 import { dossierStorage } from '../../services/dossierStorage';
@@ -21,14 +21,12 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
       
       // 1. Check Dossier first (Pre-drafted by Campaign Architect)
       const dossier = dossierStorage.getByLead(lead.id);
-      if (dossier && dossier.data.outreach?.emailSequence) {
-          // Flatten all channels into a single timeline
+      if (dossier && dossier.data.outreach?.emailSequence && dossier.data.outreach.emailSequence.length >= 7) {
           const strikePlan: any[] = [];
           
-          // Map Emails
           dossier.data.outreach.emailSequence.forEach((e: any, i: number) => {
               strikePlan.push({
-                  day: e.day || (i * 4) + 1, // Fallback to spacing if AI didn't provide
+                  day: e.day || [1, 3, 5, 10, 15, 20, 25][i] || (i * 4) + 1,
                   channel: 'EMAIL',
                   purpose: e.purpose || (i === 0 ? 'Initial Hook' : 'Value Expansion'),
                   subject: e.subject,
@@ -36,11 +34,10 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
               });
           });
 
-          // Map LinkedIn if present
           if (Array.isArray(dossier.data.outreach.linkedinSequence)) {
               dossier.data.outreach.linkedinSequence.forEach((l: any) => {
                   strikePlan.push({
-                      day: l.day || 3,
+                      day: l.day || 4,
                       channel: 'LINKEDIN',
                       purpose: 'Social Indoctrination',
                       body: l.message
@@ -59,7 +56,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
         setSequence(steps.sort((a: any, b: any) => a.day - b.day));
       } catch (e) {
         console.error(e);
-        toast.error("Campaign Architect Uplink Failed.");
+        toast.error("Strike Roadmap Generation Failed.");
       } finally {
         setIsLoading(false);
       }
@@ -70,7 +67,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
   if (!lead) {
     return (
       <div className="h-96 flex flex-col items-center justify-center text-slate-500 bg-slate-900/30 border border-slate-800 rounded-[48px] border-dashed">
-        <p className="text-[10px] font-black uppercase tracking-[0.5em]">Locked Lead Required for Engagement Sequence</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em]">Target Locked Required for Strike Sequence</p>
       </div>
     );
   }
@@ -82,12 +79,12 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
           <h1 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none">
             ENGAGEMENT <span className="text-emerald-500 not-italic">SEQUENCE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">25-Day Multi-Channel Strike for {lead.businessName}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">25-Day Strike Roadmap // 7-Email Multi-Channel Strike Protocol: {lead.businessName}</p>
         </div>
         <div className="flex gap-4">
            <div className="bg-emerald-600/10 border border-emerald-500/20 px-4 py-2 rounded-xl flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">STRIKE_ROADMAP_ACTIVE</span>
+              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">STRIKE_FLOW_ACTIVE</span>
            </div>
         </div>
       </div>
@@ -101,8 +98,8 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
                 <div className="absolute inset-0 flex items-center justify-center text-2xl">✍️</div>
              </div>
              <div className="text-center space-y-2">
-                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Engineering 25-Day Roadmap...</p>
-                <p className="text-[9px] text-slate-600 uppercase tracking-widest italic">NEURAL COPYWRITING CORE ACTIVE</p>
+                <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Architecting 25-Day Sequence...</p>
+                <p className="text-[9px] text-slate-600 uppercase tracking-widest italic">NEURAL CORE LINKED TO OPENROUTER FLASH</p>
              </div>
           </div>
         ) : sequence.length > 0 ? (
@@ -147,7 +144,7 @@ export const Sequencer: React.FC<SequencerProps> = ({ lead }) => {
 
                   <div className="md:w-56 flex flex-col items-center justify-center gap-4 border-l border-slate-800/50 pl-12 shrink-0">
                      <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800">
-                        LAUNCH STEP
+                        SEND TEST
                      </button>
                      <button className="w-full bg-slate-900 border border-slate-800 text-slate-600 hover:text-white py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all">
                         EDIT COPY
