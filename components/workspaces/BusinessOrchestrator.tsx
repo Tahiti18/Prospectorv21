@@ -1,6 +1,15 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Lead, MainMode, SubModule } from '../../types';
-import { SESSION_ASSETS, orchestrateBusinessPackage } from '../../services/geminiService';
+import { 
+  SESSION_ASSETS, 
+  orchestrateBusinessPackage, 
+  resynthesizeNarrative, 
+  resynthesizeVisuals, 
+  architectPitchDeck, 
+  generateOutreachSequence, 
+  architectFunnel 
+} from '../../services/geminiService';
 import { dossierStorage, StrategicDossier } from '../../services/dossierStorage';
 import { OutreachModal } from './OutreachModal';
 import { toast } from '../../services/toastManager';
@@ -18,6 +27,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [packageData, setPackageData] = useState<any>(null);
   const [currentDossier, setCurrentDossier] = useState<StrategicDossier | null>(null);
   const [isOrchestrating, setIsOrchestrating] = useState(false);
+  const [localLoading, setLocalLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'strategy' | 'narrative' | 'content' | 'outreach' | 'visual' | 'funnel'>('strategy');
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   
@@ -43,25 +53,66 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
 
   const handleOrchestrate = async () => {
     if (!targetLead) {
-        toast.info("Target identification required.");
+        toast.info("Business selection required.");
         return;
     }
     setIsOrchestrating(true);
     setPackageData(null); 
     
     try {
-      toast.neural("FORGE: Initiating High-Density Intelligence Sweep...");
+      toast.neural("BUILDER: Initiating High-Density Strategy Synthesis...");
       const result = await orchestrateBusinessPackage(targetLead, leadAssets);
       
       const saved = dossierStorage.save(targetLead, result, leadAssets.map(a => a.id));
       setPackageData(result);
       setCurrentDossier(saved);
-      toast.success("FORGE: Multi-Tab Intelligence Mesh Synchronized.");
+      toast.success("BUILDER: Multi-Tab Intelligence Mesh Synchronized.");
     } catch (e: any) {
       console.error(e);
-      toast.error(`NEURAL_FAULT: ${e.message || "Uplink timed out."}`);
+      toast.error(`SYSTEM_FAULT: ${e.message || "Synthesis timed out."}`);
     } finally {
       setIsOrchestrating(false);
+    }
+  };
+
+  const handleResynthesize = async (part: string) => {
+    if (!targetLead || !packageData) return;
+    setLocalLoading(part);
+    toast.neural(`RE-SYNTHESIZING: ${part.toUpperCase()}...`);
+
+    try {
+      let updatedData = { ...packageData };
+      
+      switch(part) {
+        case 'narrative':
+          const narrative = await resynthesizeNarrative(targetLead);
+          updatedData.narrative = narrative;
+          break;
+        case 'visual':
+          const visual = await resynthesizeVisuals(targetLead);
+          updatedData.visualDirection = visual;
+          break;
+        case 'strategy':
+          const deck = await architectPitchDeck(targetLead);
+          updatedData.presentation = deck;
+          break;
+        case 'outreach':
+          const sequence = await generateOutreachSequence(targetLead);
+          updatedData.outreach.emailSequence = sequence;
+          break;
+        case 'journey':
+          const funnel = await architectFunnel(targetLead);
+          updatedData.funnel = funnel;
+          break;
+      }
+
+      setPackageData(updatedData);
+      dossierStorage.save(targetLead, updatedData, leadAssets.map(a => a.id));
+      toast.success(`RE-SYNTHESIS COMPLETE: ${part.toUpperCase()} UPDATED.`);
+    } catch (e) {
+      toast.error("Re-synthesis failed.");
+    } finally {
+      setLocalLoading(null);
     }
   };
 
@@ -69,7 +120,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
     <div className="py-20 flex flex-col items-center justify-center opacity-30 border-2 border-dashed border-slate-800 rounded-[40px] text-center px-10">
        <span className="text-5xl mb-6 grayscale">📦</span>
        <h4 className="text-sm font-black uppercase tracking-widest text-slate-500">{section} STAGING</h4>
-       <p className="text-[10px] font-bold uppercase tracking-widest mt-3 text-slate-600 italic">INITIATE FORGE TO LOAD DATA MESH</p>
+       <p className="text-[10px] font-bold uppercase tracking-widest mt-3 text-slate-600 italic">INITIATE SYNTHESIS TO LOAD DATA MESH</p>
     </div>
   );
 
@@ -79,10 +130,10 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
       <div className="flex justify-between items-end border-b border-slate-800/50 pb-8">
         <div>
           <h1 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none">
-            CAMPAIGN <span className="text-emerald-500 not-italic">FORGE</span>
+            CAMPAIGN <span className="text-emerald-500 not-italic">BUILDER</span>
           </h1>
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">
-            SECURED NEURAL CORE GATEWAY
+            SECURED STRATEGY SYNTHESIS HUB
           </p>
         </div>
       </div>
@@ -91,7 +142,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         <div className="lg:col-span-4 space-y-6">
            <div className="bg-[#0b1021] border border-slate-800 rounded-[40px] p-10 shadow-2xl space-y-10">
               <div className="space-y-4">
-                 <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">MISSION_TARGET</label>
+                 <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">BUSINESS_TARGET</label>
                  <div className="bg-[#020617] border border-slate-800 rounded-2xl p-4 shadow-inner">
                     {targetLead ? (
                         <div className="flex items-center justify-between">
@@ -104,7 +155,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                           onChange={(e) => setSelectedLeadId(e.target.value)}
                           className="w-full bg-transparent border-none text-sm font-bold text-slate-500 focus:outline-none cursor-pointer appearance-none uppercase italic"
                         >
-                           <option value="">-- SELECT TARGET --</option>
+                           <option value="">-- SELECT BUSINESS --</option>
                            {leads.map(l => (
                              <option key={l.id} value={l.id}>{l.businessName}</option>
                            ))}
@@ -119,7 +170,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                   disabled={isOrchestrating}
                   className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white py-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
                 >
-                  {isOrchestrating ? 'ORCHESTRATING...' : 'INITIATE CAMPAIGN FORGE'}
+                  {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
                 </button>
               )}
               
@@ -128,7 +179,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                   onClick={() => setIsOutreachOpen(true)}
                   className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all"
                 >
-                  🚀 LAUNCH OUTREACH MODAL
+                  🚀 OPEN OUTREACH CONSOLE
                 </button>
               )}
            </div>
@@ -144,15 +195,15 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                         <div className="absolute inset-0 flex items-center justify-center text-3xl">🧠</div>
                     </div>
                     <div className="space-y-3">
-                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">NEURAL FORGE ACTIVE</h3>
-                        <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.6em] animate-pulse">ARCHITECTING EXHAUSTIVE INTELLIGENCE MESH</p>
+                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">BUILDER ACTIVE</h3>
+                        <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.6em] animate-pulse">ARCHITECTING EXHAUSTIVE BUSINESS STRATEGY</p>
                     </div>
                  </div>
               )}
 
               {!packageData && !isOrchestrating ? (
                  <div className="absolute inset-0 flex flex-col items-center justify-center opacity-10 text-center space-y-6">
-                    <span className="text-9xl font-black italic text-slate-700 uppercase tracking-tighter">STANDBY</span>
+                    <span className="text-9xl font-black italic text-slate-700 uppercase tracking-tighter">READY</span>
                  </div>
               ) : (
                  <div className="flex flex-col h-full animate-in zoom-in-95 duration-500">
@@ -161,7 +212,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                          { id: 'strategy', label: 'STRATEGY' },
                          { id: 'narrative', label: 'NARRATIVE' },
                          { id: 'content', label: 'CONTENT' },
-                         { id: 'funnel', label: 'FUNNEL' },
+                         { id: 'funnel', label: 'JOURNEY' },
                          { id: 'outreach', label: 'OUTREACH' },
                          { id: 'visual', label: 'VISUALS' }
                        ].map(tab => (
@@ -179,7 +230,20 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                        ))}
                     </div>
 
-                    <div className="flex-1 p-12 overflow-y-auto custom-scrollbar bg-[#020617]">
+                    <div className="flex-1 p-12 overflow-y-auto custom-scrollbar bg-[#020617] relative">
+                       {/* Tab Action Bar */}
+                       {packageData && (
+                         <div className="absolute top-8 right-12 z-20">
+                            <button 
+                                onClick={() => handleResynthesize(activeTab === 'funnel' ? 'journey' : activeTab)}
+                                disabled={!!localLoading}
+                                className="px-4 py-2 bg-slate-900 border border-slate-700 text-emerald-400 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+                            >
+                               {localLoading === (activeTab === 'funnel' ? 'journey' : activeTab) ? 'SYNCING...' : `RE-SYNTHESIZE ${activeTab}`}
+                            </button>
+                         </div>
+                       )}
+
                        {activeTab === 'strategy' && (
                           <div className="space-y-10">
                              {packageData?.presentation?.slides?.length > 0 ? (
@@ -248,7 +312,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                                     </div>
                                 </div>
                             ))}
-                            {!packageData?.funnel && <EmptyState section="FUNNEL" />}
+                            {!packageData?.funnel && <EmptyState section="JOURNEY" />}
                           </div>
                        )}
 
@@ -267,8 +331,8 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                        {activeTab === 'visual' && (
                           <div className="space-y-8">
                             <div className="bg-emerald-950/20 border border-emerald-500/20 p-8 rounded-[32px]">
-                                <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">MOOD & ART DIRECTION</h4>
-                                <p className="text-slate-300 text-sm leading-relaxed">{packageData?.visualDirection?.brandMood || "Art direction required."}</p>
+                                <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">BRAND AESTHETIC DIRECTION</h4>
+                                <p className="text-slate-300 text-sm leading-relaxed">{packageData?.visualDirection?.brandMood || "Direction required."}</p>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {packageData?.visualDirection?.aiImagePrompts?.map((p: any, i: number) => (

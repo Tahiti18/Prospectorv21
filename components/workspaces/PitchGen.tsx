@@ -1,6 +1,6 @@
 
 /* =========================================================
-   PITCH GEN – ENHANCED RENDERING
+   PITCH ENGINE – HIGH-FIDELITY SYNTHESIS
    ========================================================= */
 
 import React, { useState, useEffect } from 'react';
@@ -21,9 +21,11 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
     if (!lead) return;
     setIsLoading(true);
     setPitch(null);
+    toast.neural("PITCH: Crafting Psychological Conversion Scripts...");
     try {
       const data = await generatePitch(lead);
       setPitch(data);
+      toast.success("PITCH: Script Architecture Synchronized.");
     } catch (e) {
       console.error(e);
       toast.error("Pitch Engine Uplink Failed.");
@@ -38,7 +40,6 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
 
   const handleCopy = () => {
     if (pitch) {
-        // If it's JSON, copy the text within 'p' and 'bullets' types for usability
         try {
             const parsed = JSON.parse(pitch);
             const textToCopy = parsed.sections?.map((s: any) => 
@@ -48,7 +49,7 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
         } catch(e) {
             navigator.clipboard.writeText(pitch);
         }
-        toast.success("Pitch Package Copied.");
+        toast.success("Pitch Scripts Copied.");
     }
   };
 
@@ -67,29 +68,22 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
           <h1 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none mb-2">
               PITCH <span className="text-emerald-500 not-italic">ENGINE</span>
           </h1>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] italic">High-Impact Scripting Core for {lead.businessName}</p>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] italic">Psychological Scripting Architecture for {lead.businessName}</p>
         </div>
         <div className="flex gap-4">
             <button 
                 onClick={loadPitch}
                 disabled={isLoading}
-                className="bg-slate-900 border border-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                className="bg-slate-900 border border-slate-800 text-slate-400 hover:text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
             >
-                RE-SYNTHESIZE
-            </button>
-            <button 
-                onClick={handleCopy}
-                disabled={!pitch}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 border-b-4 border-emerald-800"
-            >
-                COPY SCRIPTS
+                RE-SYNTHESIZE SCRIPTS
             </button>
         </div>
       </div>
 
       <div className="bg-[#0b1021] border border-slate-800 rounded-[56px] shadow-2xl relative min-h-[600px] flex flex-col overflow-hidden">
          {isLoading ? (
-           <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 text-center bg-[#0b1021] z-20">
+           <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 text-center bg-[#0b1021] z-20 backdrop-blur-sm">
               <div className="relative">
                 <div className="w-24 h-24 border-4 border-emerald-900 rounded-full"></div>
                 <div className="absolute top-0 left-0 w-24 h-24 border-t-4 border-emerald-500 rounded-full animate-spin"></div>
@@ -106,20 +100,12 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
                  <FormattedOutput content={pitch} />
                  
                  <div className="mt-20 flex flex-col items-center gap-8 border-t border-slate-800 pt-16">
-                    <div className="bg-emerald-600/5 border border-emerald-500/20 p-10 rounded-[48px] text-center max-w-2xl">
-                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.4em] mb-4 block">PRACTICE_MODE</span>
-                        <p className="text-xl text-slate-300 font-medium italic leading-relaxed">
-                            "Record these scripts into the Sonic Studio to generate a professional voiceover preview for the client's proposal."
-                        </p>
-                    </div>
-                    <div className="flex gap-6">
-                        <button className="bg-slate-900 border border-slate-800 text-slate-500 px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all active:scale-95 group">
-                           <span className="flex items-center gap-3">
-                               <div className="w-2 h-2 rounded-full bg-rose-500 group-hover:animate-pulse"></div>
-                               TELEPROMPTER MODE
-                           </span>
-                        </button>
-                    </div>
+                    <button 
+                        onClick={handleCopy}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-16 py-6 rounded-[32px] text-[12px] font-black uppercase tracking-[0.4em] shadow-xl transition-all active:scale-95 border-b-8 border-emerald-800"
+                    >
+                        COPY ALL SCRIPTS
+                    </button>
                  </div>
               </div>
            </div>

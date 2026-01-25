@@ -17,16 +17,37 @@ interface LayoutProps {
 }
 
 const STRATEGIC_CITIES = [
-  { rank: 1, city: "NEW YORK, USA" },
-  { rank: 2, city: "LONDON, UK" },
-  { rank: 3, city: "DUBAI, UAE" },
-  { rank: 4, city: "SINGAPORE" },
-  { rank: 5, city: "AUSTIN, USA" },
-  { rank: 6, city: "MIAMI, USA" },
-  { rank: 7, city: "SYDNEY, AUS" },
-  { rank: 8, city: "SAN FRANCISCO, USA" },
-  { rank: 9, city: "TORONTO, CAN" },
-  { rank: 10, city: "LOS ANGELES, USA" }
+  { city: "CUSTOM CITY", rank: 0 },
+  { city: "NEW YORK, USA", rank: 1 },
+  { city: "LONDON, UK", rank: 2 },
+  { city: "DUBAI, UAE", rank: 3 },
+  { city: "SINGAPORE", rank: 4 },
+  { city: "ZURICH, SWI", rank: 5 },
+  { city: "MONACO", rank: 6 },
+  { city: "MIAMI, USA", rank: 7 },
+  { city: "LOS ANGELES, USA", rank: 8 },
+  { city: "AUSTIN, USA", rank: 9 },
+  { city: "HONG KONG", rank: 10 },
+  { city: "PARIS, FRA", rank: 11 },
+  { city: "GENEVA, SWI", rank: 12 },
+  { city: "SYDNEY, AUS", rank: 13 },
+  { city: "SAN FRANCISCO, USA", rank: 14 },
+  { city: "TOKYO, JPN", rank: 15 },
+  { city: "BERLIN, GER", rank: 16 },
+  { city: "AMSTERDAM, NL", rank: 17 },
+  { city: "TORONTO, CAN", rank: 18 },
+  { city: "DUBLIN, IRE", rank: 19 },
+  { city: "CHICAGO, USA", rank: 20 },
+  { city: "RIYADH, KSA", rank: 21 },
+  { city: "DOHA, QATAR", rank: 22 },
+  { city: "TEL AVIV, ISR", rank: 23 },
+  { city: "OSLO, NOR", rank: 24 },
+  { city: "STOCKHOLM, SWE", rank: 25 },
+  { city: "MUNICH, GER", rank: 26 },
+  { city: "BARCELONA, ESP", rank: 27 },
+  { city: "VIENNA, AUT", rank: 28 },
+  { city: "MELBOURNE, AUS", rank: 29 },
+  { city: "LUXEMBOURG", rank: 30 }
 ];
 
 const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
@@ -125,7 +146,7 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
     ],
     "ASSETS": [
       { id: 'PRODUCT_SYNTHESIS', label: 'Offer Synthesis', desc: 'Solution architecture' },
-      { id: 'CONTENT_IDEATION', label: 'Content Ideation', desc: 'Campaign concept hooks' },
+      { id: 'CONTENT_IDEATION', label: 'Flash Spark', desc: 'Campaign concept hooks' },
       { id: 'ASSET_LIBRARY', label: 'Asset Library', desc: 'Central media repository' },
     ]
   },
@@ -187,6 +208,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [marketExpanded, setMarketExpanded] = useState(false);
+  const [isCustomInput, setIsCustomInput] = useState(false);
   const marketRef = useRef<HTMLDivElement>(null);
 
   const groups = MODULE_GROUPS[activeMode] || MODULE_GROUPS['RESEARCH'];
@@ -199,6 +221,16 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
       case 'MEDIA': setActiveModule('VIDEO_PRODUCTION'); break;
       case 'OUTREACH': setActiveModule('CAMPAIGN_ORCHESTRATOR'); break;
       case 'ADMIN': setActiveModule('AGENCY_PLAYBOOK'); break;
+    }
+  };
+
+  const handleMarketChange = (val: string) => {
+    if (val === 'CUSTOM CITY') {
+      setIsCustomInput(true);
+    } else {
+      setTheater(val);
+      setIsCustomInput(false);
+      setMarketExpanded(false);
     }
   };
 
@@ -246,20 +278,44 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">⌘K</span>
             </button>
 
-            <div ref={marketRef} className={`relative transition-all duration-300 ${marketExpanded ? 'w-56' : 'w-[100px]'}`}>
+            <div ref={marketRef} className={`relative transition-all duration-300 ${marketExpanded ? 'w-64' : 'w-[100px]'}`}>
                 <div
-                   onClick={() => setMarketExpanded(true)}
-                   className="flex items-center gap-3 px-4 h-11 rounded-full border cursor-pointer bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden"
+                   onClick={() => !marketExpanded && setMarketExpanded(true)}
+                   className={`flex items-center gap-3 px-4 h-11 rounded-full border transition-all bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden ${marketExpanded ? 'cursor-default' : 'cursor-pointer'}`}
                 >
                    {marketExpanded ? (
-                       <select
-                          autoFocus
-                          value={theater}
-                          onChange={(e) => { setTheater(e.target.value); setMarketExpanded(false); }}
-                          className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-white"
-                       >
-                          {STRATEGIC_CITIES.map(c => <option key={c.city} value={c.city} className="text-slate-900 bg-white">{c.city}</option>)}
-                       </select>
+                       isCustomInput ? (
+                         <div className="flex items-center w-full gap-2 animate-in fade-in slide-in-from-right-2">
+                           <input
+                              autoFocus
+                              value={theater}
+                              onChange={(e) => setTheater(e.target.value.toUpperCase())}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  setMarketExpanded(false);
+                                  setIsCustomInput(false);
+                                }
+                                if (e.key === 'Escape') {
+                                  setIsCustomInput(false);
+                                  setMarketExpanded(false);
+                                }
+                              }}
+                              placeholder="ENTER CITY..."
+                              className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-emerald-400 placeholder-slate-700"
+                           />
+                           <button onClick={() => { setIsCustomInput(false); setMarketExpanded(false); }} className="text-slate-600 hover:text-white text-lg leading-none">×</button>
+                         </div>
+                       ) : (
+                         <select
+                            autoFocus
+                            value={theater}
+                            onChange={(e) => handleMarketChange(e.target.value)}
+                            onBlur={() => !isCustomInput && setMarketExpanded(false)}
+                            className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-white cursor-pointer"
+                         >
+                            {STRATEGIC_CITIES.map(c => <option key={c.city} value={c.city} className="text-slate-900 bg-white">{c.city}</option>)}
+                         </select>
+                       )
                    ) : (
                        <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">MARKET</span>
                    )}

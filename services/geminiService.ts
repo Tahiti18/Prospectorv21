@@ -239,16 +239,18 @@ export async function architectPitchDeck(lead: Lead): Promise<any> {
 export async function generateProposalDraft(lead: Lead): Promise<string> {
   pushLog(`PROPOSAL: Constructing executive strategy plan for ${lead.businessName}...`);
   const prompt = `Create a massive, professional high-ticket agency proposal for ${lead.businessName}. 
-  You must use the following UI_BLOCKS JSON structure and provide exhaustive detail for every section.
+  You must synthesize their social gap ("${lead.socialGap}") and current digital presence into a transformative multi-section plan.
+  Use the UI_BLOCKS format.
+  Sections: 1. Strategic Digital Audit (Exposing Gaps), 2. AI Transformation Logic, 3. Multi-Channel Engagement Infrastructure, 4. Revenue & ROI Projections, 5. Implementation Timeline.
   Structure: 
   { 
     "format": "ui_blocks", 
     "title": "EXECUTIVE STRATEGY PLAN", 
     "subtitle": "GROWTH ROADMAP FOR ${lead.businessName.toUpperCase()}",
     "sections": [ 
-      { "heading": "CURRENT DIGITAL STATUS", "body": [{ "type": "p", "content": "Deep analysis of current state" }, { "type": "bullets", "content": ["Weakness 1", "Weakness 2", "Weakness 3"] }] },
-      { "heading": "TRANSFORMATION ROADMAP", "body": [{ "type": "hero", "content": "The New Brand Vision" }, { "type": "p", "content": "Step-by-step implementation detail" }] },
-      { "heading": "PROJECTED REVENUE IMPACT", "body": [{ "type": "p", "content": "Detailed ROI analysis and market projection" }] }
+      { "heading": "DIGITAL AUTHORITY AUDIT", "body": [{ "type": "p", "content": "Deep qualitative audit of their current market presence" }, { "type": "bullets", "content": ["Structural Gap 1", "Structural Gap 2", "Structural Gap 3"] }] },
+      { "heading": "AI TRANSFORMATION ROADMAP", "body": [{ "type": "hero", "content": "The High-Ticket Visual Vision" }, { "type": "p", "content": "Step-by-step implementation of AI systems" }] },
+      { "heading": "PROJECTED REVENUE IMPACT", "body": [{ "type": "p", "content": "Detailed ROI analysis and market projection based on AI automation" }] }
     ] 
   }`;
   const result = await callOpenRouter(prompt);
@@ -268,19 +270,39 @@ export async function generateOutreachSequence(lead: Lead): Promise<any[]> {
 
 export async function generatePitch(lead: Lead): Promise<string> {
   pushLog(`PITCH: Synthesizing 3-part professional script set for ${lead.businessName}...`);
-  const prompt = `Generate a comprehensive 3-part script set for ${lead.businessName} using the UI_BLOCKS format. 
+  const prompt = `Generate a comprehensive 3-part script set for ${lead.businessName} to use during sales interactions.
+  You must synthesize their specific niche (${lead.niche}) and the identified gaps into the scripts.
   Include: 
-  1. The 30-Second Elevator Hook.
-  2. The Discovery Session Flow.
-  3. The Objection Handling Matrix.
+  1. The 30-Second Elevator Hook (Pattern Interrupt).
+  2. The Discovery Session Flow (5 psychological questions to expose pain).
+  3. The Objection Handling Matrix (Addressing Cost, Time, and Risk).
+  Use the UI_BLOCKS format.
   Structure: 
   { "format": "ui_blocks", "title": "PITCH ARCHITECTURE", "sections": [ 
-    { "heading": "30-SECOND ELEVATOR HOOK", "body": [{ "type": "hero", "content": "The Hook" }, { "type": "p", "content": "The Delivery" }] },
-    { "heading": "DISCOVERY SESSION FLOW", "body": [{ "type": "bullets", "content": ["Question 1", "Question 2", "Question 3"] }] },
-    { "heading": "OBJECTION HANDLING", "body": [{ "type": "p", "content": "Tactical advice for overcoming specific lead concerns" }] }
+    { "heading": "THE PATTERN INTERRUPT (30s)", "body": [{ "type": "hero", "content": "The Scripted Hook" }, { "type": "p", "content": "Delivery notes and tonal guidance" }] },
+    { "heading": "DISCOVERY SESSION FLOW", "body": [{ "type": "bullets", "content": ["Question 1: Pain Exposure", "Question 2: Vision Mapping", "Question 3: Friction Detection"] }] },
+    { "heading": "OBJECTION HANDLING MATRIX", "body": [{ "type": "p", "content": "Tactical responses for price and implementation hesitation" }] }
   ] }`;
   const result = await callOpenRouter(prompt);
   return result.text;
+}
+
+/* =========================================================
+   GRANULAR RE-SYNTHESIS HANDLERS
+   ========================================================= */
+
+export async function resynthesizeNarrative(lead: Lead): Promise<string> {
+  pushLog(`RE-SYNTHESIS: Re-drafting Executive Narrative for ${lead.businessName}...`);
+  const prompt = `Generate a new, professional 300-word executive summary for ${lead.businessName} explaining why they must implement AI marketing today. Focus on urgency and ROI. Return ONLY the text.`;
+  const result = await callOpenRouter(prompt);
+  return result.text;
+}
+
+export async function resynthesizeVisuals(lead: Lead): Promise<any> {
+  pushLog(`RE-SYNTHESIS: Re-calculating Visual Aesthetics for ${lead.businessName}...`);
+  const prompt = `Generate a professional visual brand direction for ${lead.businessName}. Return JSON: { "brandMood": "string", "colorPalette": [{ "hex": "string", "color": "name" }], "typography": { "heading": "string", "body": "string" }, "aiImagePrompts": [{ "use_case": "Primary", "prompt": "Exhaustive prompt" }] }`;
+  const result = await callOpenRouter(prompt);
+  return extractJSON(result.text);
 }
 
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
@@ -369,7 +391,7 @@ export async function testModelPerformance(model: string, prompt: string): Promi
 export async function loggedGenerateContent(params: { module: string; contents: string | any; config?: any; }): Promise<string> { 
     const res = await callOpenRouter(params.contents);
     return res.text;
-}
+  }
 export async function generateAffiliateProgram(niche: string): Promise<any> { return {}; }
 export async function synthesizeArticle(source: string, mode: string): Promise<string> { return ""; }
 export async function crawlTheaterSignals(sector: string, signal: string): Promise<Lead[]> { return []; }
