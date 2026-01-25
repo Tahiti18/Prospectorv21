@@ -32,7 +32,7 @@ export const SettingsNode: React.FC = () => {
                <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">INFERENCE MODEL STATUS</label>
                   <div className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-5 flex items-center justify-between">
-                     <span className="text-emerald-400 font-mono text-sm uppercase">gemini-3-flash-preview (HARD-LOCKED)</span>
+                     <span className="text-emerald-400 font-mono text-sm uppercase tracking-tight">GEMINI-3.0-FLASH-PREVIEW (OPENROUTER)</span>
                      <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                         <span className="text-[10px] font-black text-emerald-500 uppercase">ACTIVE</span>
@@ -58,7 +58,7 @@ export const SettingsNode: React.FC = () => {
 
             <div className="border-t border-slate-800 pt-8">
                 <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest text-center italic">
-                   INFRASTRUCTURE SECURED VIA ENVIRONMENT GATEWAY. DIRECT MANUAL OVERRIDE IS RESTRICTED.
+                   INFRASTRUCTURE SECURED VIA OPENROUTER 3.0 GATEWAY. DIRECT MANUAL OVERRIDE IS RESTRICTED.
                 </p>
             </div>
          </div>

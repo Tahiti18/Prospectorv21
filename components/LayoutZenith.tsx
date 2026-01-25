@@ -204,8 +204,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
-      {/* FIXED HEADER: High-priority layout element */}
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[1000] flex items-center bg-[#030712]/95 backdrop-blur-xl border-slate-800 px-8">
+      {/* FIXED HEADER: High-priority layout element with maximized z-index */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[9999] flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8">
          {/* Left: Branding */}
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">

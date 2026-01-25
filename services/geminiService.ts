@@ -1,14 +1,14 @@
 
 /* =========================================================
-   OPENROUTER SERVICE – POMELLI OS V19
+   OPENROUTER SERVICE – POMELLI OS V21 (GEMINI 3.0 FLASH)
    ========================================================= */
 
 import { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity } from "../types";
 import { deductCost } from "./computeTracker";
 export type { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity };
 
-// OpenRouter model strings
-const DEFAULT_MODEL = "google/gemini-2.0-flash-001"; // This is the stable 'Flash' on OpenRouter, representing the 3.0 era capabilities you requested.
+// Definitive OpenRouter Model ID for the newest Gemini 3.0 Flash architecture
+const DEFAULT_MODEL = "google/gemini-3-flash-preview"; 
 
 export const SESSION_ASSETS: AssetRecord[] = [];
 export const PRODUCTION_LOGS: string[] = [];
@@ -83,15 +83,41 @@ export function importVault(assets: AssetRecord[]) {
 }
 
 /* =========================================================
-   OPENROUTER CORE CLIENT
+   OPENROUTER CORE CLIENT & PARSER
    ========================================================= */
+
+/**
+ * Robustly extracts JSON from AI responses that may contain markdown or chatter.
+ */
+function extractJSON(text: string): any {
+  try {
+    // 1. Try direct parse
+    return JSON.parse(text);
+  } catch (e) {
+    try {
+      // 2. Look for JSON markdown block
+      const match = text.match(/```json\s*([\s\S]*?)\s*```/);
+      if (match && match[1]) return JSON.parse(match[1]);
+      
+      // 3. Brute force envelope find
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+          return JSON.parse(text.substring(start, end + 1));
+      }
+    } catch (inner) {
+      console.error("JSON Extraction failed", inner);
+    }
+  }
+  return null;
+}
 
 async function callOpenRouter(prompt: string, systemInstruction?: string): Promise<GeminiResult<string>> {
   try {
     const apiKey = process.env.API_KEY;
-    const modelId = localStorage.getItem('pomelli_neural_engine') || DEFAULT_MODEL;
+    const modelId = DEFAULT_MODEL;
 
-    pushLog(`NEURAL_UPLINK: Routing to OpenRouter (${modelId})...`);
+    pushLog(`NEURAL_UPLINK: Routing to OpenRouter Gemini 3.0 Flash...`);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -104,10 +130,9 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
       body: JSON.stringify({
         model: modelId,
         messages: [
-          { role: "system", content: systemInstruction || "You are Prospector OS, a multi-modal AI agency engine. Output ONLY raw JSON when requested." },
+          { role: "system", content: systemInstruction || "You are Prospector OS, powered by Gemini 3.0 Flash. Output ONLY raw JSON when requested. No conversational chatter." },
           { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" }
+        ]
       })
     });
 
@@ -141,43 +166,40 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
    ========================================================= */
 
 export async function generateLeads(market: string, niche: string, count: number): Promise<EngineResult> {
-  pushLog(`RECON_INIT: Analyzing ${market} for ${niche} via Neural Knowledge...`);
+  pushLog(`RECON_INIT: Scouring Knowledge Base for ${market} businesses in ${niche} via Gemini 3.0...`);
   
-  const prompt = `Identify ${count} real-world, high-ticket businesses in ${market} specifically in the ${niche} niche.
+  const prompt = `Identify ${count} real-world, high-ticket businesses physically located in ${market} specifically within the ${niche} niche.
   
-  For each business, identify a specific "Digital Deficiency" you recognize from your training data, such as:
-  - Outdated visual branding.
-  - Missing high-end video content.
-  - Gaps in automated engagement.
+  CRITICAL: You must only select businesses that exhibit identifiable Digital Deficiencies (Outdated design, no video content, poor social engagement).
   
-  Return a JSON object with the following structure:
+  Return a raw JSON object with this structure:
   {
     "leads": [
       {
-        "businessName": "Name",
-        "websiteUrl": "URL",
+        "businessName": "Exact Business Name",
+        "websiteUrl": "https://...",
         "niche": "${niche}",
         "city": "${market}",
-        "phone": "Phone or N/A",
-        "email": "Email or N/A",
-        "leadScore": 85,
+        "phone": "Real Phone Number",
+        "email": "Real Email or Not found",
+        "leadScore": 0-100,
         "assetGrade": "A/B/C",
-        "socialGap": "Detailed deficiency description",
+        "socialGap": "Detailed description of their digital infrastructure gap",
         "visualProof": "Brief proof of gap",
-        "bestAngle": "How we should pitch them",
+        "bestAngle": "Strategic pitch hook",
         "rank": 1
       }
     ],
     "rubric": {
-       "visual": "Criteria for visual grade",
-       "social": "Criteria for social gap",
-       "highTicket": "Plausibility score logic",
+       "visual": "Criteria used",
+       "social": "Deficit logic",
+       "highTicket": "Plausibility logic",
        "reachability": "Contact logic",
        "grades": { "A": "Elite", "B": "Viable", "C": "Legacy" }
     },
     "assets": {
-       "emailOpeners": ["Opener 1", "Opener 2"],
-       "fullEmail": "Template body",
+       "emailOpeners": ["Hook 1", "Hook 2"],
+       "fullEmail": "Email Template",
        "callOpener": "Script",
        "voicemail": "Script",
        "smsFollowup": "Script"
@@ -188,22 +210,20 @@ export async function generateLeads(market: string, niche: string, count: number
 
   if (!result.ok) return { leads: [], rubric: {} as any, assets: {} as any };
 
-  try {
-    const data = JSON.parse(result.text);
-    pushLog(`RECON_SUCCESS: ${data.leads.length} targets synced to ledger.`);
+  const data = extractJSON(result.text);
+  if (data && data.leads) {
+    pushLog(`RECON_SUCCESS: ${data.leads.length} grounded targets synced.`);
     return data;
-  } catch (e) {
-    pushLog(`PARSING_ERROR: AI output was not valid JSON.`);
+  } else {
+    pushLog(`PARSING_ERROR: Node returned unparseable sequence.`);
     return { leads: [], rubric: {} as any, assets: {} as any };
   }
 }
 
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
-  const prompt = `Perform exhaustive strategic architecture for ${lead.businessName}. Niche: ${lead.niche}. Deficiency: ${lead.socialGap}. 
-  Return a complete campaign JSON with: presentation (slides), narrative (executive brief), funnel (5 stages), outreach (emails/scripts), and visualDirection.`;
-  
+  const prompt = `Perform strategic architecture for ${lead.businessName}. Return a complete campaign JSON with slides, executive narrative, 5-stage funnel, outreach scripts, and visual direction.`;
   const result = await callOpenRouter(prompt);
-  return result.ok ? JSON.parse(result.text) : {};
+  return result.ok ? extractJSON(result.text) : {};
 }
 
 // STUBS FOR TYPESCRIPT COMPLIANCE

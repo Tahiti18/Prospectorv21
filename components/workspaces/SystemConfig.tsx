@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { toast } from '../../services/toastManager';
 
 export const SystemConfig: React.FC = () => {
-  const [protocol, setProtocol] = useState(() => localStorage.getItem('pomelli_protocol_id') || 'PROSPECT_CORE_V15_FINAL');
-  const [model, setModel] = useState(() => localStorage.getItem('pomelli_neural_engine') || 'gemini-3-flash-preview');
+  const [protocol, setProtocol] = useState(() => localStorage.getItem('pomelli_protocol_id') || 'PROSPECT_CORE_V21_3.0');
+  const [model, setModel] = useState(() => localStorage.getItem('pomelli_neural_engine') || 'google/gemini-3-flash-preview');
   const [latencyMode, setLatencyMode] = useState<'LOW' | 'HIGH'>(() => (localStorage.getItem('pomelli_latency') as any) || 'LOW');
 
   useEffect(() => {
@@ -52,9 +52,8 @@ export const SystemConfig: React.FC = () => {
                         onChange={(e) => setModel(e.target.value)}
                         className="w-full bg-[#020617] border-2 border-slate-800 rounded-[32px] px-8 py-6 text-white text-[12px] font-black uppercase tracking-widest focus:border-emerald-500 outline-none cursor-pointer appearance-none group-hover:border-slate-600 transition-colors"
                         >
-                        <option value="gemini-3-flash-preview">GEMINI 3 FLASH (OPTIMAL)</option>
-                        <option value="gemini-3-pro-preview">GEMINI 3 PRO (REASONING)</option>
-                        <option value="gemini-2.5-flash-image">GEMINI 2.5 VISION</option>
+                        <option value="google/gemini-3-flash-preview">GEMINI 3.0 FLASH (OPTIMAL)</option>
+                        <option value="google/gemini-3-pro-preview">GEMINI 3.0 PRO (REASONING)</option>
                         </select>
                         <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-500">▼</div>
                     </div>
