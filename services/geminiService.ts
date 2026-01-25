@@ -1,13 +1,12 @@
 
 /* =========================================================
-   OPENROUTER SERVICE – POMELLI OS V22 (KEY PERSISTENCE)
+   OPENROUTER SERVICE – POMELLI OS V23 (HIGH-DENSITY FORGE)
    ========================================================= */
 
 import { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity } from "../types";
 import { deductCost } from "./computeTracker";
 export type { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity };
 
-// Definitive OpenRouter Model ID for the newest Gemini 3.0 Flash architecture
 const DEFAULT_MODEL = "google/gemini-3-flash-preview"; 
 
 const KEY_STORAGE_OR = 'pomelli_os_or_key';
@@ -136,8 +135,6 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
         throw new Error("AUTHORIZATION_REQUIRED: Set OpenRouter key in Settings.");
     }
 
-    pushLog(`NEURAL_UPLINK: Connecting via 3.0 Flash Architecture...`);
-
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -151,32 +148,21 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
         messages: [
           { role: "system", content: systemInstruction || "You are Prospector OS. Output ONLY raw JSON when requested. No chatter." },
           { role: "user", content: prompt }
-        ]
+        ],
+        temperature: 0.7 // Slight creativity for campaign drafting
       })
     });
 
     const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(data.error.message || "OpenRouter internal error");
-    }
+    if (data.error) throw new Error(data.error.message || "OpenRouter internal error");
 
     const text = data.choices[0].message.content;
     deductCost(modelId, (prompt.length + text.length));
     
-    return {
-      ok: true,
-      text: text,
-      raw: data
-    };
+    return { ok: true, text: text, raw: data };
   } catch (e: any) {
     pushLog(`NEURAL_FAULT: ${e.message}`);
-    return {
-      ok: false,
-      text: "",
-      raw: null,
-      error: { message: e.message }
-    };
+    return { ok: false, text: "", raw: null, error: { message: e.message } };
   }
 }
 
@@ -188,8 +174,7 @@ export async function generateLeads(market: string, niche: string, count: number
   pushLog(`RECON_INIT: Analyzing ${market} for ${niche} prospects...`);
   
   const prompt = `Identify ${count} real-world, high-ticket businesses located in ${market} specifically within the ${niche} niche.
-  
-  CRITICAL: You must only select businesses that exhibit identifiable Digital Deficiencies (Outdated design, no video content, poor social engagement).
+  CRITICAL: You must only select businesses that exhibit identifiable Digital Deficiencies.
   
   Return a raw JSON object with this EXACT structure:
   {
@@ -209,43 +194,106 @@ export async function generateLeads(market: string, niche: string, count: number
         "rank": 1
       }
     ],
-    "rubric": {
-       "visual": "Criteria used",
-       "social": "Logic for gap",
-       "highTicket": "Plausibility logic",
-       "reachability": "Contact logic",
-       "grades": { "A": "Elite", "B": "Viable", "C": "Legacy" }
-    },
-    "assets": {
-       "emailOpeners": ["Opener 1", "Opener 2"],
-       "fullEmail": "Template",
-       "callOpener": "Script",
-       "voicemail": "Script",
-       "smsFollowup": "Script"
-    }
+    "rubric": { "visual": "...", "social": "...", "highTicket": "...", "reachability": "...", "grades": { "A": "...", "B": "...", "C": "..." } },
+    "assets": { "emailOpeners": ["...", "..."], "fullEmail": "...", "callOpener": "...", "voicemail": "...", "smsFollowup": "..." }
   }`;
   
   const result = await callOpenRouter(prompt);
-
   if (!result.ok) return { leads: [], rubric: {} as any, assets: {} as any };
 
   const data = extractJSON(result.text);
   if (data && data.leads) {
-    pushLog(`RECON_SUCCESS: ${data.leads.length} targets synced to ledger.`);
+    pushLog(`RECON_SUCCESS: ${data.leads.length} targets synced.`);
     return data;
-  } else {
-    pushLog(`PARSING_ERROR: Response structure violation.`);
-    return { leads: [], rubric: {} as any, assets: {} as any };
   }
+  return { leads: [], rubric: {} as any, assets: {} as any };
 }
 
+/**
+ * HIGH-DENSITY CAMPAIGN ORCHESTRATION
+ * This function forces the model to produce a massive, detailed response.
+ */
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
-  const prompt = `Perform strategic architecture for ${lead.businessName}. Return a complete campaign JSON with slides, narrative, funnel, outreach scripts, and visual direction.`;
-  const result = await callOpenRouter(prompt);
-  return result.ok ? extractJSON(result.text) : {};
+  pushLog(`FORGE_INIT: Architecting high-density campaign for ${lead.businessName}...`);
+  
+  const prompt = `Perform a comprehensive high-ticket agency strategic architecture for the business "${lead.businessName}" (${lead.niche}).
+  
+  You are the world's most elite CMO. Your task is to produce an EXHAUSTIVE, multi-tab strategic dossier. DO NOT skip any fields. DO NOT provide placeholders.
+  
+  Return ONLY a raw JSON object with this precise high-density structure:
+  {
+    "narrative": "A 300-word executive summary of the brand's current failure and the AI-driven salvation we are proposing.",
+    "presentation": {
+      "title": "ELITE TRANSFORMATION BLUEPRINT: ${lead.businessName}",
+      "slides": [
+        { "title": "The Digital Deficit", "bullets": ["Point 1 detailing a specific gap", "Point 2", "Point 3"], "category": "AUDIT", "insight": "A sharp strategic observation" },
+        { "title": "Aesthetic Authority", "bullets": ["Visual Point 1", "Visual Point 2", "Visual Point 3"], "category": "DESIGN", "insight": "Visual leverage point" },
+        { "title": "Conversion Geometry", "bullets": ["Conversion Point 1", "Conversion Point 2", "Conversion Point 3"], "category": "STRATEGY", "insight": "Funnel logic" },
+        { "title": "The AI Multiplier", "bullets": ["AI Point 1", "AI Point 2", "AI Point 3"], "category": "TECH", "insight": "Tool specific value" },
+        { "title": "Economic Outcome", "bullets": ["ROI Point 1", "ROI Point 2", "ROI Point 3"], "category": "FINANCE", "insight": "Revenue projection" }
+      ]
+    },
+    "outreach": {
+      "emailSequence": [
+        { "subject": "High-impact subject 1", "body": "Full professional email body..." },
+        { "subject": "High-impact subject 2", "body": "Full follow-up email body..." },
+        { "subject": "High-impact subject 3", "body": "Closing email body..." }
+      ],
+      "linkedinSequence": [
+        { "type": "CONNECTION_NOTE", "message": "High-conversion 300 character message..." },
+        { "type": "DIRECT_PITCH", "message": "Sophisticated deep-dive DM..." }
+      ],
+      "callScript": {
+        "opener": "The exact attention-grabbing opening line",
+        "hook": "The core value proposition and objection handler",
+        "closing": "The exact closing question to book the meeting"
+      }
+    },
+    "funnel": [
+      { "title": "Awareness Hook", "description": "Detailed description of stage 1", "conversionGoal": "CLICK", "frictionFix": "Specific AI solution for this stage" },
+      { "title": "Logic Staging", "description": "Detailed description of stage 2", "conversionGoal": "OPT-IN", "frictionFix": "AI Concierge engagement" },
+      { "title": "Visual Proof", "description": "Detailed description of stage 3", "conversionGoal": "TRUST", "frictionFix": "4K Brand Assets" },
+      { "title": "Deal Closure", "description": "Detailed description of stage 4", "conversionGoal": "DEPOSIT", "frictionFix": "Interactive Proposal" }
+    ],
+    "contentPack": [
+      { "platform": "Instagram", "type": "REEL", "caption": "Viral-engineered hook and copy...", "visualDirective": "Specific visual instructions for AI Video Studio" },
+      { "platform": "LinkedIn", "type": "THOUGHT_LEADERSHIP", "caption": "Strategic professional post...", "visualDirective": "4K Studio shot directive" },
+      { "platform": "X/Twitter", "type": "THREAD", "caption": "10-part educational thread...", "visualDirective": "Graphic style directive" },
+      { "platform": "Facebook", "type": "COMMUNITY_AD", "caption": "Local targeting ad copy...", "visualDirective": "Aesthetic style directive" }
+    ],
+    "visualDirection": {
+      "brandMood": "Comprehensive description of the new brand archetype (e.g., 'Modern Minimalist Luxury with High-Contrast Emerald Tones')",
+      "colorPalette": [
+        { "hex": "#HEXCODE1", "color": "Color Name 1" },
+        { "hex": "#HEXCODE2", "color": "Color Name 2" },
+        { "hex": "#HEXCODE3", "color": "Color Name 3" },
+        { "hex": "#HEXCODE4", "color": "Color Name 4" }
+      ],
+      "typography": { "heading": "Specific Font Family Name", "body": "Complementary Body Font" },
+      "aiImagePrompts": [
+        { "use_case": "WEBSITE_HERO", "prompt": "Exhaustive 4K stable diffusion prompt for hero section..." },
+        { "use_case": "SOCIAL_AD", "prompt": "Exhaustive cinematic prompt for Instagram ad..." },
+        { "use_case": "PRODUCT_SHOT", "prompt": "Exhaustive studio lighting prompt..." },
+        { "use_case": "LIFESTYLE", "prompt": "Exhaustive atmosphere prompt..." }
+      ]
+    }
+  }`;
+
+  const result = await callOpenRouter(prompt, "You are a world-class strategic agency orchestrator. Fill all fields with high-value, professional content.");
+  
+  if (result.ok) {
+    const data = extractJSON(result.text);
+    if (data) {
+      pushLog(`FORGE_COMPLETE: Multi-dimensional blueprint synchronized for ${lead.businessName}.`);
+      return data;
+    }
+  }
+  
+  pushLog(`FORGE_FAULT: Strategy engine failed to generate high-density payload.`);
+  return null;
 }
 
-// STUBS FOR TYPESCRIPT COMPLIANCE
+// STUBS REMAIN THE SAME
 export async function architectFunnel(lead: Lead): Promise<any[]> { return []; }
 export async function architectPitchDeck(lead: Lead): Promise<any> { return { slides: [] }; }
 export async function generateTaskMatrix(lead: Lead): Promise<any[]> { return []; }
