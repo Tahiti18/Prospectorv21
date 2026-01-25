@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Lead, OutreachChannel, OutreachMode } from '../../types';
 import { outreachService } from '../../services/outreachService';
+import { generateEmailVariations } from '../../services/geminiService';
+import { toast } from '../../services/toastManager';
 
 interface OutreachModalProps {
   isOpen: boolean;
@@ -22,6 +24,11 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
   const [body, setBody] = useState(emailData.body);
   const [channel, setChannel] = useState<'GMAIL' | 'LINKEDIN'>('GMAIL');
   const [isSending, setIsSending] = useState(false);
+
+  // A/B Variation State
+  const [variations, setVariations] = useState<{ subject: string, body: string }[]>([]);
+  const [isGeneratingVariations, setIsGeneratingVariations] = useState(false);
+  const [activeVarIdx, setActiveVarIdx] = useState<number | null>(null);
 
   // Phase 2: Enhanced State
   const [previewMode, setPreviewMode] = useState<'TEXT' | 'HTML'>('TEXT');
@@ -45,6 +52,27 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
       setSubject("LinkedIn Note");
       setBody(linkedinData);
     }
+    setActiveVarIdx(null);
+  };
+
+  const handleGenerateVariations = async () => {
+    setIsGeneratingVariations(true);
+    toast.neural("FORGE: Initiating A/B Neural Variations...");
+    try {
+        const results = await generateEmailVariations(lead);
+        setVariations(results);
+        toast.success("3 Variations Synchronized.");
+    } catch(e) {
+        toast.error("Variation Forge Failed.");
+    } finally {
+        setIsGeneratingVariations(false);
+    }
+  };
+
+  const selectVariation = (idx: number) => {
+    setActiveVarIdx(idx);
+    setSubject(variations[idx].subject);
+    setBody(variations[idx].body);
   };
 
   const escapeHtml = (s: string) =>
@@ -113,7 +141,6 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
 
     window.open(url, '_blank');
 
-    // STRICT RULES: Mode = test, Channel = email, NO status update
     outreachService.logInteraction({
       leadId: lead.id,
       channel: 'email', 
@@ -132,10 +159,8 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
     setUiNotice(null);
     setInlineError(null);
     
-    // Determine Recipient
     const targetEmail = sendMode === 'TEST' ? adminEmail : (lead.email || '');
     
-    // 1. Trigger the native client
     if (channel === 'GMAIL') {
       const { url, isTruncated } = outreachService.generateMailto({
         to: targetEmail,
@@ -150,14 +175,12 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
       
       window.open(url, '_blank');
     } else {
-      // For LinkedIn, we copy to clipboard and attempt to open URL
       await outreachService.copyToClipboard(body);
       const targetUrl = lead.contactUrl || lead.websiteUrl;
       window.open(targetUrl, '_blank');
       setUiNotice("Message copied. Opening target...");
     }
 
-    // 2. Log Interaction with STRICT Types
     const logChannel: OutreachChannel = channel === 'GMAIL' ? 'email' : 'linkedin';
     const logMode: OutreachMode = sendMode === 'TEST' ? 'test' : 'live';
     
@@ -170,25 +193,22 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
       body: body
     });
     
-    // 3. Update Lead Status (System of Record) - ONLY IF LIVE
     if (logMode === 'live') {
         const newHistory = [log, ...(lead.outreachHistory || [])];
         
         onUpdateLead(lead.id, {
           outreachStatus: 'sent',
-          status: 'sent', // Legacy sync
+          status: 'sent',
           lastContactAt: Date.now(),
           outreachHistory: newHistory,
-          nextFollowUpAt: Date.now() + (3 * 24 * 60 * 60 * 1000) // +3 days
+          nextFollowUpAt: Date.now() + (3 * 24 * 60 * 60 * 1000)
         });
     }
 
-    // Simulate brief processing for UX
     await new Promise(r => setTimeout(r, 600));
     
     setIsSending(false);
     if (onSent) onSent();
-    // Don't close immediately on test so user can iterate
     if (logMode === 'live') onClose();
   };
 
@@ -200,9 +220,18 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
         {/* Left: Configuration */}
         <div className="flex-1 flex flex-col border-r border-slate-800 overflow-hidden">
             {/* Header */}
-            <div className="p-8 border-b border-slate-800 bg-slate-900/50">
-              <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">CAMPAIGN <span className="text-emerald-500">PRE-FLIGHT</span></h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Target: {lead.businessName} ({lead.email || 'NO_EMAIL'})</p>
+            <div className="p-8 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter">CAMPAIGN <span className="text-emerald-500">PRE-FLIGHT</span></h2>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Target: {lead.businessName}</p>
+              </div>
+              <button 
+                onClick={handleGenerateVariations}
+                disabled={isGeneratingVariations}
+                className="px-4 py-2 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50"
+              >
+                {isGeneratingVariations ? 'FORGING...' : '✨ NEURAL VARIATIONS'}
+              </button>
             </div>
 
             <div className="p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -231,6 +260,21 @@ export const OutreachModal: React.FC<OutreachModalProps> = ({ isOpen, onClose, d
                    </button>
                  )}
                </div>
+
+               {/* Variation Picker */}
+               {channel === 'GMAIL' && variations.length > 0 && (
+                 <div className="flex gap-2 animate-in slide-in-from-top-2">
+                    {variations.map((v, i) => (
+                        <button 
+                            key={i}
+                            onClick={() => selectVariation(i)}
+                            className={`flex-1 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest border transition-all ${activeVarIdx === i ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-600 hover:text-slate-400'}`}
+                        >
+                            VARIANT {i+1}
+                        </button>
+                    ))}
+                 </div>
+               )}
 
                {/* Editor Inputs */}
                <div className="space-y-4">

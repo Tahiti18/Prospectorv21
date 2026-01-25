@@ -1,6 +1,6 @@
 
 /* =========================================================
-   GEMINI SERVICE – NATIVE PREVIEW OPTIMIZED (V16)
+   GEMINI SERVICE – NATIVE PREVIEW OPTIMIZED (V18)
    ========================================================= */
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
@@ -87,18 +87,12 @@ export function deleteAsset(id: string) {
   }
 }
 
-/**
- * Clears all assets from the session vault.
- */
 export function clearVault() {
   SESSION_ASSETS.length = 0;
   assetListeners.forEach(l => l([...SESSION_ASSETS]));
   pushLog(`ASSET_VAULT_CLEARED`);
 }
 
-/**
- * Imports a batch of assets into the session vault.
- */
 export function importVault(assets: AssetRecord[]) {
   SESSION_ASSETS.length = 0;
   SESSION_ASSETS.push(...assets);
@@ -216,9 +210,52 @@ export async function generateLeads(market: string, niche: string, count: number
 }
 
 /**
- * EXHAUSTIVE MISSION ORCHESTRATOR
- * This produces the main "Campaign Forge" package.
+ * GENERATE EMAIL VARIATIONS (A/B TEST CORE)
  */
+export async function generateEmailVariations(lead: Lead): Promise<{ subject: string, body: string }[]> {
+    pushLog(`VARIATION_FORGE: Synthesizing A/B outreach vectors for ${lead.businessName}...`);
+    const prompt = `
+        TASK: Generate 3 distinct outreach email variations for ${lead.businessName}.
+        Context: Their niche is ${lead.niche} and they have a identified gap: "${lead.socialGap}".
+        
+        VARIATION 1: Aggressive/ROI focused. Short subject line, very direct value pitch. CTA: "Book a 15-minute audit".
+        VARIATION 2: Insight/Analytic focused. Mention a specific observation about their site or social presence. CTA: "Reply 'BLUE' for the full gap report".
+        VARIATION 3: Casual/Human-centric. Very low-friction. Focus on a quick curiosity question. CTA: "Open to a quick screen-share video?".
+        
+        Return JSON object with "variations" key containing an array of 3 objects { "subject": string, "body": string }.
+    `;
+    
+    const result = await callGemini(prompt, { 
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                variations: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            subject: { type: Type.STRING },
+                            body: { type: Type.STRING }
+                        },
+                        required: ["subject", "body"]
+                    }
+                }
+            },
+            required: ["variations"]
+        }
+    });
+
+    if (result.ok) {
+        try {
+            return JSON.parse(result.text).variations;
+        } catch(e) {
+            return [];
+        }
+    }
+    return [];
+}
+
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
   pushLog(`FORGE_INIT: Starting multi-vector architecture for ${lead.businessName}`);
   const prompt = `
@@ -340,26 +377,13 @@ export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord
   return {};
 }
 
-/**
- * Architects an exhaustive 5-stage funnel map.
- */
 export async function architectFunnel(lead: Lead): Promise<any[]> {
   pushLog(`FUNNEL_ENGINE: Mapping 5-stage intent geometry for ${lead.businessName}`);
   const prompt = `
     TASK: Architect a definitive 5-stage conversion funnel for ${lead.businessName}.
     Niche: ${lead.niche}
-    
-    STAGES REQUIRED: 
-    1. Awareness (The Disruptive Hook)
-    2. Interest (The Value-Gap Demonstration)
-    3. Consideration (Case Study & Social Proof)
-    4. Intent (The Transformation Offer)
-    5. Conversion (The Closing Protocol)
-    
-    For each stage, provide a detailed 3-sentence description of the psychological transition and the conversion mechanics.
     Return JSON array of { stage: number, title: string, description: string, conversionGoal: string }.
   `;
-
   const result = await callGemini(prompt, { 
     responseMimeType: "application/json",
     responseSchema: {
@@ -376,35 +400,15 @@ export async function architectFunnel(lead: Lead): Promise<any[]> {
         }
     }
   });
-
-  if (!result.ok) return [];
-  try {
-    return JSON.parse(result.text);
-  } catch (e) {
-    return [];
-  }
+  return result.ok ? JSON.parse(result.text) : [];
 }
 
-/**
- * Architects an exhaustive 7-slide pitch deck structure.
- */
 export async function architectPitchDeck(lead: Lead): Promise<any> {
   pushLog(`DECK_ARCHITECT: Structural design for 7-slide narrative for ${lead.businessName}`);
   const prompt = `
     TASK: Architect a 7-slide strategic pitch deck narrative for ${lead.businessName}.
-    SLIDES REQUIRED:
-    1. The Vision (Title & Future State)
-    2. The Problem (The Market Gap/Vulnerability)
-    3. The Solution (AI Transformation Engine)
-    4. Technical Proof (Mockups & Capability Proof)
-    5. Financial Lift (ROI Projections)
-    6. Implementation (The 90-Day Roadmap)
-    7. The Partnership (The Close & Next Steps)
-
-    For each slide, provide 5 detailed bullets that build a logical closing argument.
     Return JSON: { "slides": [ { "title": "", "bullets": [""] } ] }
   `;
-
   const result = await callGemini(prompt, { 
     responseMimeType: "application/json",
     responseSchema: {
@@ -425,140 +429,52 @@ export async function architectPitchDeck(lead: Lead): Promise<any> {
       required: ["slides"]
     }
   });
-
-  if (!result.ok) return { slides: [] };
-  try {
-    return JSON.parse(result.text);
-  } catch (e) {
-    return { slides: [] };
-  }
+  return result.ok ? JSON.parse(result.text) : { slides: [] };
 }
 
 export async function generateTaskMatrix(lead: Lead): Promise<any[]> {
   const prompt = `Generate a 10-step technical implementation roadmap for transforming ${lead.businessName}. 
-  Focus on their niche: ${lead.niche} and gap: ${lead.socialGap}.
   Return JSON array of { id: string, task: string, status: 'pending' | 'complete' }.`;
-  
   const result = await callGemini(prompt, {
     responseMimeType: "application/json",
     responseSchema: {
         type: Type.ARRAY,
         items: {
             type: Type.OBJECT,
-            properties: {
-                id: { type: Type.STRING },
-                task: { type: Type.STRING },
-                status: { type: Type.STRING }
-            },
+            properties: { id: { type: Type.STRING }, task: { type: Type.STRING }, status: { type: Type.STRING } },
             required: ["id", "task", "status"]
         }
     }
   });
-
   return result.ok ? JSON.parse(result.text) : [];
 }
 
 export async function generatePitch(lead: Lead): Promise<string> {
-  pushLog(`PITCH_ENGINE: Synthesizing multi-vector scripts for ${lead.businessName}`);
-  const prompt = `
-    TASK: Generate a definitive high-fidelity pitch script suite for ${lead.businessName}.
-    Niche: ${lead.niche}
-    Vulnerability: ${lead.socialGap}
-
-    Structure the response using this EXACT UI_BLOCKS JSON schema:
-    {
-      "format": "ui_blocks",
-      "title": "PITCH ARCHITECTURE",
-      "subtitle": "STRATEGIC SCRIPTS FOR ${lead.businessName.toUpperCase()}",
-      "sections": [
-        {
-          "heading": "1. THE ULTIMATE HOOK",
-          "body": [
-            { "type": "hero", "content": "A 10-word sentence that stops their brain." }
-          ]
-        },
-        {
-          "heading": "2. EXECUTIVE CLIENT PITCH (30 SECONDS)",
-          "body": [
-            { "type": "p", "content": "Concise high-impact script focused on ROI and competitive gap closure." },
-            { "type": "bullets", "content": ["Hook line", "Gap reference", "Vision statement", "Direct call to action"] }
-          ]
-        },
-        {
-          "heading": "3. CANDIDATE VISION PITCH",
-          "body": [
-            { "type": "p", "content": "How to attract top-tier talent by selling the mission of transforming ${lead.businessName} into an AI-first leader." }
-          ]
-        },
-        {
-          "heading": "4. OBJECTION HANDLERS",
-          "body": [
-            { "type": "bullets", "content": ["Price objection response", "Technical complexity response", "Timeline response"] }
-          ]
-        }
-      ]
-    }
-  `;
+  const prompt = `Generate high-fidelity pitch scripts for ${lead.businessName}. Use UI_BLOCKS JSON format.`;
   const result = await callGemini(prompt, { responseMimeType: "application/json" });
   return result.text;
 }
 
 export async function generateProposalDraft(lead: Lead): Promise<string> {
-  pushLog(`PROPOSAL_BUILDER: Architecting transformation agreement for ${lead.businessName}`);
-  const prompt = `
-    GENERATE_PROPOSAL_V16: Create a high-fidelity strategic transformation proposal for ${lead.businessName}.
-    Return the response as a UI_BLOCKS JSON object with:
-    1. EXECUTVE SUMMARY (Hero format)
-    2. THE OPPORTUNITY (Deep paragraph)
-    3. THE SOLUTION (Bullet points of AI features)
-    4. PROJECTED ROI (Paragraph)
-    5. TIMELINE (Bullet points)
-    
-    Structure the response using UI_BLOCKS JSON schema.
-  `;
+  const prompt = `Create a high-fidelity strategic transformation proposal for ${lead.businessName}. Use UI_BLOCKS JSON schema.`;
   const result = await callGemini(prompt, { responseMimeType: "application/json" });
   return result.text;
 }
 
 export async function generateOutreachSequence(lead: Lead): Promise<any[]> {
-  pushLog(`SEQUENCER: Drafting 25-day omnipresence flow for ${lead.businessName}`);
-  const prompt = `
-    TASK: Architect a 7-step high-ticket engagement flow for ${lead.businessName}.
-    Step 1: Day 1 (Email - The Disruptive Hook)
-    Step 2: Day 3 (Email - Case Study/Proof)
-    Step 3: Day 6 (LinkedIn - High-Value Connection Note)
-    Step 4: Day 10 (Email - ROI Projection/Value Add)
-    Step 5: Day 15 (LinkedIn - Direct Engagement)
-    Step 6: Day 20 (Email - Soft Close/Availability)
-    Step 7: Day 25 (Email - Final Breakup/Legacy Sync)
-
-    Include full, professional, persuasive message bodies.
-  `;
-
+  const prompt = `Architect a 7-step high-ticket engagement flow for ${lead.businessName}. Return JSON array.`;
   const result = await callGemini(prompt, { 
     responseMimeType: "application/json",
     responseSchema: {
         type: Type.ARRAY,
         items: {
             type: Type.OBJECT,
-            properties: {
-                day: { type: Type.NUMBER },
-                channel: { type: Type.STRING, description: "EMAIL or LINKEDIN" },
-                purpose: { type: Type.STRING },
-                subject: { type: Type.STRING },
-                body: { type: Type.STRING }
-            },
+            properties: { day: { type: Type.NUMBER }, channel: { type: Type.STRING }, purpose: { type: Type.STRING }, subject: { type: Type.STRING }, body: { type: Type.STRING } },
             required: ["day", "channel", "purpose", "body"]
         }
     }
   });
-
-  if (!result.ok) return [];
-  try {
-    return JSON.parse(result.text);
-  } catch (e) {
-    return [];
-  }
+  return result.ok ? JSON.parse(result.text) : [];
 }
 
 export async function groundedLeadSearch(query: string, market: string, count: number): Promise<EngineResult> { return generateLeads(market, query, count); }
