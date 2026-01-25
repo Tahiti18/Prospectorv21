@@ -141,8 +141,20 @@ async function callGemini(prompt: string, config?: any): Promise<GeminiResult<st
    ========================================================= */
 
 export async function generateLeads(market: string, niche: string, count: number): Promise<EngineResult> {
-  pushLog(`RECON_START: Scanning ${market} for ${niche}`);
-  const prompt = `Find ${count} high-ticket businesses in ${market} specifically in the ${niche} niche that could benefit from AI transformation.`;
+  pushLog(`NEURAL_SCAN_INIT: Accessing Knowledge Base for ${market} businesses in ${niche}...`);
+  
+  const prompt = `You are a high-level lead discovery agent for a multi-modal AI agency. 
+  Your mission is to identify ${count} real-world, high-ticket businesses located in ${market} specifically within the ${niche} niche.
+  
+  CRITICAL: You must identify specific businesses that have identifiable "Digital Deficiencies" such as:
+  1. Outdated or low-fidelity visual assets.
+  2. Lack of cinematic or high-end video content.
+  3. Poor social media conversion architecture.
+  4. Gaps in automated customer engagement.
+
+  For each business, provide deep tactical data points. Use your internal knowledge to retrieve verified business names and websites.
+  
+  Return the results as a JSON object adhering to the specified schema.`;
   
   const result = await callGemini(prompt, { 
     responseMimeType: "application/json",
@@ -166,8 +178,9 @@ export async function generateLeads(market: string, niche: string, count: number
               visualProof: { type: Type.STRING },
               bestAngle: { type: Type.STRING },
               personalizedHook: { type: Type.STRING },
+              rank: { type: Type.NUMBER }
             },
-            required: ["businessName", "websiteUrl", "niche", "city", "leadScore", "assetGrade", "socialGap"],
+            required: ["businessName", "websiteUrl", "niche", "city", "leadScore", "assetGrade", "socialGap", "rank"],
           }
         },
         rubric: {
@@ -202,9 +215,10 @@ export async function generateLeads(market: string, niche: string, count: number
 
   try {
     const data = JSON.parse(result.text);
-    pushLog(`RECON_SUCCESS: Identified ${data.leads.length} high-fidelity targets.`);
+    pushLog(`NEURAL_SCAN_SUCCESS: Syncing ${data.leads.length} identified targets to ledger.`);
     return data;
   } catch (e) {
+    pushLog(`RECOVERY_ERROR: Parsing failure on Lead Ledger data.`);
     return { leads: [], rubric: {} as any, assets: {} as any };
   }
 }

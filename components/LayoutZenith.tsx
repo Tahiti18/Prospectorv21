@@ -204,17 +204,17 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
-      {/* HEADER: Updated to use robust flex-distribution for categories */}
-      <header className="h-20 flex-none border-b z-[100] flex items-center bg-[#030712] border-slate-800 px-8">
+      {/* HEADER: Refactored to FIXED position to prevent squashing in production builds */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[100] flex items-center bg-[#030712] border-slate-800 px-8">
          {/* Left: Branding */}
-         <div className="flex-1 flex items-center">
+         <div className="flex-1 flex items-center shrink-0">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
                PROSPECTOR <span className="text-emerald-500 italic">OS</span>
             </h1>
          </div>
 
-         {/* Center: Main Categories (Refactored to flex-distribution) */}
-         <div className="hidden lg:flex items-center justify-center flex-[2] pointer-events-auto">
+         {/* Center: Main Categories */}
+         <div className="hidden lg:flex items-center justify-center flex-[2] pointer-events-auto shrink-0">
             <nav className="flex items-center gap-1 p-1.5 rounded-full border shadow-2xl bg-[#0b1021] border-slate-800">
                {(Object.keys(MODULE_GROUPS) as MainMode[]).map((mode) => {
                   const isActive = activeMode === mode;
@@ -237,7 +237,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          </div>
 
          {/* Right: Actions */}
-         <div className="flex-1 flex items-center gap-4 justify-end">
+         <div className="flex-1 flex items-center gap-4 justify-end shrink-0">
             <button 
                onClick={onSearchClick}
                className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
@@ -268,7 +268,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      {/* Main Layout Wrapper: Now accounts for fixed header height */}
+      <div className="flex-1 flex overflow-hidden pt-20">
          <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
