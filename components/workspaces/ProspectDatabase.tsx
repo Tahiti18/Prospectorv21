@@ -79,8 +79,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   // 5. Grouping visualization logic
   const groupedData = useMemo(() => {
-    // If we are isolating a single value (e.g. "UAE"), don't show group headers
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
+    // If we are isolating a single value (e.g. "UK"), don't show group headers
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
@@ -114,7 +114,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Permanently remove this target from the ledger?")) {
+    if (confirm("Permanently remove this target?")) {
         db.deleteLead(id);
         toast.info("Target removed.");
     }
@@ -131,7 +131,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("DATABASE_EXPORTED");
+    toast.success("EXPORT_COMPLETE");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,18 +143,18 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
                 const results = db.upsertLeads(imported);
-                toast.success(`SYNC: +${results.added} NEW, ${results.updated} UPDATED.`);
+                toast.success(`DATABASE_SYNC: +${results.added} NEW.`);
             }
         } catch (err) {
-            toast.error("INVALID JSON FILE");
+            toast.error("INVALID_JSON");
         }
     };
     reader.readAsText(file);
   };
 
   const SortIcon = ({ col }: { col: keyof Lead }) => {
-    if (sortConfig.key !== col) return <span className="opacity-20 ml-2 text-[12px]">⇅</span>;
-    return <span className="text-emerald-500 ml-2 text-[12px] font-bold">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    if (sortConfig.key !== col) return <span className="opacity-20 ml-2 text-[10px]">⇅</span>;
+    return <span className="text-emerald-500 ml-2 text-[10px] font-bold">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
   };
 
   return (
@@ -164,35 +164,30 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER REPOSITORY // {leads.length} RECORDS</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">LEDGER MASTER // {leads.length} RECORDS</p>
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* ORGANIZE & ISOLATE HUB */}
+          {/* ADVANCED ORGANIZE & ISOLATE PANEL */}
           <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl gap-8">
              <div className="flex items-center gap-3 border-r border-slate-800 pr-8">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE BY:</span>
                 <div className="flex gap-1">
-                    {(['none', 'city', 'niche', 'country'] as GroupBy[]).map(g => (
-                        <button 
-                            key={g} 
-                            onClick={() => handleGroupingChange(g)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-                        >
-                            {g === 'none' ? 'FLAT LIST' : g}
-                        </button>
-                    ))}
+                    <button onClick={() => handleGroupingChange('none')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>FLAT LIST</button>
+                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
+                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
+                    <button onClick={() => handleGroupingChange('country')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'country' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>COUNTRY 🇩🇪🇬🇧</button>
                 </div>
              </div>
 
-             {/* DYNAMIC ISOLATION DROPDOWN */}
+             {/* DYNAMIC ISOLATION DROP-DOWN (Appears when a category is selected) */}
              {grouping !== 'none' && (
-                <div className="flex items-center gap-4 animate-in slide-in-from-left-4 duration-300">
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">ISOLATE {grouping.toUpperCase()}:</span>
+                <div className="flex flex-col animate-in slide-in-from-left-4 duration-300">
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse">ISOLATE {grouping.toUpperCase()} TARGETS</span>
                     <select 
                         value={subFilterValue}
                         onChange={(e) => setSubFilterValue(e.target.value)}
-                        className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+                        className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[200px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
                     >
                         <option value="ALL">VIEW ALL REPRESENTED {grouping.toUpperCase()}S</option>
                         {representedValues.map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
@@ -214,7 +209,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
           {selectedIds.size > 0 && (
              <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 border-b-4 border-emerald-800">
-               LAUNCH CAMPAIGNS ({selectedIds.size})
+               LAUNCH CAMPAIGN ({selectedIds.size})
              </button>
           )}
         </div>
@@ -228,7 +223,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 <th className="px-8 py-6 w-12 text-center">
                     <input type="checkbox" checked={selectedIds.size === sortedLeads.length && sortedLeads.length > 0} onChange={toggleSelectAll} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
                 </th>
-                {/* HEADERS ARE NOW CLEAN AND CLICKABLE WITHOUT TOOLTIPS */}
+                {/* TOOLTIPS REMOVED TO PREVENT INTERFERENCE WITH CLICKS */}
                 <th 
                   onClick={() => handleSort('rank')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none whitespace-nowrap"
@@ -265,7 +260,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             <tbody className="divide-y-2 divide-slate-800/50">
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
-                  {/* GROUP HEADERS (Only visible when VIEW ALL is selected) */}
+                  {/* GROUP HEADERS (Only visible when "VIEW ALL" is selected) */}
                   {grouping !== 'none' && subFilterValue === 'ALL' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-8 py-4">
@@ -273,7 +268,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">{groupName}</span>
                              <div className="h-px bg-slate-800 flex-1 ml-4 opacity-30"></div>
-                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES</span>
+                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES FOUND</span>
                           </div>
                        </td>
                     </tr>
@@ -307,7 +302,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                         <td className="px-6 py-6 max-w-sm"><p className="text-[11px] font-medium text-slate-400 line-clamp-1 italic">"{lead.socialGap}"</p></td>
                         <td className="px-6 py-6 text-right"><span className={`text-3xl font-black italic tracking-tighter ${lead.leadScore > 80 ? 'text-emerald-500' : 'text-slate-600'}`}>{lead.leadScore}</span></td>
                         <td className="px-8 py-6 text-right flex items-center justify-end gap-3">
-                            <button onClick={() => onInspect(lead.id)} className="px-5 py-2.5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95">AUDIT</button>
+                            <button onClick={() => onInspect(lead.id)} className="px-5 py-2.5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95">STRATEGY</button>
                             <button onClick={() => handleDelete(lead.id)} className="p-2 text-slate-800 hover:text-rose-500 transition-colors text-xl">×</button>
                         </td>
                       </tr>
@@ -318,7 +313,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-32 text-center text-slate-700 italic uppercase tracking-widest text-xs">
-                        Database Empty or Filtered out. Use Market Discovery to identify prospects.
+                        Ledger segment empty. Refine your search or clear filters.
                     </td>
                 </tr>
               )}
@@ -342,12 +337,12 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               onClick={handleExport}
               className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <span className="group-hover:translate-y-0.5 transition-transform text-lg">↓</span> EXPORT JSON
+              <span className="group-hover:translate-y-0.5 transition-transform text-lg">↓</span> EXPORT DATABASE
             </button>
          </div>
 
          <button 
-            onClick={() => { db.saveLeads(leads); toast.success("DATABASE_SYNCED"); }}
+            onClick={() => { db.saveLeads(leads); toast.success("DATABASE_COMMITTED"); }}
             className="px-12 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-emerald-600/20 active:scale-95 border-b-4 border-emerald-800 flex items-center gap-4"
          >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
