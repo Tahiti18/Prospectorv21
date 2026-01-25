@@ -75,6 +75,7 @@ export interface Lead {
   websiteUrl: string;
   niche: string;
   city: string;
+  country?: string;
   rank: number;
   phone?: string;
   email?: string;

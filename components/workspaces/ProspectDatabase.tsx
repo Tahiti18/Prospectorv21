@@ -9,18 +9,28 @@ import { toast } from '../../services/toastManager';
 
 const STATUS_FILTER_OPTIONS: (OutreachStatus | 'ALL')[] = ['ALL', 'cold', 'queued', 'sent', 'opened', 'replied', 'booked', 'won', 'lost', 'paused'];
 
+type GroupBy = 'none' | 'city' | 'niche' | 'country';
+
 export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | null, onLockLead: (id: string) => void, onInspect: (id: string) => void }> = ({ leads, lockedLeadId, onLockLead, onInspect }) => {
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Lead; direction: 'asc' | 'desc' }>({ key: 'leadScore', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Lead; direction: 'asc' | 'desc' | null }>({ key: 'leadScore', direction: 'desc' });
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<OutreachStatus | 'ALL'>('ALL');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showHyperLaunch, setShowHyperLaunch] = useState(false);
+  const [grouping, setGrouping] = useState<GroupBy>('none');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const sortedLeads = useMemo(() => {
+  const filteredLeads = useMemo(() => {
     let filtered = leads;
-    if (statusFilter !== 'ALL') filtered = leads.filter(l => (l.outreachStatus ?? l.status ?? 'cold') === statusFilter);
-    return [...filtered].sort((a, b) => {
+    if (statusFilter !== 'ALL') {
+        filtered = leads.filter(l => (l.outreachStatus ?? l.status ?? 'cold') === statusFilter);
+    }
+    return filtered;
+  }, [leads, statusFilter]);
+
+  const sortedLeads = useMemo(() => {
+    if (!sortConfig.direction) return filteredLeads;
+    return [...filteredLeads].sort((a, b) => {
       // @ts-ignore
       const aVal = a[sortConfig.key] ?? '';
       // @ts-ignore
@@ -29,13 +39,26 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       const comparison = aVal > bVal ? 1 : -1;
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [leads, sortConfig, statusFilter]);
+  }, [filteredLeads, sortConfig]);
+
+  const groupedData = useMemo(() => {
+    if (grouping === 'none') return { 'ALL TARGETS': sortedLeads };
+    const groups: Record<string, Lead[]> = {};
+    sortedLeads.forEach(lead => {
+      const key = (lead[grouping as keyof Lead] as string) || 'UNCLASSIFIED';
+      const displayKey = key.toUpperCase();
+      if (!groups[displayKey]) groups[displayKey] = [];
+      groups[displayKey].push(lead);
+    });
+    return groups;
+  }, [sortedLeads, grouping]);
 
   const handleSort = (key: keyof Lead) => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'desc' ? 'asc' : 'desc'
-    }));
+    setSortConfig(current => {
+      if (current.key !== key) return { key, direction: 'desc' };
+      if (current.direction === 'desc') return { key, direction: 'asc' };
+      return { key, direction: null };
+    });
   };
 
   const handleOneClickRun = async () => {
@@ -82,7 +105,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PROSPECTOR_LEDGER_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `PROSPECTOR_DATABASE_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -98,9 +121,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
-                // Trigger central deduplication engine
                 const results = db.upsertLeads(imported);
-                toast.success(`LEDGER SYNC: Added ${results.added} new, Merged ${results.updated} existing.`);
+                toast.success(`DATABASE SYNC: Added ${results.added} new, Merged ${results.updated} existing.`);
             } else {
                 toast.error("INVALID_FILE_STRUCTURE: Expected JSON array.");
             }
@@ -114,7 +136,12 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   const handleSaveAll = () => {
     db.saveLeads(leads);
-    toast.success("LEDGER_COMMIT_SUCCESSFUL");
+    toast.success("DATABASE_COMMIT_SUCCESSFUL");
+  };
+
+  const SortIcon = ({ col }: { col: keyof Lead }) => {
+    if (sortConfig.key !== col) return <span className="opacity-20 ml-2">⇅</span>;
+    return <span className="text-emerald-500 ml-2">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>;
   };
 
   return (
@@ -122,12 +149,26 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       <div className="flex justify-between items-end">
         <div className="space-y-2">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
-            PROSPECT <span className="text-emerald-500">LEDGER</span>
+            PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">RECORDS: {leads.length}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER ENTITY REPOSITORY // RECORDS: {leads.length}</p>
         </div>
         <div className="flex gap-4">
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-lg px-4 flex items-center">
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 flex items-center shadow-lg">
+             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3 border-r border-slate-800 pr-3">GROUP BY:</span>
+             <div className="flex gap-1">
+                {(['none', 'city', 'niche', 'country'] as GroupBy[]).map(g => (
+                    <button 
+                        key={g} 
+                        onClick={() => setGrouping(g)}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-400'}`}
+                    >
+                        {g === 'none' ? 'FLAT' : g}
+                    </button>
+                ))}
+             </div>
+          </div>
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 flex items-center shadow-lg">
              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3">FILTER:</span>
              <select 
                value={statusFilter}
@@ -137,13 +178,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                {STATUS_FILTER_OPTIONS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
              </select>
           </div>
-          {selectedIds.size > 0 ? (
-             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 transition-all active:scale-95 border-b-4 border-emerald-800">
+          {selectedIds.size > 0 && (
+             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 transition-all active:scale-95 border-b-4 border-emerald-800">
                LAUNCH CAMPAIGNS ({selectedIds.size})
-             </button>
-          ) : (
-             <button onClick={handleOneClickRun} className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 border-slate-700 flex items-center gap-2">
-               AUTO-ENGAGE NEXT
              </button>
           )}
         </div>
@@ -157,49 +194,66 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 <th className="px-6 py-4 w-12 text-center">
                     <input type="checkbox" checked={selectedIds.size === sortedLeads.length && sortedLeads.length > 0} onChange={toggleSelectAll} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
                 </th>
-                <th onClick={() => handleSort('rank')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">RANK</th>
-                <th onClick={() => handleSort('businessName')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">BUSINESS IDENTITY</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">STATUS</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">GROWTH OPPORTUNITY</th>
-                <th onClick={() => handleSort('leadScore')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white text-right">SCORE</th>
+                <th onClick={() => handleSort('rank')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">RANK<SortIcon col="rank" /></th>
+                <th onClick={() => handleSort('businessName')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">BUSINESS IDENTITY<SortIcon col="businessName" /></th>
+                <th onClick={() => handleSort('status')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center hover:text-white transition-colors">STATUS<SortIcon col="status" /></th>
+                <th onClick={() => handleSort('socialGap')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">GROWTH OPPORTUNITY<SortIcon col="socialGap" /></th>
+                <th onClick={() => handleSort('leadScore')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white text-right">SCORE<SortIcon col="leadScore" /></th>
                 <th className="w-48 px-6 py-4"></th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-800/50">
-              {sortedLeads.map((lead) => {
-                const displayStatus = lead.outreachStatus ?? lead.status ?? 'cold';
-                return (
-                  <tr key={lead.id} className={`group hover:bg-white/5 transition-all ${selectedIds.has(lead.id) ? 'bg-emerald-900/10' : ''}`}>
-                    <td className="px-6 py-4 text-center">
-                        <input type="checkbox" checked={selectedIds.has(lead.id)} onChange={() => toggleSelect(lead.id)} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
-                    </td>
-                    <td className="px-6 py-4"><span className="text-lg font-black text-slate-600 italic group-hover:text-emerald-500 transition-colors">#{lead.rank}</span></td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span onClick={() => onInspect(lead.id)} className="text-sm font-bold text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors cursor-pointer">{lead.businessName}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{lead.city}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-2 py-1 rounded text-[8px] font-black border uppercase tracking-widest ${displayStatus === 'sent' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
-                        {displayStatus}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 max-w-sm"><p className="text-[10px] font-medium text-slate-400 line-clamp-1 italic">"{lead.socialGap}"</p></td>
-                    <td className="px-6 py-4 text-right"><span className="text-2xl font-black italic text-emerald-500">{lead.leadScore}</span></td>
-                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                        <button onClick={() => onInspect(lead.id)} className="px-4 py-2 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95">AUDIT</button>
-                        <button onClick={() => handleDelete(lead.id)} className="p-2 text-slate-700 hover:text-rose-500 transition-colors">×</button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {/* Comment: Fixed errors by casting Object.entries(groupedData) to [string, Lead[]][] */}
+              {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
+                <React.Fragment key={groupName}>
+                  {grouping !== 'none' && (
+                    <tr className="bg-slate-900/50 border-y border-slate-800/50">
+                       <td colSpan={7} className="px-6 py-3">
+                          <div className="flex items-center gap-3">
+                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                             <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">{groupName}</span>
+                             <span className="text-[9px] font-bold text-slate-600 ml-auto">{groupLeads.length} TARGETS</span>
+                          </div>
+                       </td>
+                    </tr>
+                  )}
+                  {groupLeads.map((lead) => {
+                    const displayStatus = lead.outreachStatus ?? lead.status ?? 'cold';
+                    return (
+                      <tr key={lead.id} className={`group hover:bg-white/5 transition-all ${selectedIds.has(lead.id) ? 'bg-emerald-900/10' : ''}`}>
+                        <td className="px-6 py-4 text-center">
+                            <input type="checkbox" checked={selectedIds.has(lead.id)} onChange={() => toggleSelect(lead.id)} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
+                        </td>
+                        <td className="px-6 py-4"><span className="text-lg font-black text-slate-600 italic group-hover:text-emerald-500 transition-colors">#{lead.rank}</span></td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span onClick={() => onInspect(lead.id)} className="text-sm font-bold text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors cursor-pointer">{lead.businessName}</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{lead.city}</span>
+                              {lead.country && <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest border-l border-slate-800 pl-2">{lead.country}</span>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-2 py-1 rounded text-[8px] font-black border uppercase tracking-widest ${displayStatus === 'sent' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                            {displayStatus}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 max-w-sm"><p className="text-[10px] font-medium text-slate-400 line-clamp-1 italic">"{lead.socialGap}"</p></td>
+                        <td className="px-6 py-4 text-right"><span className="text-2xl font-black italic text-emerald-500">{lead.leadScore}</span></td>
+                        <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                            <button onClick={() => onInspect(lead.id)} className="px-4 py-2 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95">AUDIT</button>
+                            <button onClick={() => handleDelete(lead.id)} className="p-2 text-slate-700 hover:text-rose-500 transition-colors">×</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-20 text-center text-slate-600 italic uppercase tracking-widest text-xs">
-                        Ledger Empty. Use Market Discovery to identify prospects.
+                        Database Empty. Use Market Discovery to identify prospects.
                     </td>
                 </tr>
               )}
@@ -215,7 +269,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               onClick={() => fileInputRef.current?.click()}
               className="px-8 py-4 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <span className="group-hover:-translate-y-0.5 transition-transform">⬆️</span> IMPORT LEDGER
+              <span className="group-hover:-translate-y-0.5 transition-transform">⬆️</span> IMPORT DATA
             </button>
             <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
             
@@ -223,7 +277,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               onClick={handleExport}
               className="px-8 py-4 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <span className="group-hover:translate-y-0.5 transition-transform">⬇️</span> EXPORT LEDGER
+              <span className="group-hover:translate-y-0.5 transition-transform">⬇️</span> EXPORT DATA
             </button>
 
             <button 
