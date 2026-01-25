@@ -130,8 +130,9 @@ export const MarketDiscovery: React.FC<MarketDiscoveryProps> = ({ market, onLead
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
-                db.saveLeads(imported);
-                toast.success(`IMPORTED ${imported.length} RECORDS`);
+                // Unified deduplication sync
+                const results = db.upsertLeads(imported);
+                toast.success(`IMPORT COMPLETE: Added ${results.added} new targets, merged ${results.updated} existing.`);
             } else {
                 toast.error("INVALID_FILE_STRUCTURE");
             }

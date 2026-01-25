@@ -98,13 +98,14 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
-                db.upsertLeads(imported);
-                toast.success(`IMPORTED ${imported.length} RECORDS`);
+                // Trigger central deduplication engine
+                const results = db.upsertLeads(imported);
+                toast.success(`LEDGER SYNC: Added ${results.added} new, Merged ${results.updated} existing.`);
             } else {
-                toast.error("INVALID_FILE_STRUCTURE");
+                toast.error("INVALID_FILE_STRUCTURE: Expected JSON array.");
             }
         } catch (err) {
-            toast.error("PARSE_FAILURE");
+            toast.error("PARSE_FAILURE: Check file for JSON errors.");
         }
     };
     reader.readAsText(file);
@@ -212,19 +213,17 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
          <div className="flex gap-4">
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="px-6 py-3 bg-slate-900 border-2 border-slate-700 text-slate-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+              className="px-8 py-4 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              IMPORT
+              <span className="group-hover:-translate-y-0.5 transition-transform">⬆️</span> IMPORT LEDGER
             </button>
             <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
             
             <button 
               onClick={handleExport}
-              className="px-6 py-3 bg-slate-900 border-2 border-slate-700 text-slate-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+              className="px-8 py-4 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-              EXPORT
+              <span className="group-hover:translate-y-0.5 transition-transform">⬇️</span> EXPORT LEDGER
             </button>
 
             <button 
