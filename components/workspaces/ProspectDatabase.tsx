@@ -6,6 +6,7 @@ import { RunStatus } from '../automation/RunStatus';
 import { HyperLaunchModal } from '../automation/HyperLaunchModal';
 import { db } from '../../services/automation/db';
 import { toast } from '../../services/toastManager';
+import { Tooltip } from './Tooltip';
 
 const STATUS_FILTER_OPTIONS: (OutreachStatus | 'ALL')[] = ['ALL', 'cold', 'queued', 'sent', 'opened', 'replied', 'booked', 'won', 'lost', 'paused'];
 
@@ -17,10 +18,26 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const [statusFilter, setStatusFilter] = useState<OutreachStatus | 'ALL'>('ALL');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showHyperLaunch, setShowHyperLaunch] = useState(false);
+  
+  // Advanced Grouping & Isolation State
   const [grouping, setGrouping] = useState<GroupBy>('none');
+  const [subFilterValue, setSubFilterValue] = useState<string>('ALL');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredLeads = useMemo(() => {
+  // 1. Calculate unique values represented in the database for the active grouping key
+  const representedValues = useMemo(() => {
+    if (grouping === 'none') return [];
+    const values = new Set<string>();
+    leads.forEach(l => {
+        const val = (l[grouping as keyof Lead] as string);
+        if (val) values.add(val);
+    });
+    return Array.from(values).sort();
+  }, [leads, grouping]);
+
+  // 2. Initial Filtering (Status)
+  const statusFilteredLeads = useMemo(() => {
     let filtered = leads;
     if (statusFilter !== 'ALL') {
         filtered = leads.filter(l => (l.outreachStatus ?? l.status ?? 'cold') === statusFilter);
@@ -28,9 +45,16 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return filtered;
   }, [leads, statusFilter]);
 
+  // 3. Secondary Isolation Filtering (By Group Key)
+  const isolatedLeads = useMemo(() => {
+    if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
+    return statusFilteredLeads.filter(l => (l[grouping as keyof Lead] as string) === subFilterValue);
+  }, [statusFilteredLeads, grouping, subFilterValue]);
+
+  // 4. Final Sorting
   const sortedLeads = useMemo(() => {
-    if (!sortConfig.direction) return filteredLeads;
-    return [...filteredLeads].sort((a, b) => {
+    if (!sortConfig.direction) return isolatedLeads;
+    return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
       const aVal = a[sortConfig.key] ?? '';
       // @ts-ignore
@@ -39,10 +63,13 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       const comparison = aVal > bVal ? 1 : -1;
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [filteredLeads, sortConfig]);
+  }, [isolatedLeads, sortConfig]);
 
+  // 5. Grouping visualization logic
   const groupedData = useMemo(() => {
-    if (grouping === 'none') return { 'ALL TARGETS': sortedLeads };
+    // If we are isolating a single value, don't show group headers
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'TARGETS': sortedLeads };
+    
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
       const key = (lead[grouping as keyof Lead] as string) || 'UNCLASSIFIED';
@@ -51,7 +78,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       groups[displayKey].push(lead);
     });
     return groups;
-  }, [sortedLeads, grouping]);
+  }, [sortedLeads, grouping, subFilterValue]);
 
   const handleSort = (key: keyof Lead) => {
     setSortConfig(current => {
@@ -59,6 +86,11 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       if (current.direction === 'desc') return { key, direction: 'asc' };
       return { key, direction: null };
     });
+  };
+
+  const handleGroupingChange = (newGrouping: GroupBy) => {
+      setGrouping(newGrouping);
+      setSubFilterValue('ALL'); // Reset isolation when changing grouping mode
   };
 
   const handleOneClickRun = async () => {
@@ -146,30 +178,50 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   return (
     <div className="space-y-6 py-6 max-w-[1600px] mx-auto relative px-6 pb-40 animate-in fade-in duration-700">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER ENTITY REPOSITORY // RECORDS: {leads.length}</p>
         </div>
-        <div className="flex gap-4">
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 flex items-center shadow-lg">
-             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3 border-r border-slate-800 pr-3">GROUP BY:</span>
-             <div className="flex gap-1">
-                {(['none', 'city', 'niche', 'country'] as GroupBy[]).map(g => (
-                    <button 
-                        key={g} 
-                        onClick={() => setGrouping(g)}
-                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-400'}`}
-                    >
-                        {g === 'none' ? 'FLAT' : g}
-                    </button>
-                ))}
+        
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* GROUPING RIBBON */}
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 py-2 flex items-center shadow-lg gap-4">
+             <div className="flex items-center gap-2 border-r border-slate-800 pr-4">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE:</span>
+                <div className="flex gap-1">
+                    {(['none', 'city', 'niche', 'country'] as GroupBy[]).map(g => (
+                        <button 
+                            key={g} 
+                            onClick={() => handleGroupingChange(g)}
+                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${grouping === g ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-400'}`}
+                        >
+                            {g === 'none' ? 'FLAT' : g}
+                        </button>
+                    ))}
+                </div>
              </div>
+
+             {/* DYNAMIC ISOLATION FILTER */}
+             {grouping !== 'none' && (
+                <div className="flex items-center gap-3 animate-in slide-in-from-left-2 duration-300">
+                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">ISOLATE {grouping}:</span>
+                    <select 
+                        value={subFilterValue}
+                        onChange={(e) => setSubFilterValue(e.target.value)}
+                        className="bg-[#020617] border border-slate-800 rounded-lg px-3 py-1.5 text-[9px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[120px]"
+                    >
+                        <option value="ALL">SHOW ALL {grouping}s</option>
+                        {representedValues.map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
+                    </select>
+                </div>
+             )}
           </div>
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 flex items-center shadow-lg">
-             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3">FILTER:</span>
+
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-xl px-4 py-2 flex items-center shadow-lg">
+             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-3">PIPELINE:</span>
              <select 
                value={statusFilter}
                onChange={(e) => setStatusFilter(e.target.value as any)}
@@ -178,8 +230,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                {STATUS_FILTER_OPTIONS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
              </select>
           </div>
+
           {selectedIds.size > 0 && (
-             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 transition-all active:scale-95 border-b-4 border-emerald-800">
+             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 transition-all active:scale-95 border-b-4 border-emerald-800">
                LAUNCH CAMPAIGNS ({selectedIds.size})
              </button>
           )}
@@ -194,25 +247,32 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 <th className="px-6 py-4 w-12 text-center">
                     <input type="checkbox" checked={selectedIds.size === sortedLeads.length && sortedLeads.length > 0} onChange={toggleSelectAll} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
                 </th>
-                <th onClick={() => handleSort('rank')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">RANK<SortIcon col="rank" /></th>
+                <th onClick={() => handleSort('rank')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">
+                    <Tooltip content="Batch Pick Priority (#1 = Top Pick in Scan Batch)" side="top">
+                        RANK<SortIcon col="rank" />
+                    </Tooltip>
+                </th>
                 <th onClick={() => handleSort('businessName')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">BUSINESS IDENTITY<SortIcon col="businessName" /></th>
                 <th onClick={() => handleSort('status')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center hover:text-white transition-colors">STATUS<SortIcon col="status" /></th>
                 <th onClick={() => handleSort('socialGap')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors">GROWTH OPPORTUNITY<SortIcon col="socialGap" /></th>
-                <th onClick={() => handleSort('leadScore')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white text-right">SCORE<SortIcon col="leadScore" /></th>
+                <th onClick={() => handleSort('leadScore')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white text-right">
+                    <Tooltip content="Quantitative Potential Index (0-100 Quality Score)" side="top">
+                        SCORE<SortIcon col="leadScore" />
+                    </Tooltip>
+                </th>
                 <th className="w-48 px-6 py-4"></th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-800/50">
-              {/* Comment: Fixed errors by casting Object.entries(groupedData) to [string, Lead[]][] */}
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
-                  {grouping !== 'none' && (
+                  {grouping !== 'none' && subFilterValue === 'ALL' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-6 py-3">
                           <div className="flex items-center gap-3">
                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">{groupName}</span>
-                             <span className="text-[9px] font-bold text-slate-600 ml-auto">{groupLeads.length} TARGETS</span>
+                             <span className="text-[9px] font-bold text-slate-600 ml-auto">{groupLeads.length} TARGETS REPRESENTED</span>
                           </div>
                        </td>
                     </tr>
@@ -253,7 +313,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-20 text-center text-slate-600 italic uppercase tracking-widest text-xs">
-                        Database Empty. Use Market Discovery to identify prospects.
+                        Database Empty or Filtered out. Use Market Discovery to identify prospects.
                     </td>
                 </tr>
               )}
