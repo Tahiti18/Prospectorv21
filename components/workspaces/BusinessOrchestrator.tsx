@@ -176,6 +176,23 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
             SECURED STRATEGY SYNTHESIS HUB
           </p>
         </div>
+        <div className="flex gap-4">
+            {packageData && (
+                <button 
+                  onClick={() => onNavigate('RESEARCH', 'EXECUTIVE_DOSSIER')}
+                  className="bg-white text-black hover:bg-emerald-500 hover:text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 border-b-4 border-slate-300"
+                >
+                  📄 EXPORT EXECUTIVE PACKAGE
+                </button>
+            )}
+            <button 
+                onClick={handleOrchestrate}
+                disabled={isOrchestrating || (!isManualMode && !targetLead)}
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
+            >
+                {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
+            </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">

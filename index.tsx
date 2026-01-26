@@ -60,6 +60,7 @@ import { TaskManager } from './components/workspaces/TaskManager';
 import { FactCheck } from './components/workspaces/FactCheck';
 import { TranslatorNode } from './components/workspaces/TranslatorNode';
 import { VideoAudit } from './components/workspaces/VideoAudit';
+import { ExecutiveDossier } from './components/workspaces/ExecutiveDossier';
 
 const App = () => {
   const [activeMode, setActiveMode] = useState<MainMode>('RESEARCH');
@@ -113,6 +114,7 @@ const App = () => {
       case 'STRATEGIC_REASONING': return <DeepLogic lead={lockedLead} />;
       case 'HEATMAP': return <Heatmap leads={leads} market={activeMarket} />;
       case 'CONTENT_ANALYSIS': return <ArticleIntel lead={lockedLead} />;
+      case 'EXECUTIVE_DOSSIER': return lockedLead ? <ExecutiveDossier lead={lockedLead} /> : <div>No Lead Selected</div>;
 
       // DESIGN
       case 'VISUAL_STUDIO': return <VisualStudio leads={leads} lockedLead={lockedLead} />;

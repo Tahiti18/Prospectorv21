@@ -63,7 +63,8 @@ export type SubModule =
   | 'ANALYTICS'
   | 'PROMPT_AI'
   | 'DASHBOARD'
-  | 'ENTERPRISE_DASHBOARD';
+  | 'ENTERPRISE_DASHBOARD'
+  | 'EXECUTIVE_DOSSIER';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';
 export type OutreachChannel = 'email' | 'linkedin' | 'call' | 'sms' | 'whatsapp';
