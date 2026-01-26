@@ -14,25 +14,25 @@ const DossierBlockRenderer: React.FC<{ content: any }> = ({ content }) => {
         data = JSON.parse(content);
       }
     } catch (e) {
-      return <p className="text-sm text-slate-700 leading-relaxed font-serif italic border-l-4 border-slate-200 pl-6 mb-4">"{content}"</p>;
+      return <p className="text-sm text-slate-700 leading-relaxed font-serif border-l-2 border-slate-200 pl-4 mb-4">"{content}"</p>;
     }
   }
 
   if (data && data.sections) {
     return (
-      <div className="space-y-12">
+      <div className="space-y-8">
         {data.sections.map((section: any, sIdx: number) => (
-          <div key={sIdx} className="space-y-6">
-            <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.4em] border-b-2 border-emerald-100 pb-2">{section.heading}</h4>
-            <div className="space-y-6">
+          <div key={sIdx} className="space-y-4 break-inside-avoid">
+            <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest border-b border-emerald-100 pb-1">{section.heading}</h4>
+            <div className="space-y-4">
               {section.body?.map((block: any, bIdx: number) => {
-                if (block.type === 'hero') return <div key={bIdx} className="p-10 bg-emerald-600 rounded-[32px] text-white text-2xl font-black italic uppercase tracking-tighter shadow-xl">"{block.content}"</div>;
-                if (block.type === 'p') return <p key={bIdx} className="text-sm text-slate-700 leading-relaxed font-serif italic border-l-4 border-slate-200 pl-8 py-2">"{block.content}"</p>;
+                if (block.type === 'hero') return <div key={bIdx} className="p-6 bg-slate-50 border-l-4 border-emerald-500 rounded-r-xl text-slate-900 text-lg font-black italic uppercase tracking-tight">"{block.content}"</div>;
+                if (block.type === 'p') return <p key={bIdx} className="text-xs text-slate-700 leading-relaxed font-serif italic border-l border-slate-100 pl-4 py-1">"{block.content}"</p>;
                 if (block.type === 'bullets') return (
-                  <ul key={bIdx} className="grid grid-cols-1 gap-4">
+                  <ul key={bIdx} className="grid grid-cols-1 gap-2">
                     {block.content?.map((item: string, i: number) => (
-                      <li key={i} className="bg-white border border-slate-100 p-5 rounded-2xl flex items-start gap-4 text-xs font-bold text-slate-800 uppercase tracking-tight shadow-sm">
-                        <span className="text-emerald-500 text-lg">→</span> {item}
+                      <li key={i} className="bg-white border border-slate-100 p-3 rounded-xl flex items-start gap-3 text-[10px] font-bold text-slate-800 uppercase tracking-tight">
+                        <span className="text-emerald-500">→</span> {item}
                       </li>
                     ))}
                   </ul>
@@ -46,11 +46,7 @@ const DossierBlockRenderer: React.FC<{ content: any }> = ({ content }) => {
     );
   }
 
-  if (typeof data === 'string') {
-    return <p className="text-sm text-slate-700 leading-relaxed font-serif italic border-l-4 border-slate-200 pl-6">"{data}"</p>;
-  }
-
-  return null;
+  return <p className="text-xs text-slate-700 leading-relaxed font-serif italic border-l border-slate-100 pl-4">"{String(data)}"</p>;
 };
 
 export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
@@ -76,143 +72,134 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
   return (
     <div className="bg-white text-slate-900 min-h-screen font-sans selection:bg-emerald-100 dossier-container">
       
-      {/* GLOBAL PDF ACTION BAR */}
-      <div className="fixed bottom-12 right-12 z-[9999] print:hidden flex flex-col items-end gap-3">
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 p-6 rounded-[32px] shadow-2xl max-w-xs animate-in slide-in-from-bottom-4">
-            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">IPAD PDF PROTOCOL</p>
-            <p className="text-[9px] text-slate-400 leading-relaxed uppercase font-bold">
-              1. Tap the button below.<br/>
-              2. On the Print screen, <span className="text-white italic">pinch to zoom OUT</span> on the preview.<br/>
-              3. It will convert to a full Digital PDF.<br/>
-              4. Tap "Share" to Save to Files.
+      {/* GLOBAL PDF ACTION BAR - Minimal & Non-Obtrusive */}
+      <div className="fixed bottom-8 right-8 z-[9999] print:hidden flex flex-col items-end gap-3">
+        <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-2xl max-w-[240px]">
+            <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                PDF GENERATION READY
+            </p>
+            <p className="text-[8px] text-slate-400 leading-relaxed uppercase font-bold">
+              Tip: Pinch to zoom OUT on the print preview thumbnails to convert this document to a digital PDF file.
             </p>
         </div>
         <button 
           onClick={handlePrint}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-6 rounded-[32px] text-[12px] font-black uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(16,185,129,0.6)] transition-all active:scale-95 flex items-center gap-4 border-b-8 border-emerald-800 group"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 flex items-center gap-3 border-b-4 border-emerald-800"
         >
-          <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-          <span className="text-xl">📥</span> GENERATE 20-PAGE PDF
+          <span className="text-lg">📥</span> SAVE DIGITAL PDF
         </button>
       </div>
 
       <style>{`
-        /* ULTIMATE PRINT ENGINE V4 */
         @media print {
-          @page { 
-            size: A4; 
-            margin: 0mm; /* Full bleed handled by page padding */
-          }
+          @page { size: A4; margin: 15mm; }
           
           html, body, .dossier-container {
             height: auto !important;
             overflow: visible !important;
             background: white !important;
-            color: black !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
             display: block !important;
           }
 
           .print-hidden { display: none !important; }
           
           .dossier-page { 
-            display: flex !important;
-            flex-direction: column !important;
-            page-break-after: always !important; 
-            height: 297mm !important; /* Force exact A4 pages */
-            width: 210mm !important;
-            padding: 25mm !important;
-            margin: 0 auto !important;
-            overflow: hidden !important;
-            position: relative !important;
-            box-sizing: border-box !important;
+            page-break-after: always; 
+            min-height: auto !important;
+            height: auto !important;
+            padding: 10mm 0 !important;
+            display: block !important;
+            width: 100% !important;
           }
 
-          .section-break { 
-            page-break-before: always !important; 
-          }
+          .section-break { page-break-before: always; }
+          .break-inside-avoid { page-break-inside: avoid !important; }
 
-          /* Reset grids for print flow */
-          .grid { display: grid !important; }
-          .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          h1 { font-size: 32pt !important; }
+          h2 { font-size: 18pt !important; }
+          p, li { font-size: 10pt !important; }
           
           .bg-[#020617] { background: #020617 !important; -webkit-print-color-adjust: exact; color: white !important; }
           .bg-emerald-600 { background: #059669 !important; -webkit-print-color-adjust: exact; }
           .bg-slate-50 { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
           .text-white { color: white !important; }
-          .text-emerald-500 { color: #10b981 !important; }
+          .text-slate-500 { color: #64748b !important; }
+          
+          /* Fix Grid cutoffs in print */
+          .grid { display: block !important; }
+          .grid-cols-2 { display: block !important; }
+          .grid-cols-2 > * { width: 100% !important; margin-bottom: 5mm !important; }
         }
 
-        .dossier-page { min-height: 100vh; padding: 5rem; position: relative; border-bottom: 1px solid #f1f5f9; }
+        .dossier-page { min-height: 100vh; padding: 4rem; position: relative; border-bottom: 1px solid #f1f5f9; }
       `}</style>
 
       {/* PAGE 1: MASTER COVER */}
       <section className="dossier-page flex flex-col justify-center items-center text-center bg-[#020617] text-white">
-        <div className="absolute top-16 left-16 flex items-center gap-4">
-          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-xl">P</div>
-          <span className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40">PROSPECTOR_OS // MASTER_MANIFEST_V3</span>
+        <div className="absolute top-12 left-12 flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center font-black text-lg">P</div>
+          <span className="text-[8px] font-black uppercase tracking-widest opacity-40">PROSPECTOR_OS // MASTER_MANIFEST</span>
         </div>
         
-        <div className="space-y-16">
-            <h4 className="text-[12px] font-black uppercase tracking-[0.8em] text-emerald-500">CONFIDENTIAL STRATEGIC ARCHITECTURE</h4>
-            <div className="space-y-6">
-                <h1 className="text-8xl font-black italic uppercase tracking-tighter leading-[0.85] text-white">{lead.businessName}</h1>
-                <p className="text-3xl font-serif italic text-slate-400 opacity-80">{lead.niche} // {lead.city.toUpperCase()}</p>
+        <div className="space-y-12">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.6em] text-emerald-500">CONFIDENTIAL STRATEGIC ARCHITECTURE</h4>
+            <div className="space-y-4">
+                <h1 className="text-7xl font-black italic uppercase tracking-tighter leading-tight text-white">{lead.businessName}</h1>
+                <p className="text-2xl font-serif italic text-slate-400 opacity-80">{lead.niche} // {lead.city.toUpperCase()}</p>
             </div>
-            <div className="w-32 h-1.5 bg-emerald-600 mx-auto shadow-[0_0_25px_rgba(16,185,129,0.8)]"></div>
-            <div className="space-y-2">
-                <p className="text-[12px] font-black uppercase tracking-[0.6em] text-slate-500">PRODUCED BY THE NEURAL FORGE</p>
-                <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <div className="w-24 h-1 bg-emerald-600 mx-auto shadow-[0_0_20px_rgba(16,185,129,0.6)]"></div>
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">PRODUCED BY THE NEURAL FORGE</p>
+                <p className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
             </div>
         </div>
       </section>
 
       {/* PAGE 2: THE EXECUTIVE THESIS */}
-      <section className="dossier-page flex flex-col justify-center max-w-5xl mx-auto">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">01 // THE STRATEGIC THESIS</h2>
-        <div className="space-y-12">
-            <p className="text-5xl font-serif italic leading-tight text-slate-900">
+      <section className="dossier-page flex flex-col justify-center max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-12 border-b-2 border-slate-900 pb-2 w-fit italic">01 // THE STRATEGIC THESIS</h2>
+        <div className="space-y-8">
+            <p className="text-3xl font-serif italic leading-snug text-slate-900">
                "{data.narrative}"
             </p>
-            <div className="grid grid-cols-2 gap-10 pt-16">
-                <div className="p-10 bg-slate-50 border-2 border-slate-100 rounded-[40px] shadow-sm">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">IDENTIFIED MARKET GAP</span>
-                    <p className="text-xl font-bold text-slate-900 uppercase italic tracking-tight leading-relaxed">{lead.socialGap}</p>
+            <div className="grid grid-cols-1 gap-6 pt-10">
+                <div className="p-8 bg-slate-50 border border-slate-100 rounded-3xl break-inside-avoid">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">IDENTIFIED MARKET GAP</span>
+                    <p className="text-lg font-bold text-slate-900 uppercase italic tracking-tight">{lead.socialGap}</p>
                 </div>
-                <div className="p-10 bg-emerald-600 rounded-[40px] text-white shadow-2xl">
-                    <span className="text-[10px] font-black text-emerald-200 uppercase tracking-widest block mb-4">TRANSFORMATION VECTOR</span>
-                    <p className="text-xl font-bold uppercase italic tracking-tight leading-relaxed">{lead.bestAngle}</p>
+                <div className="p-8 bg-emerald-600 rounded-3xl text-white shadow-xl break-inside-avoid">
+                    <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest block mb-2">TRANSFORMATION VECTOR</span>
+                    <p className="text-lg font-bold uppercase italic tracking-tight">{lead.bestAngle}</p>
                 </div>
             </div>
         </div>
       </section>
 
-      {/* MASTER ASSETS HUB HEADER */}
-      <section className="dossier-page section-break flex flex-col justify-center items-center text-center bg-slate-50">
-        <h1 className="text-7xl font-black italic uppercase tracking-tighter text-slate-900">MASTER ASSET <span className="text-emerald-600">REPOSITORY</span></h1>
-        <p className="text-sm font-black uppercase tracking-[0.8em] text-slate-400 mt-6 italic">Verbatim Multi-Module Repository</p>
-      </section>
-
       {/* SECTION: CAMPAIGN ARCHITECT */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
-        <div className="space-y-12">
-            <div className="p-12 bg-[#020617] text-white rounded-[56px] shadow-2xl flex flex-col items-center text-center">
-                <span className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em] mb-8">VISUAL DNA & BRAND MOOD</span>
-                <p className="text-3xl font-serif italic max-w-3xl leading-relaxed mb-10">"{data.visualDirection?.brandMood}"</p>
-                <div className="flex gap-6">
-                    {data.visualDirection?.colorPalette?.map((c: any, i: number) => (
-                        <div key={i} className="flex flex-col items-center gap-3">
-                            <div className="w-20 h-20 rounded-3xl border-4 border-white/10 shadow-2xl" style={{ backgroundColor: c.hex }}></div>
-                            <span className="text-[9px] font-black opacity-50 uppercase tracking-widest">{c.color}</span>
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
+        <div className="space-y-10">
+            <div className="p-10 bg-[#020617] text-white rounded-[40px] shadow-xl flex flex-col items-center text-center break-inside-avoid">
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">VISUAL DNA & BRAND MOOD</span>
+                <p className="text-2xl font-serif italic max-w-2xl leading-relaxed mb-8">"{data.visualDirection?.brandMood}"</p>
+                <div className="flex gap-4">
+                    {data.visualDirection?.colorPalette?.slice(0, 4).map((c: any, i: number) => (
+                        <div key={i} className="flex flex-col items-center gap-2">
+                            <div className="w-12 h-12 rounded-xl border-2 border-white/10" style={{ backgroundColor: c.hex }}></div>
+                            <span className="text-[8px] font-black opacity-50 uppercase tracking-tighter">{c.color}</span>
                         </div>
                     ))}
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-6">
                 {data.contentPack?.map((item: any, i: number) => (
-                    <div key={i} className="p-10 bg-slate-50 border-2 border-slate-100 rounded-[40px] flex flex-col gap-6 shadow-sm">
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-4 py-1.5 bg-white border-2 border-emerald-100 rounded-xl w-fit">{item.platform} // {item.type}</span>
-                        <p className="text-sm font-medium text-slate-800 italic leading-relaxed border-l-4 border-emerald-500 pl-6">"{item.caption}"</p>
+                    <div key={i} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-4 break-inside-avoid">
+                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1 bg-white border border-emerald-100 rounded-lg w-fit">{item.platform} // {item.type}</span>
+                        <p className="text-xs font-medium text-slate-800 italic leading-relaxed border-l-2 border-emerald-500 pl-4">"{item.caption}"</p>
                     </div>
                 ))}
             </div>
@@ -220,44 +207,38 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
       </section>
 
       {/* SECTION: DECK ARCHITECT */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">03 // DECK ARCHITECT</h2>
-        <div className="grid grid-cols-2 gap-8">
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">03 // DECK ARCHITECT</h2>
+        <div className="space-y-6">
            {data.presentation?.slides?.map((slide: any, idx: number) => (
-             <div key={idx} className="p-10 border-2 border-slate-100 rounded-[40px] flex flex-col justify-between bg-slate-50/50">
-                <div>
-                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-4 block">SLIDE_0{idx+1} // {slide.category}</span>
-                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-6 italic">{slide.title}</h3>
-                    <ul className="space-y-4">
-                        {slide.bullets?.map((b: string, i: number) => (
-                            <li key={i} className="text-xs font-bold text-slate-600 flex gap-3 italic">
-                                <span className="text-emerald-500 font-black">→</span> {b}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                {slide.insight && (
-                  <p className="mt-8 text-[10px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-200 pt-4 italic">"{slide.insight}"</p>
-                )}
+             <div key={idx} className="p-8 border border-slate-100 rounded-3xl bg-slate-50/50 break-inside-avoid">
+                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-2 block">SLIDE_0{idx+1} // {slide.category}</span>
+                <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 mb-4 italic">{slide.title}</h3>
+                <ul className="grid grid-cols-1 gap-2">
+                    {slide.bullets?.map((b: string, i: number) => (
+                        <li key={i} className="text-[10px] font-bold text-slate-600 flex gap-2 italic">
+                            <span className="text-emerald-500">•</span> {b}
+                        </li>
+                    ))}
+                </ul>
              </div>
            ))}
         </div>
       </section>
 
       {/* SECTION: JOURNEY MAPPER */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">04 // JOURNEY MAPPER</h2>
-        <div className="space-y-10 max-w-4xl mx-auto">
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">04 // JOURNEY MAPPER</h2>
+        <div className="space-y-6">
             {data.funnel?.map((step: any, i: number) => (
-                <div key={i} className="flex items-center gap-14 relative">
-                    {i < data.funnel.length - 1 && <div className="absolute left-8 top-16 w-1 h-14 bg-slate-100"></div>}
-                    <div className="w-16 h-16 rounded-[24px] border-4 border-slate-900 bg-white flex items-center justify-center font-black italic text-2xl shrink-0 shadow-lg">0{i+1}</div>
-                    <div className="flex-1 bg-slate-50 border-2 border-slate-100 p-10 rounded-[40px] shadow-sm">
-                        <div className="flex justify-between items-center mb-4">
-                            <h4 className="text-2xl font-black uppercase italic text-slate-900 tracking-tighter">{step.title}</h4>
-                            <span className="text-[9px] font-black bg-emerald-600 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-md">GOAL: {step.conversionGoal}</span>
+                <div key={i} className="flex gap-6 break-inside-avoid">
+                    <div className="w-10 h-10 rounded-xl border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-lg shrink-0">0{i+1}</div>
+                    <div className="flex-1 bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-md font-black uppercase italic text-slate-900">{step.title}</h4>
+                            <span className="text-[8px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">GOAL: {step.conversionGoal}</span>
                         </div>
-                        <p className="text-sm text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
+                        <p className="text-xs text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
                     </div>
                 </div>
             ))}
@@ -265,31 +246,25 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
       </section>
 
       {/* SECTION: PROPOSAL BUILDER */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">05 // PROPOSAL BUILDER</h2>
-        <div className="bg-slate-50 border-2 border-slate-100 p-16 rounded-[64px] shadow-inner">
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">05 // PROPOSAL BUILDER</h2>
+        <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
             <DossierBlockRenderer content={data.proposal} />
         </div>
       </section>
 
       {/* SECTION: ENGAGEMENT SEQUENCE */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
-        <div className="space-y-8">
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
+        <div className="space-y-4">
            {data.outreach?.emailSequence?.map((email: any, i: number) => (
-             <div key={i} className="p-10 border-2 border-slate-100 rounded-[40px] space-y-5 bg-slate-50/30">
-                <div className="flex justify-between items-center border-b border-slate-100 pb-5">
-                    <div className="flex items-center gap-6">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">DAY {email.day || (i*3+1)} // OUTBOUND</span>
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest italic">{email.purpose}</span>
-                    </div>
+             <div key={i} className="p-6 border border-slate-100 rounded-2xl space-y-3 bg-slate-50/30 break-inside-avoid">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DAY {email.day || (i*3+1)} // {email.purpose}</span>
                 </div>
-                <div className="space-y-4">
-                    <div className="flex gap-4 items-center">
-                       <span className="text-[9px] font-black text-slate-500 uppercase">SUBJECT:</span>
-                       <p className="text-xs font-black text-slate-900 uppercase italic">{email.subject}</p>
-                    </div>
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l-2 border-slate-200 pl-6">"{email.body}"</p>
+                <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-900 uppercase italic"><span className="text-slate-400 not-italic">RE:</span> {email.subject}</p>
+                    <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l border-slate-200 pl-4">"{email.body}"</p>
                 </div>
              </div>
            ))}
@@ -297,16 +272,17 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
       </section>
 
       {/* SECTION: PITCH GENERATOR */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">07 // PITCH GENERATOR</h2>
-        <div className="bg-slate-50 border-2 border-slate-100 p-16 rounded-[64px] shadow-inner">
+      <section className="dossier-page section-break max-w-4xl mx-auto">
+        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">07 // PITCH GENERATOR</h2>
+        <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
             <DossierBlockRenderer content={data.pitch} />
         </div>
       </section>
 
       <section className="dossier-page flex flex-col items-center justify-center text-center">
-             <p className="text-[12px] font-black text-slate-400 uppercase tracking-[1em]">END OF STRATEGIC MANIFEST</p>
-             <p className="text-[9px] font-mono text-slate-300 mt-6 uppercase tracking-widest italic">VERIFIED BY PROSPECTOR OS V3.2 // SECURE ARCHIVAL NODE</p>
+             <div className="w-16 h-16 bg-[#020617] rounded-2xl flex items-center justify-center text-2xl mb-8">P</div>
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">END OF STRATEGIC MANIFEST</p>
+             <p className="text-[8px] font-mono text-slate-300 mt-4 uppercase tracking-widest italic">ARCHIVED SECURELY BY PROSPECTOR OS V3.2</p>
       </section>
     </div>
   );
