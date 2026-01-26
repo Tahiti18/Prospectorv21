@@ -13,39 +13,84 @@ export interface BoardroomStep {
 }
 
 /**
- * PRODUCTION-GRADE GHL KNOWLEDGE BASE
- * Deliverables A, B, C integrated into the prompt context.
+ * THE ULTIMATE GOHIGHLEVEL MASTER KNOWLEDGE BASE
+ * This represents the "System of Truth" for all GHL Architect agents.
  */
-const GHL_KNOWLEDGE_BASE = `
-GOHIGHLEVEL (GHL) ARCHITECTURAL CONSTRAINTS:
-1. PLATFORM UNIT: Sub-Account deployment.
-2. AI SUITE: Voice AI (receptionist/booking), Conversation AI (omnichannel chat), Reviews AI (reputation), Funnel AI, Content AI, Workflow AI.
-3. AUTOMATION: Use Workflows only. Campaigns/Triggers are deprecated.
-4. SNAPSHOTS: Copy funnels, calendars, workflows, and custom fields across sub-accounts.
-5. CHANNELS: LC Email (Mailgun), LC Phone (Twilio), SMS, WhatsApp, FB, IG, Webchat.
-6. COMPLIANCE: TCPA, HIPAA, GDPR, 10DLC A2P must be technical hurdles handled via workflow gates.
+const GHL_MASTER_KNOWLEDGE = `
+GOHIGHLEVEL (GHL) PLATFORM CAPABILITIES & CONSTRAINTS:
 
-NICHE SNAPSHOTS (TRUTH ANCHORS):
-- DENTAL: Implant consults, insurance qualification surveys, 90-day reactivation.
-- ROOFING: Storm damage assessments, inspection prep workflows, weather-triggered blasts.
-- MEDSPA: Contraindication screening via Chat AI, injectables consults, membership retention.
-- LEGAL: Case intake checklists, statute of limitations tracking, document request loops.
-- REAL ESTATE: Home valuation funnels, buyer consult nurture, open house follow-ups.
-- SMB: Same-day service scheduling, MCTB (Missed Call Text Back) is critical.
+1. AI EMPLOYEE SUITE:
+   - Voice AI: After-hours receptionist, real-time qualification, calendar booking, website voice widget.
+   - Conversation AI: Omnichannel (SMS, FB, IG, WA, Web) chat automation with fallback thresholds.
+   - Reviews AI: Automated sentiment triage and review response management.
+   - Funnel AI / Content AI / Workflow AI: Generative deployment and logic branching.
+
+2. OMNICHANNEL ENGINE:
+   - LC Phone (Twilio Native): Power Dialer, Call Dispositions, Missed-Call-Text-Back (MCTB).
+   - LC Email (Mailgun Native): Sequence automation, deliverability optimization.
+   - 10DLC A2P Compliance: Required technical gates for all SMS campaigns.
+
+3. CONVERSION ASSETS:
+   - Funnels/Websites: High-speed conversion architecture.
+   - Calendars: Round-robin, team-based, and payment-gated bookings.
+   - Snapshots: Master templates for cloning complete sub-account logic.
+
+NICHE SNAPSHOT ARCHITECTURES:
+- DENTAL: Implant consults, insurance qualification forms, 180-day reactivation loops.
+- ROOFING: Storm damage assessments, weather-trigger campaigns, estimate follow-up sequences.
+- MEDSPA: Contraindication screening via Chat AI, membership retention, injectables consults.
+- LEGAL: Case evaluation calls, intake checklists, doc-request workflows.
+- REAL ESTATE: Home valuation funnels, buyer/seller nurture, open house follow-up.
+- SMB/TRADES: MCTB-heavy, technician dispatch ETA notifications, instant payment links.
+
+HANDOFF PROTOCOL:
+- Lead Source Map -> Tags:source_<name>
+- Trigger Events: lead.created, call.missed, appointment.booked, pipeline.stage_changed.
 `;
 
 const FINAL_SYNTHESIS_SCHEMA = `
-Deliverable A JSON Schema Structure (Strict):
+JSON OUTPUT SCHEMA (STRICT ADHERENCE):
 {
-  "meta": { "schema_version": "1.0", "source_system": "ProspectorOS" },
-  "implementation_plan": {
-    "platform_assumptions": { "use_workflows_not_campaigns": true, "ai_suite_expected": ["Voice AI", "Conversation AI", "Reviews AI", "Funnel AI", "Content AI", "Workflow AI"] },
-    "pipelines": [{ "name": "Main", "stages": [], "definitions": { "stage_entry_rules": [], "stage_exit_rules": [] } }],
-    "assets": { "funnels": [], "forms": [], "calendars": [] },
-    "ai": { "voice_ai": {}, "conversation_ai": {}, "policies": {} },
-    "workflows": [{ "name": "", "trigger": "", "steps": [], "exit_conditions": [] }],
-    "roadmap_90_day": { "days_0_7": [], "days_8_30": [], "days_31_60": [], "days_61_90": [] }
-  }
+  "format": "ui_blocks",
+  "title": "GHL MASTER ARCHITECTURE",
+  "subtitle": "EXHAUSTIVE IMPLEMENTATION SCHEMATIC",
+  "sections": [
+    {
+      "heading": "SYSTEM INFRASTRUCTURE AND COMPLIANCE",
+      "body": [
+        { "type": "hero", "content": "The overall vision for the sub-account architecture." },
+        { "type": "p", "content": "Details on LC Phone/Email and A2P 10DLC setup." },
+        { "type": "scorecard", "label": "COMPLIANCE STATUS", "value": "Awaiting Bundle" }
+      ]
+    },
+    {
+      "heading": "PIPELINE AND CRM MAPPING",
+      "body": [
+        { "type": "p", "content": "Definition of stages from New Lead to Won." },
+        { "type": "bullets", "content": ["Stage 1: Logic...", "Stage 2: Logic..."] }
+      ]
+    },
+    {
+      "heading": "AI EMPLOYEE AND CONVERSATIONAL LAYER",
+      "body": [
+         { "type": "p", "content": "Configuration of Voice AI and Chat AI tools." },
+         { "type": "steps", "content": ["Step 1: Training Data...", "Step 2: Handoff Rules..."] }
+      ]
+    },
+    {
+      "heading": "WORKFLOW AND AUTOMATION LIBRARY",
+      "body": [
+         { "type": "p", "content": "Detailed breakdown of at least 15 required workflows." },
+         { "type": "bullets", "content": ["Workflow: MCTB...", "Workflow: No-Show Recovery...", "Workflow: Speed-to-Lead..."] }
+      ]
+    },
+    {
+      "heading": "90-DAY GROWTH ROADMAP",
+      "body": [
+        { "type": "timeline", "content": ["Days 0-7: Build", "Days 8-30: Launch", "Days 31-90: Scale"] }
+      ]
+    }
+  ]
 }
 `;
 
@@ -55,42 +100,31 @@ async function callAgent(prompt: string, system: string, model: string): Promise
 
   if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000); 
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "HTTP-Referer": "https://pomelli.agency",
+      "X-Title": "Prospector OS GHL Architect",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 4000
+    })
+  });
 
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://pomelli.agency",
-        "X-Title": "Prospector OS GHL Architect",
-        "Content-Type": "application/json"
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000
-      })
-    });
-
-    clearTimeout(timeoutId);
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message || "Neural Link Timeout");
-    
-    const text = data.choices[0].message.content;
-    deductCost(model, (prompt.length + text.length));
-    return text;
-  } catch (e: any) {
-    clearTimeout(timeoutId);
-    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Boardroom debate reached complexity limits.");
-    throw e;
-  }
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message || "Neural Link Timeout");
+  
+  const text = data.choices[0].message.content;
+  deductCost(model, (prompt.length + text.length));
+  return text;
 }
 
 export const executeNeuralBoardroom = async (
@@ -105,9 +139,9 @@ export const executeNeuralBoardroom = async (
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'PLANNER', role: 'System Implementation Architect', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'QA & Compliance Auditor', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'ENGINEER', role: 'Workflow & AI Policy Engineer', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
+    { agentName: 'PLANNER', role: 'Technical System Architect', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Risk & QA Auditor', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'ENGINEER', role: 'Workflow & AI Engineer', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
     { agentName: 'EXECUTIVE', role: 'Master System Synthesizer', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ];
 
@@ -117,18 +151,18 @@ export const executeNeuralBoardroom = async (
   const PROTOCOL = `
   STRICT ARCHITECT PROTOCOL:
   - NO MARKDOWN (NO ASTERISKS, NO BACKTICKS).
-  - USE SENTENCE CASE FOR PARAGRAPHS.
-  - BE EXHAUSTIVE. COVER ALL GHL MODULES.
-  - CONTEXT: ${GHL_KNOWLEDGE_BASE}
+  - USE SENTENCE CASE FOR ALL BODY CONTENT.
+  - BE EXHAUSTIVE. NO REDUNDANCY. COVER ALL 6 GHL AI TOOLS.
+  - KNOWLEDGE BASE: ${GHL_MASTER_KNOWLEDGE}
   `;
 
   try {
-    // --- PHASE 1: PLANNER (D2) ---
+    // --- PHASE 1: PLANNER ---
     steps[0].status = 'THINKING';
     updateUI();
     const plannerOutput = await callAgent(
-      `BUSINESS DATA: ${context}\n\nTask: Architect a complete GHL deployment for ${lead.businessName}. Define pipeline stages, core offer mapping, and channel stack selection.\n${PROTOCOL}`,
-      "You are the GHL Planner Agent. You turn business analysis into implementation architecture. No markdown.",
+      `BUSINESS DATA: ${context}\n\nTask: Architect the complete GHL sub-account structure. Define pipelines, offer assets, and niche-specific snapshot contents.\n${PROTOCOL}`,
+      "You are the GHL Planner Agent. You turn high-level strategy into technical platform architecture. No markdown.",
       steps[0].modelId
     );
     debateTranscript += `PLANNER ARCHITECTURE:\n${plannerOutput}\n\n`;
@@ -136,15 +170,15 @@ export const executeNeuralBoardroom = async (
     steps[0].status = 'COMPLETED';
     updateUI();
 
-    // --- PHASE 2: ADVERSARIAL LOOPS (D6 & Deliverable B) ---
+    // --- PHASE 2: ADVERSARIAL LOOPS ---
     for (let r = 1; r <= rounds; r++) {
-      // Auditor (D6)
+      // Auditor
       steps[1].status = 'THINKING';
       steps[1].currentRound = r;
       updateUI();
       const auditOutput = await callAgent(
-        `HISTORY:\n${debateTranscript}\n\nTask: Perform a QA Audit. Generate 15+ test cases and a go-live checklist. Identify compliance risks (A2P 10DLC) and logic holes.\n${PROTOCOL}`,
-        "You are the GHL Go-Live Auditor. You find every point of failure. Brutal precision. No markdown.",
+        `HISTORY:\n${debateTranscript}\n\nTask: Perform a brutal QA audit. Identify failure points in A2P 10DLC, HIPAA gates, and funnel friction. Demand technical precision.\n${PROTOCOL}`,
+        "You are the GHL Auditor. You find every hidden technical and compliance flaw. No markdown.",
         steps[1].modelId
       );
       debateTranscript += `AUDIT REPORT:\n${auditOutput}\n\n`;
@@ -152,13 +186,13 @@ export const executeNeuralBoardroom = async (
       steps[1].status = 'COMPLETED';
       updateUI();
 
-      // Engineer (D3/D4)
+      // Engineer
       steps[2].status = 'THINKING';
       steps[2].currentRound = r;
       updateUI();
       const engineerOutput = await callAgent(
-        `HISTORY:\n${debateTranscript}\n\nTask: Build the Workflow Library (12-25 workflows) and AI Policy. Define triggers, steps, and handoff thresholds.\n${PROTOCOL}`,
-        "You are the Workflow Engineer. You define the logic that powers the business. Implementation-ready details. No markdown.",
+        `HISTORY:\n${debateTranscript}\n\nTask: Resolve Auditor findings. Build the Workflow Library (triggers/steps) and define the AI handoff protocols.\n${PROTOCOL}`,
+        "You are the GHL Workflow Engineer. You define the executable logic of the platform. No markdown.",
         steps[2].modelId
       );
       debateTranscript += `ENGINEERING SPECS:\n${engineerOutput}\n\n`;
@@ -167,31 +201,16 @@ export const executeNeuralBoardroom = async (
       updateUI();
     }
 
-    // --- PHASE 3: MASTER SYNTHESIS (D1/D7/Dossier blocks) ---
+    // --- PHASE 3: MASTER SYNTHESIS ---
     steps[3].status = 'THINKING';
     updateUI();
 
     const finalBlueprint = await callAgent(
-      `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the DEFINITIVE GHL MASTER BLUEPRINT.
-      STRUCTURE: Output EXACT raw JSON following the UI_BLOCKS format.
-      REQUIREMENT: Merge ALL findings into a massive, non-redundant plan. 
-      INCLUDE: 90-day roadmap, complete asset list, and workflow map.
-      JSON SCHEMA REFERENCE: ${FINAL_SYNTHESIS_SCHEMA}
-      
-      FINAL UI_BLOCKS OUTPUT SCHEMA:
-      {
-        "format": "ui_blocks",
-        "title": "GHL MASTER ARCHITECTURE",
-        "subtitle": "EXHAUSTIVE IMPLEMENTATION BLUEPRINT",
-        "sections": [
-          { "heading": "SYSTEM INFRASTRUCTURE", "body": [ { "type": "hero", "content": "" }, { "type": "p", "content": "" } ] },
-          { "heading": "AI EMPLOYEE SUITE", "body": [ { "type": "steps", "content": ["Config Voice AI", "Map Chat AI"] } ] },
-          { "heading": "WORKFLOW REVENUE ENGINE", "body": [ { "type": "bullets", "content": [] } ] },
-          { "heading": "COMPLIANCE & QA MATRIX", "body": [ { "type": "scorecard", "label": "TCPA", "value": "PASSED" } ] },
-          { "heading": "90-DAY GROWTH ROADMAP", "body": [ { "type": "timeline", "content": [] } ] }
-        ]
-      }`,
-      "You are the Executive Vice President of GHL Implementation. You deliver zero-fluff, implementation-grade JSON blueprints. Exhaustive detail. Sentence case content.",
+      `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the DEFINITIVE MASTER BLUEPRINT for ${lead.businessName}.
+      MERGE everything into a massive, technical, non-redundant schematic.
+      OUTPUT EXACT RAW JSON FOLLOWING THE UI_BLOCKS FORMAT. NO MARKDOWN.
+      SCHEMA: ${FINAL_SYNTHESIS_SCHEMA}`,
+      "You are the Executive Vice President of GHL Strategy. You deliver massive, implementation-grade blueprints in valid raw JSON. No markdown.",
       steps[3].modelId
     );
 
