@@ -13,10 +13,10 @@ interface GHLGrowthBoardroomProps {
 export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, leads, onLockLead }) => {
   const [rounds, setRounds] = useState(3);
   const [steps, setSteps] = useState<BoardroomStep[]>([
-    { agentName: 'THE VISIONARY', role: 'Brand & Experience Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'PROFIT HACKER', role: 'Revenue Optimization Expert', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'OPS MASTER', role: 'Efficiency Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'MD SYNTHESIS', role: 'Managing Director', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'THE VISIONARY', role: 'Brand & Experience Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'PROFIT HACKER', role: 'Revenue Optimization Expert', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'OPS MASTER', role: 'Efficiency Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'MD SYNTHESIS', role: 'Managing Director', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1, output: "" }
   ]);
   
   const [isExecuting, setIsExecuting] = useState(false);
@@ -39,6 +39,9 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
     }
     setIsExecuting(true);
     setFinalResult(null);
+    // Reset outputs for new session
+    setSteps(prev => prev.map(s => ({ ...s, output: "", status: 'WAITING', currentRound: 1 })));
+    
     try {
       const result = await executeGrowthBoardroom(lead, rounds, setSteps);
       setFinalResult(result);
@@ -58,19 +61,19 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
           <h1 className="text-5xl font-black italic text-white uppercase tracking-tighter leading-none">
             GROWTH <span className="text-indigo-500 not-italic">BOARDROOM</span>
           </h1>
-          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Layman Strategic Refinement v1.0 // {lead ? `Client: ${lead.businessName}` : 'AWAITING CLIENT SELECTION'}</p>
+          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Layman Strategic Refinement v1.1 // {lead ? `Client: ${lead.businessName}` : 'AWAITING CLIENT SELECTION'}</p>
         </div>
         
         <div className="flex items-center gap-6 bg-[#0b1021] p-6 rounded-[32px] border border-slate-800 shadow-2xl">
            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">STRATEGY ROUNDS</span>
+              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">DEBATE INTENSITY</span>
               <select 
                 value={rounds}
                 onChange={(e) => setRounds(Number(e.target.value))}
                 disabled={isExecuting}
                 className="bg-black border border-slate-800 text-indigo-400 text-[10px] font-black uppercase px-6 py-3 rounded-2xl focus:border-indigo-500 cursor-pointer outline-none transition-all"
               >
-                {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} ROUNDS OF DEBATE</option>)}
+                {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} ROUNDS PER AGENT</option>)}
               </select>
            </div>
            
@@ -98,7 +101,7 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
                {lead ? 'CONVENE BOARDROOM' : 'CLIENT REQUIRED'}
              </button>
            ) : (
-             <button onClick={() => setFinalResult(null)} className="px-10 py-4 bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">NEW SESSION</button>
+             <button onClick={() => { setFinalResult(null); setSteps(prev => prev.map(s => ({ ...s, output: "", status: 'WAITING' }))); }} className="px-10 py-4 bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">NEW SESSION</button>
            )}
         </div>
       </div>
@@ -116,33 +119,33 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
       </div>
 
       {finalResult && (
-        <div ref={finalRef} className="bg-black border-4 border-indigo-500/50 rounded-[64px] shadow-2xl p-20 animate-in slide-in-from-bottom-20 duration-1000">
-           <div className="mb-16 border-b border-slate-800 pb-12 flex justify-between items-end">
+        <div ref={finalRef} className="bg-white border-4 border-emerald-500/50 rounded-[64px] shadow-2xl p-20 animate-in slide-in-from-bottom-20 duration-1000">
+           <div className="mb-16 border-b border-slate-200 pb-12 flex justify-between items-end">
              <div>
-                <h2 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none mb-4">MASTER GROWTH <span className="text-indigo-500">PLAN</span></h2>
+                <h2 className="text-5xl font-black italic text-slate-900 uppercase tracking-tighter leading-none mb-4">DEFINITIVE GROWTH <span className="text-emerald-600">SCHEMATIC</span></h2>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">CLIENT TRANSFORMATION BLUEPRINT // {lead?.businessName}</p>
              </div>
              <div className="text-right">
-                <span className="px-6 py-2 bg-indigo-900/20 border border-indigo-500/20 text-indigo-400 rounded-full text-[9px] font-black uppercase tracking-widest">McKinsey Standard</span>
+                <span className="px-6 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">Certified McKinsey Standard</span>
              </div>
            </div>
            <FormattedOutput content={finalResult} />
            
-           <div className="mt-20 pt-16 border-t border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-10">
-              <div className="bg-slate-900/50 p-10 rounded-[40px] text-center space-y-4 group hover:bg-indigo-950/20 transition-all">
+           <div className="mt-20 pt-16 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">💰</span>
-                 <h4 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest">Revenue Impact</h4>
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Projected +25-40% Lift</p>
+                 <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Revenue Impact</h4>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Projected +25-40% Yearly Lift</p>
               </div>
-              <div className="bg-slate-900/50 p-10 rounded-[40px] text-center space-y-4 group hover:bg-indigo-950/20 transition-all">
+              <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">⏱️</span>
-                 <h4 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest">Time Reclaimed</h4>
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">40+ Hours/Mo Saved</p>
+                 <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Time Reclaimed</h4>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">40+ Hours/Mo Salvaged</p>
               </div>
-              <div className="bg-slate-900/50 p-10 rounded-[40px] text-center space-y-4 group hover:bg-indigo-950/20 transition-all">
+              <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">📈</span>
-                 <h4 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest">Scale Readiness</h4>
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Infrastructure Optimal</p>
+                 <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Scale Readiness</h4>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Infrastructure Optimized</p>
               </div>
            </div>
         </div>
@@ -158,7 +161,7 @@ const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean })
 
     return (
         <div className={`bg-[#0b1021] border-4 rounded-[64px] p-12 transition-all duration-1000 relative overflow-hidden flex flex-col ${
-            isActive ? 'border-indigo-500 shadow-[0_0_80px_rgba(79,70,229,0.3)] scale-[1.01] z-10' : 
+            isActive ? 'border-emerald-500 shadow-[0_0_80px_rgba(16,185,129,0.3)] scale-[1.01] z-10' : 
             isDone ? 'border-slate-800 opacity-100 shadow-xl' : 
             isFailed ? 'border-rose-500/50 opacity-100' : 'border-slate-900 opacity-20'
           } ${isLarge ? 'min-h-[600px]' : 'min-h-[400px]'}`}>
@@ -173,25 +176,32 @@ const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean })
                   <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic">{step.role}</p>
                </div>
                <div className="flex flex-col items-end gap-2">
-                 <div className={`px-6 py-2 rounded-xl border-2 text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? 'bg-indigo-500 text-white border-indigo-400 animate-pulse' : 'bg-slate-950 text-slate-600 border-slate-800'}`}>{step.status}</div>
-                 {isActive && <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">ROUND {step.currentRound}</span>}
+                 <div className={`px-6 py-2 rounded-xl border-2 text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? 'bg-emerald-500 text-white border-emerald-400 animate-pulse' : 'bg-slate-950 text-slate-600 border-slate-800'}`}>{step.status}</div>
+                 {isActive && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">ROUND {step.currentRound}</span>}
                </div>
             </div>
 
             <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {isActive && (
                    <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6">
-                     <div className="w-16 h-16 border-4 border-indigo-900 border-t-indigo-500 rounded-full animate-spin"></div>
-                     <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.6em] animate-pulse italic">PROCESSING LOGIC...</p>
+                     <div className="w-16 h-16 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin"></div>
+                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.6em] animate-pulse italic">CULTIVATING STRATEGY...</p>
                    </div>
                 )}
-                {step.output && (
-                    <div className="h-full overflow-y-auto custom-scrollbar pr-4 space-y-6">
-                        {step.output.split('\n').filter(l => l.trim() !== '').map((line, idx) => (
-                           <p key={idx} className="text-[14px] text-slate-300 leading-relaxed font-sans border-l-2 border-indigo-500/20 pl-6 italic">"{line.trim()}"</p>
-                        ))}
-                    </div>
-                )}
+                <div className="h-full overflow-y-auto custom-scrollbar pr-4 space-y-6">
+                    {step.output ? step.output.split('\n').filter(l => l.trim() !== '').map((line, idx) => {
+                       const isRoundHeader = line.includes('--- ROUND');
+                       return (
+                         <div key={idx} className={isRoundHeader ? "mt-8 border-b border-slate-800 pb-2" : ""}>
+                           <p className={`${isRoundHeader ? "text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em]" : "text-[14px] text-slate-300 leading-relaxed font-sans border-l-2 border-indigo-500/20 pl-6 italic"}`}>
+                              {line.trim()}
+                           </p>
+                         </div>
+                       );
+                    }) : (
+                      !isActive && <div className="h-full flex items-center justify-center text-slate-800 italic uppercase tracking-widest text-[10px]">Awaiting sequence...</div>
+                    )}
+                </div>
             </div>
         </div>
     );

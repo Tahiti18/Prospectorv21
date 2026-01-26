@@ -22,9 +22,9 @@ INDIGO GHL MASTER KB v1.0:
 
 const LAYMAN_KNOWLEDGE_BASE = `
 GHL STRATEGIC IMPACT KB v1.0:
-- Goal: Bottom-line revenue and operational freedom.
-- Tools: Smart follow-ups, unified inbox, reputation management, automated booking, VIP nurture sequences.
-- Outcomes: Zero missed leads, 2x conversion lift, 40+ hours saved per month, elite brand authority.
+- Goal: Maximize Bottom-line revenue and Operational freedom.
+- Key Systems: AI Speed-to-lead, Automated Reputation, VIP Nurture, Calendar Consolidation, Unified Communications.
+- Business Logic: Eliminate "Lead Leakage," double the "Conversion Velocity," and reclaim 10+ hours of manual labor per week.
 `;
 
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
@@ -43,7 +43,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
     body: JSON.stringify({
       model: model,
       messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
-      temperature: 0.7,
+      temperature: 0.8,
       max_tokens: 4000
     })
   });
@@ -160,10 +160,10 @@ export const executeGrowthBoardroom = async (
   let debateHistory = "";
 
   const steps: BoardroomStep[] = [
-    { agentName: 'THE VISIONARY', role: 'Brand & Experience Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'PROFIT HACKER', role: 'Revenue Optimization Expert', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'OPS MASTER', role: 'Efficiency Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'MD SYNTHESIS', role: 'Managing Director', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'THE VISIONARY', role: 'Brand & Experience Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'PROFIT HACKER', role: 'Revenue Optimization Expert', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'OPS MASTER', role: 'Efficiency Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1, output: "" },
+    { agentName: 'MD SYNTHESIS', role: 'Managing Director', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1, output: "" }
   ];
 
   const updateUI = () => onUpdate([...steps]);
@@ -171,10 +171,9 @@ export const executeGrowthBoardroom = async (
 
   const LAYMAN_PROTOCOL = `
     LAYMAN STRATEGY PROTOCOL:
-    - NO CODE REFERENCES.
-    - NO API TALK.
+    - NO CODE REFERENCES (No "API", "JSON", "Webhook", "Custom Fields").
     - FOCUS ON BUSINESS VALUE, CUSTOMER JOURNEY, AND REVENUE.
-    - USE ACCESSIBLE, POWERFUL ENGLISH.
+    - USE POWERFUL, PLAIN ENGLISH.
     - KB: ${LAYMAN_KNOWLEDGE_BASE}
   `;
 
@@ -182,27 +181,32 @@ export const executeGrowthBoardroom = async (
     for (let r = 1; r <= rounds; r++) {
       // 1. Visionary
       steps[0].currentRound = r; steps[0].status = 'THINKING'; updateUI();
-      const visionPrompt = `ROUND ${r}: Review ${lead.businessName} context: ${context}. ${debateHistory ? `Previous debate: ${debateHistory}` : ''}. Propose the high-level brand transformation vision. ${LAYMAN_PROTOCOL}`;
-      const visionOut = await callAgent(visionPrompt, "You are THE VISIONARY. Focus on authority and client experience.", steps[0].modelId);
+      const visionPrompt = `ROUND ${r}/${rounds}: Establish the high-level brand transformation vision for ${lead.businessName}. CONTEXT: ${context}. HISTORY: ${debateHistory || 'Start of debate'}. ${LAYMAN_PROTOCOL}`;
+      const visionOut = await callAgent(visionPrompt, "You are THE VISIONARY. You architect premium market authority and client experience.", steps[0].modelId);
+      steps[0].output += `\n\n--- ROUND ${r} ---\n${visionOut}`;
       debateHistory += `\nVISIONARY (R${r}): ${visionOut}`;
-      steps[0].output = visionOut; steps[0].status = 'COMPLETED'; updateUI();
+      steps[0].status = 'COMPLETED'; updateUI();
 
       // 2. Profit Hacker
       steps[1].currentRound = r; steps[1].status = 'THINKING'; updateUI();
-      const profitPrompt = `ROUND ${r}: Based on Vision: ${visionOut}. How do we maximize pure revenue and ROI? ${LAYMAN_PROTOCOL}`;
-      const profitOut = await callAgent(profitPrompt, "You are THE PROFIT HACKER. Focus on conversion and money.", steps[1].modelId);
+      const profitPrompt = `ROUND ${r}/${rounds}: Based on the Vision provided, how do we extract maximum revenue for ${lead.businessName}? Focus on conversion velocity and ROI. ${LAYMAN_PROTOCOL}`;
+      const profitOut = await callAgent(profitPrompt, "You are THE PROFIT HACKER. You care about one thing: making the client more money and plugging lead leaks.", steps[1].modelId);
+      steps[1].output += `\n\n--- ROUND ${r} ---\n${profitOut}`;
       debateHistory += `\nPROFIT HACKER (R${r}): ${profitOut}`;
-      steps[1].output = profitOut; steps[1].status = 'COMPLETED'; updateUI();
+      steps[1].status = 'COMPLETED'; updateUI();
 
       // 3. Ops Master
       steps[2].currentRound = r; steps[2].status = 'THINKING'; updateUI();
-      const opsPrompt = `ROUND ${r}: Vision: ${visionOut}, Profit: ${profitOut}. How do we automate this to save 40+ hours/month? ${LAYMAN_PROTOCOL}`;
-      const opsOut = await callAgent(opsPrompt, "You are THE OPS MASTER. Focus on time and efficiency.", steps[2].modelId);
+      const opsPrompt = `ROUND ${r}/${rounds}: Review the Vision and Profit strategies. How do we automate these systems so ${lead.businessName} saves 40+ hours per month? ${LAYMAN_PROTOCOL}`;
+      const opsOut = await callAgent(opsPrompt, "You are THE OPS MASTER. You architect efficiency, scaling systems, and operational sanity.", steps[2].modelId);
+      steps[2].output += `\n\n--- ROUND ${r} ---\n${opsOut}`;
       debateHistory += `\nOPS MASTER (R${r}): ${opsOut}`;
-      steps[2].output = opsOut; steps[2].status = 'COMPLETED'; updateUI();
+      steps[2].status = 'COMPLETED'; updateUI();
       
       if (r < rounds) {
-         steps.forEach(s => { if (s.agentName !== 'MD SYNTHESIS') s.status = 'WAITING'; });
+         steps[0].status = 'WAITING';
+         steps[1].status = 'WAITING';
+         steps[2].status = 'WAITING';
          updateUI();
       }
     }
@@ -211,20 +215,53 @@ export const executeGrowthBoardroom = async (
     steps[3].status = 'THINKING'; updateUI();
     const finalPrompt = `
       DEBATE HISTORY: ${debateHistory}
-      TASK: Synthesize the DEFINITIVE BUSINESS TRANSFORMATION PLAN for ${lead.businessName} in UI_BLOCKS format.
       
-      CRITICAL: Focus on:
-      - The Problem (Business Deficiencies)
-      - The Solution (Business Enhancements via GHL)
-      - The Outcomes (Time Saved, Revenue Lift, Scale)
+      TASK: As the Managing Director, synthesize this intense debate into the DEFINITIVE BUSINESS GROWTH PLAN for ${lead.businessName}.
       
-      Structure: { "format": "ui_blocks", "title": "BUSINESS GROWTH PLAN", "sections": [...] }
+      CRITICAL: You must output a valid JSON object in UI_BLOCKS format. 
+      Use "heading" blocks for the EMERALD green titles.
+      Use "hero" blocks for the Vision statement.
+      Use "bullets" for tactical steps.
+      Use "p" for straight normal paragraphs.
+      
+      FORMAT:
+      {
+        "format": "ui_blocks",
+        "title": "BUSINESS TRANSFORMATION PLAN",
+        "subtitle": "PREMIUM GROWTH ARCHITECTURE",
+        "sections": [
+          {
+            "heading": "I. THE DIGITAL GAP",
+            "body": [ { "type": "p", "content": "Analyze current deficiencies..." } ]
+          },
+          {
+            "heading": "II. REVENUE ENGINE ACTIVATION",
+            "body": [ { "type": "hero", "content": "The Profit Vision..." }, { "type": "bullets", "content": ["Tactic 1", "Tactic 2"] } ]
+          },
+          {
+            "heading": "III. OPERATIONAL FREEDOM",
+            "body": [ { "type": "p", "content": "Automation impact..." } ]
+          },
+          {
+            "heading": "IV. PROJECTED OUTCOMES",
+            "body": [ { "type": "p", "content": "Revenue and time saved stats..." } ]
+          }
+        ]
+      }
     `;
-    const finalOut = await callAgent(finalPrompt, "You are the Managing Director. Provide the final executive plan.", steps[3].modelId);
-    steps[3].output = "Plan synthesized successfully.";
-    steps[3].status = 'COMPLETED';
-    updateUI();
+    const finalOut = await callAgent(finalPrompt, "You are the Managing Director. Provide a massive, comprehensive, client-ready growth plan in valid UI_BLOCKS JSON.", steps[3].modelId);
+    
+    // Validate JSON
+    try {
+      JSON.parse(finalOut);
+      steps[3].output = "Growth Strategy Finalized. Deploying Schematic.";
+      steps[3].status = 'COMPLETED';
+    } catch (e) {
+      steps[3].status = 'FAILED';
+      throw new Error("MD_SYNTHESIS_JSON_FAILURE");
+    }
 
+    updateUI();
     return finalOut;
 
   } catch (error: any) {
