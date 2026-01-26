@@ -72,7 +72,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
   return (
     <div className="bg-white text-slate-900 min-h-screen font-sans selection:bg-emerald-100 dossier-container">
       
-      {/* GLOBAL PDF ACTION BAR - Minimal & Non-Obtrusive */}
+      {/* GLOBAL PDF ACTION BAR */}
       <div className="fixed bottom-8 right-8 z-[9999] print:hidden flex flex-col items-end gap-3">
         <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-2xl max-w-[240px]">
             <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
@@ -93,14 +93,17 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
 
       <style>{`
         @media print {
-          @page { size: A4; margin: 0; }
+          @page { 
+            size: A4; 
+            margin: 15mm; 
+          }
           
           html, body, .dossier-container {
             height: auto !important;
             overflow: visible !important;
             background: white !important;
-            width: 210mm !important;
-            margin: 0 auto !important;
+            width: 100% !important;
+            margin: 0 !important;
             padding: 0 !important;
             display: block !important;
           }
@@ -108,19 +111,34 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
           .print-hidden { display: none !important; }
           
           .dossier-page { 
-            page-break-after: always !important; 
-            min-height: 297mm !important;
-            height: auto !important; /* Allow growth if content is long */
-            padding: 20mm !important;
-            display: flex !important;
-            flex-direction: column !important;
+            page-break-after: auto; 
+            min-height: auto !important;
+            height: auto !important;
+            padding: 10mm 0 !important;
+            display: block !important;
             width: 100% !important;
-            overflow: visible !important; /* Critical: Prevent clipping */
+            overflow: visible !important;
             box-sizing: border-box !important;
           }
 
-          .section-break { page-break-before: always !important; }
-          .break-inside-avoid { page-break-inside: avoid !important; }
+          /* Force Cover to be its own page */
+          .dossier-cover {
+            page-break-after: always !important;
+            height: 270mm !important; /* Nearly full A4 height to center content */
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+
+          .section-break { 
+            page-break-before: always; 
+            margin-top: 20mm !important;
+          }
+          
+          .break-inside-avoid { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important;
+          }
 
           h1 { font-size: 32pt !important; }
           h2 { font-size: 18pt !important; }
@@ -132,7 +150,6 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
           .text-white { color: white !important; }
           .text-emerald-500 { color: #10b981 !important; }
           
-          /* Force layout consistency */
           .grid { display: block !important; }
           .grid-cols-1, .grid-cols-2 { display: block !important; }
           .grid > *, .grid-cols-2 > * { width: 100% !important; margin-bottom: 5mm !important; display: block !important; }
@@ -141,8 +158,8 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         .dossier-page { min-height: 100vh; padding: 4rem; position: relative; border-bottom: 1px solid #f1f5f9; }
       `}</style>
 
-      {/* PAGE 1: MASTER COVER */}
-      <section className="dossier-page flex flex-col justify-center items-center text-center bg-[#020617] text-white">
+      {/* PAGE 1: MASTER COVER (Hard Page Break) */}
+      <section className="dossier-page dossier-cover flex flex-col justify-center items-center text-center bg-[#020617] text-white">
         <div className="absolute top-12 left-12 flex items-center gap-3">
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center font-black text-lg">P</div>
           <span className="text-[8px] font-black uppercase tracking-widest opacity-40">PROSPECTOR_OS // MASTER_MANIFEST</span>
@@ -162,131 +179,136 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* PAGE 2: THE EXECUTIVE THESIS */}
-      <section className="dossier-page flex flex-col justify-center max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-12 border-b-2 border-slate-900 pb-2 w-fit italic">01 // THE STRATEGIC THESIS</h2>
-        <div className="space-y-8">
-            <p className="text-3xl font-serif italic leading-snug text-slate-900">
-               "{data.narrative}"
-            </p>
-            <div className="grid grid-cols-1 gap-6 pt-10">
-                <div className="p-8 bg-slate-50 border border-slate-100 rounded-3xl break-inside-avoid">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">IDENTIFIED MARKET GAP</span>
-                    <p className="text-lg font-bold text-slate-900 uppercase italic tracking-tight">{lead.socialGap}</p>
-                </div>
-                <div className="p-8 bg-emerald-600 rounded-3xl text-white shadow-xl break-inside-avoid">
-                    <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest block mb-2">TRANSFORMATION VECTOR</span>
-                    <p className="text-lg font-bold uppercase italic tracking-tight">{lead.bestAngle}</p>
-                </div>
-            </div>
-        </div>
-      </section>
+      {/* SUBSEQUENT SECTIONS (Flow Naturally) */}
+      <div className="max-w-4xl mx-auto space-y-20 py-10">
+        
+        {/* SECTION 01: THESIS */}
+        <section className="dossier-page flex flex-col justify-center break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-12 border-b-2 border-slate-900 pb-2 w-fit italic">01 // THE STRATEGIC THESIS</h2>
+          <div className="space-y-8">
+              <p className="text-3xl font-serif italic leading-snug text-slate-900">
+                 "{data.narrative}"
+              </p>
+              <div className="grid grid-cols-1 gap-6 pt-10">
+                  <div className="p-8 bg-slate-50 border border-slate-100 rounded-3xl break-inside-avoid">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">IDENTIFIED MARKET GAP</span>
+                      <p className="text-lg font-bold text-slate-900 uppercase italic tracking-tight">{lead.socialGap}</p>
+                  </div>
+                  <div className="p-8 bg-emerald-600 rounded-3xl text-white shadow-xl break-inside-avoid">
+                      <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest block mb-2">TRANSFORMATION VECTOR</span>
+                      <p className="text-lg font-bold uppercase italic tracking-tight">{lead.bestAngle}</p>
+                  </div>
+              </div>
+          </div>
+        </section>
 
-      {/* SECTION: CAMPAIGN ARCHITECT */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
-        <div className="space-y-10">
-            <div className="p-10 bg-[#020617] text-white rounded-[40px] shadow-xl flex flex-col items-center text-center break-inside-avoid">
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">VISUAL DNA & BRAND MOOD</span>
-                <p className="text-2xl font-serif italic max-w-2xl leading-relaxed mb-8">"{data.visualDirection?.brandMood}"</p>
-                <div className="flex gap-4">
-                    {data.visualDirection?.colorPalette?.slice(0, 4).map((c: any, i: number) => (
-                        <div key={i} className="flex flex-col items-center gap-2">
-                            <div className="w-12 h-12 rounded-xl border-2 border-white/10" style={{ backgroundColor: c.hex }}></div>
-                            <span className="text-[8px] font-black opacity-50 uppercase tracking-tighter">{c.color}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className="grid grid-cols-1 gap-6">
-                {data.contentPack?.map((item: any, i: number) => (
-                    <div key={i} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-4 break-inside-avoid">
-                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1 bg-white border border-emerald-100 rounded-lg w-fit">{item.platform} // {item.type}</span>
-                        <p className="text-xs font-medium text-slate-800 italic leading-relaxed border-l-2 border-emerald-500 pl-4">"{item.caption}"</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-      </section>
+        {/* SECTION 02: CAMPAIGN ARCHITECT */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
+          <div className="space-y-10">
+              <div className="p-10 bg-[#020617] text-white rounded-[40px] shadow-xl flex flex-col items-center text-center break-inside-avoid">
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">VISUAL DNA & BRAND MOOD</span>
+                  <p className="text-2xl font-serif italic max-w-2xl leading-relaxed mb-8">"{data.visualDirection?.brandMood}"</p>
+                  <div className="flex gap-4">
+                      {data.visualDirection?.colorPalette?.slice(0, 4).map((c: any, i: number) => (
+                          <div key={i} className="flex flex-col items-center gap-2">
+                              <div className="w-12 h-12 rounded-xl border-2 border-white/10" style={{ backgroundColor: c.hex }}></div>
+                              <span className="text-[8px] font-black opacity-50 uppercase tracking-tighter">{c.color}</span>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+              <div className="grid grid-cols-1 gap-6">
+                  {data.contentPack?.map((item: any, i: number) => (
+                      <div key={i} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-4 break-inside-avoid">
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1 bg-white border border-emerald-100 rounded-lg w-fit">{item.platform} // {item.type}</span>
+                          <p className="text-xs font-medium text-slate-800 italic leading-relaxed border-l-2 border-emerald-500 pl-4">"{item.caption}"</p>
+                      </div>
+                  ))}
+              </div>
+          </div>
+        </section>
 
-      {/* SECTION: DECK ARCHITECT */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">03 // DECK ARCHITECT</h2>
-        <div className="space-y-6">
-           {data.presentation?.slides?.map((slide: any, idx: number) => (
-             <div key={idx} className="p-8 border border-slate-100 rounded-3xl bg-slate-50/50 break-inside-avoid">
-                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-2 block">SLIDE_0{idx+1} // {slide.category}</span>
-                <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 mb-4 italic">{slide.title}</h3>
-                <ul className="grid grid-cols-1 gap-2">
-                    {slide.bullets?.map((b: string, i: number) => (
-                        <li key={i} className="text-[10px] font-bold text-slate-600 flex gap-2 italic">
-                            <span className="text-emerald-500">•</span> {b}
-                        </li>
-                    ))}
-                </ul>
-             </div>
-           ))}
-        </div>
-      </section>
+        {/* SECTION 03: DECK ARCHITECT */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">03 // DECK ARCHITECT</h2>
+          <div className="space-y-6">
+             {data.presentation?.slides?.map((slide: any, idx: number) => (
+               <div key={idx} className="p-8 border border-slate-100 rounded-3xl bg-slate-50/50 break-inside-avoid">
+                  <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-2 block">SLIDE_0{idx+1} // {slide.category}</span>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 mb-4 italic">{slide.title}</h3>
+                  <ul className="grid grid-cols-1 gap-2">
+                      {slide.bullets?.map((b: string, i: number) => (
+                          <li key={i} className="text-[10px] font-bold text-slate-600 flex gap-2 italic">
+                              <span className="text-emerald-500">•</span> {b}
+                          </li>
+                      ))}
+                  </ul>
+               </div>
+             ))}
+          </div>
+        </section>
 
-      {/* SECTION: JOURNEY MAPPER */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">04 // JOURNEY MAPPER</h2>
-        <div className="space-y-6">
-            {data.funnel?.map((step: any, i: number) => (
-                <div key={i} className="flex gap-6 break-inside-avoid py-2">
-                    <div className="w-10 h-10 rounded-xl border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-lg shrink-0">0{i+1}</div>
-                    <div className="flex-1 bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
-                        <div className="flex justify-between items-center mb-2">
-                            <h4 className="text-md font-black uppercase italic text-slate-900">{step.title}</h4>
-                            <span className="text-[8px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">GOAL: {step.conversionGoal}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-      </section>
+        {/* SECTION 04: JOURNEY MAPPER */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">04 // JOURNEY MAPPER</h2>
+          <div className="space-y-6">
+              {data.funnel?.map((step: any, i: number) => (
+                  <div key={i} className="flex gap-6 break-inside-avoid py-2">
+                      <div className="w-10 h-10 rounded-xl border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-lg shrink-0">0{i+1}</div>
+                      <div className="flex-1 bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
+                          <div className="flex justify-between items-center mb-2">
+                              <h4 className="text-md font-black uppercase italic text-slate-900">{step.title}</h4>
+                              <span className="text-[8px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">GOAL: {step.conversionGoal}</span>
+                          </div>
+                          <p className="text-xs text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
+                      </div>
+                  </div>
+              ))}
+          </div>
+        </section>
 
-      {/* SECTION: PROPOSAL BUILDER */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">05 // PROPOSAL BUILDER</h2>
-        <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
-            <DossierBlockRenderer content={data.proposal} />
-        </div>
-      </section>
+        {/* SECTION 05: PROPOSAL BUILDER */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">05 // PROPOSAL BUILDER</h2>
+          <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
+              <DossierBlockRenderer content={data.proposal} />
+          </div>
+        </section>
 
-      {/* SECTION: ENGAGEMENT SEQUENCE */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
-        <div className="space-y-4">
-           {data.outreach?.emailSequence?.map((email: any, i: number) => (
-             <div key={i} className="p-6 border border-slate-100 rounded-2xl space-y-3 bg-slate-50/30 break-inside-avoid">
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DAY {email.day || (i*3+1)} // {email.purpose}</span>
-                </div>
-                <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-900 uppercase italic"><span className="text-slate-400 not-italic">RE:</span> {email.subject}</p>
-                    <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l border-slate-200 pl-4">"{email.body}"</p>
-                </div>
-             </div>
-           ))}
-        </div>
-      </section>
+        {/* SECTION 06: ENGAGEMENT SEQUENCE */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
+          <div className="space-y-4">
+             {data.outreach?.emailSequence?.map((email: any, i: number) => (
+               <div key={i} className="p-6 border border-slate-100 rounded-2xl space-y-3 bg-slate-50/30 break-inside-avoid">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DAY {email.day || (i*3+1)} // {email.purpose}</span>
+                  </div>
+                  <div className="space-y-2">
+                      <p className="text-[10px] font-black text-slate-900 uppercase italic"><span className="text-slate-400 not-italic">RE:</span> {email.subject}</p>
+                      <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l border-slate-200 pl-4">"{email.body}"</p>
+                  </div>
+               </div>
+             ))}
+          </div>
+        </section>
 
-      {/* SECTION: PITCH GENERATOR */}
-      <section className="dossier-page section-break max-w-4xl mx-auto">
-        <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">07 // PITCH GENERATOR</h2>
-        <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
-            <DossierBlockRenderer content={data.pitch} />
-        </div>
-      </section>
+        {/* SECTION 07: PITCH GENERATOR */}
+        <section className="dossier-page break-inside-avoid">
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">07 // PITCH GENERATOR</h2>
+          <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
+              <DossierBlockRenderer content={data.pitch} />
+          </div>
+        </section>
 
-      <section className="dossier-page flex flex-col items-center justify-center text-center">
-             <div className="w-16 h-16 bg-[#020617] rounded-2xl flex items-center justify-center text-2xl mb-8">P</div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">END OF STRATEGIC MANIFEST</p>
-             <p className="text-[8px] font-mono text-slate-300 mt-4 uppercase tracking-widest italic">ARCHIVED SECURELY BY PROSPECTOR OS V3.2</p>
-      </section>
+        {/* FOOTER */}
+        <section className="dossier-page flex flex-col items-center justify-center text-center py-20 break-inside-avoid">
+               <div className="w-16 h-16 bg-[#020617] rounded-2xl flex items-center justify-center text-2xl mb-8">P</div>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">END OF STRATEGIC MANIFEST</p>
+               <p className="text-[8px] font-mono text-slate-300 mt-4 uppercase tracking-widest italic">ARCHIVED SECURELY BY PROSPECTOR OS V3.2</p>
+        </section>
+      </div>
     </div>
   );
 };
