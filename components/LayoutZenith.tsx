@@ -64,7 +64,7 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   RESEARCH: {
     "CORE ANALYTICS": [
       { id: 'EXECUTIVE_DASHBOARD', label: 'Agency Overview', desc: 'Main operational center' },
-      { id: 'SYSTEM_CAPABILITIES', label: 'Solutions Matrix', desc: 'Capability framework' },
+      { id: 'SYSTEM_CAPABILITIES', label: 'System Capabilities', desc: 'Capability framework' },
       { id: 'USER_GUIDE', label: 'User Manual', desc: 'Feature documentation' },
       { id: 'MARKET_DISCOVERY', label: 'Lead Discovery', desc: 'Identify new opportunities' },
       { id: 'AUTOMATED_SEARCH', label: 'Auto Analysis', desc: 'Autonomous identification' },
