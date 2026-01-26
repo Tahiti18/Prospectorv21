@@ -4,7 +4,13 @@ import { executeNeuralBoardroom, BoardroomStep } from '../../services/ghlArchite
 import { FormattedOutput } from '../common/FormattedOutput';
 import { toast } from '../../services/toastManager';
 
-export const GHLArchitect: React.FC<{ lead: Lead }> = ({ lead }) => {
+interface GHLArchitectProps {
+  lead?: Lead;
+  leads: Lead[];
+  onLockLead: (id: string) => void;
+}
+
+export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockLead }) => {
   const [rounds, setRounds] = useState(3);
   const [steps, setSteps] = useState<BoardroomStep[]>([
     { agentName: 'ARCHITECT', role: 'GHL System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
@@ -29,6 +35,10 @@ export const GHLArchitect: React.FC<{ lead: Lead }> = ({ lead }) => {
   }, [steps, finalResult]);
 
   const handleLaunch = async () => {
+    if (!lead) {
+      toast.error("MISSION_ABORT: Target identification required.");
+      return;
+    }
     setIsExecuting(true);
     setFinalResult(null);
     try {
@@ -50,12 +60,25 @@ export const GHLArchitect: React.FC<{ lead: Lead }> = ({ lead }) => {
           <h1 className="text-5xl font-black italic text-white uppercase tracking-tighter leading-none">
             GHL <span className="text-emerald-500 not-italic">PLANNER</span>
           </h1>
-          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Neural Boardroom Engine // Target: {lead.businessName}</p>
+          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Neural Boardroom Engine // {lead ? `Target: ${lead.businessName}` : 'AWAITING TARGET SELECTION'}</p>
         </div>
         
-        <div className="flex items-center gap-8 bg-[#0b1021] p-8 rounded-[40px] border border-slate-800 shadow-2xl">
+        <div className="flex items-center gap-6 bg-[#0b1021] p-6 rounded-[32px] border border-slate-800 shadow-2xl">
            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">DEBATE INTENSITY</span>
+              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">SELECT TARGET</span>
+              <select 
+                value={lead?.id || ''}
+                onChange={(e) => onLockLead(e.target.value)}
+                disabled={isExecuting}
+                className="bg-black border border-slate-800 text-slate-300 text-[10px] font-black uppercase px-6 py-3 rounded-2xl focus:border-emerald-500 cursor-pointer outline-none transition-all max-w-[200px] truncate"
+              >
+                <option value="">-- NO TARGET SELECTED --</option>
+                {leads.map(l => <option key={l.id} value={l.id}>{l.businessName}</option>)}
+              </select>
+           </div>
+
+           <div className="flex flex-col items-end">
+              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">DEBATE INTENSITY</span>
               <select 
                 value={rounds}
                 onChange={(e) => setRounds(parseInt(e.target.value))}
@@ -67,8 +90,14 @@ export const GHLArchitect: React.FC<{ lead: Lead }> = ({ lead }) => {
            </div>
 
            {!isExecuting && !finalResult ? (
-             <button onClick={handleLaunch} className="bg-emerald-600 hover:bg-emerald-500 text-white px-12 py-5 rounded-[24px] text-[13px] font-black uppercase tracking-[0.3em] shadow-xl active:scale-95 border-b-4 border-emerald-800 transition-all">
-               INITIALIZE BOARDROOM
+             <button 
+                onClick={handleLaunch} 
+                disabled={!lead}
+                className={`px-12 py-5 rounded-[24px] text-[13px] font-black uppercase tracking-[0.3em] shadow-xl transition-all border-b-4 ${
+                    lead ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800 active:scale-95' : 'bg-slate-800 text-slate-500 border-slate-900 cursor-not-allowed opacity-50'
+                }`}
+             >
+               {lead ? 'INITIALIZE BOARDROOM' : 'TARGET REQUIRED'}
              </button>
            ) : (
              <button onClick={() => { setFinalResult(null); setIsExecuting(false); }} className="px-10 py-4 bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">RE-INITIATE SEQUENCE</button>
@@ -172,11 +201,11 @@ const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean })
                                     return (
                                         <div key={idx} className="flex gap-3 items-start pl-6 group">
                                             <div className="w-1 h-1 rounded-full bg-emerald-500 mt-2 shrink-0 group-hover:scale-150 transition-all"></div>
-                                            <p className="text-[13px] text-slate-300 leading-relaxed font-medium uppercase tracking-tight">{trimmedLine.replace('-', '').trim()}</p>
+                                            <p className="text-[13px] text-slate-300 leading-relaxed font-sans">{trimmedLine.replace('-', '').trim()}</p>
                                         </div>
                                     );
                                 }
-                                return <p key={idx} className="text-[14px] text-slate-400 leading-[1.7] font-serif italic pl-5 border-l border-slate-800">{trimmedLine}</p>;
+                                return <p key={idx} className="text-[14px] text-slate-400 leading-[1.7] font-sans pl-5 border-l border-slate-800">{trimmedLine}</p>;
                             })}
                          </div>
                     </div>

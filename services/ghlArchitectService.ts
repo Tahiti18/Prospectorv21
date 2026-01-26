@@ -18,31 +18,42 @@ async function callAgent(prompt: string, system: string, model: string): Promise
 
   if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://pomelli.agency",
-      "X-Title": "Prospector OS Boardroom",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.8,
-      max_tokens: 3800
-    })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s circuit breaker
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message || "Neural Link Timeout");
-  
-  const text = data.choices[0].message.content;
-  deductCost(model, (prompt.length + text.length));
-  return text;
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://pomelli.agency",
+        "X-Title": "Prospector OS Boardroom",
+        "Content-Type": "application/json"
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.85,
+        max_tokens: 3800
+      })
+    });
+
+    clearTimeout(timeoutId);
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message || "Neural Link Timeout");
+    
+    const text = data.choices[0].message.content;
+    deductCost(model, (prompt.length + text.length));
+    return text;
+  } catch (e: any) {
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Network saturation reached.");
+    throw e;
+  }
 }
 
 export const executeNeuralBoardroom = async (
@@ -68,11 +79,11 @@ export const executeNeuralBoardroom = async (
 
   const CLEAN_SIGNAL_PROTOCOL = `
   STRICT OUTPUT PROTOCOL:
-  - DO NOT USE MARKDOWN. NO ASTERISKS, NO HASHTAGS, NO BOLDING SYMBOLS.
-  - USE PLAIN TEXT ONLY.
-  - USE ALL-CAPS HEADINGS FOLLOWED BY A COLON (E.G. TECHNICAL SCHEMATIC:).
-  - USE SIMPLE DASHES (-) FOR LIST ITEMS.
-  - 10X TECHNICAL DEPTH: REFER TO GHL API V2, CUSTOM OBJECTS, WEBHOOKS, AND 10DLC COMPLIANCE.
+  - NEVER USE ALL CAPS FOR BODY TEXT OR PARAGRAPHS.
+  - USE NORMAL SENTENCE CASE (Capitalize only the first letter of sentences).
+  - DO NOT USE MARKDOWN (NO ASTERISKS, NO HASHTAGS).
+  - ONLY USE ALL-CAPS FOR MAIN HEADINGS ENDING IN A COLON (E.G. TECHNICAL SCHEMATIC:).
+  - PROVIDE 10X TECHNICAL DEPTH REGARDING GHL API V2, CUSTOM OBJECTS, AND A2P 10DLC.
   `;
 
   try {
@@ -81,8 +92,8 @@ export const executeNeuralBoardroom = async (
     updateUI();
     
     const initialDraft = await callAgent(
-      `CONTEXT: ${context}\n\nTask: Architect a massive GHL Technical build for ${lead.businessName}.\n${CLEAN_SIGNAL_PROTOCOL}\n\nREQUIRED FOCUS:\n1. WORKFLOW AUTOMATION MESH: Map 7 complex triggers.\n2. CUSTOM DATA SCHEMA: List 20 specific Custom Fields.\n3. CONVERSATION AI: Write a 1000-word GHL AI System Instruction set.\n4. API INTEGRATION: Define Zapier/Webhook payloads for external ROI reporting.`,
-      "You are the Apex GHL Architect. You speak in technical specifications. You strictly never use markdown.",
+      `CONTEXT: ${context}\n\nTask: Architect a massive GHL Technical build for ${lead.businessName}.\n${CLEAN_SIGNAL_PROTOCOL}\n\nFOCUS: Automation Mesh, Custom Data Schemas, and AI Booking Bots.`,
+      "You are the Apex GHL Architect. You speak in straight, technical, implementation-ready language. You strictly never use markdown or all-caps paragraphs.",
       steps[0].modelId
     );
     
@@ -100,8 +111,8 @@ export const executeNeuralBoardroom = async (
 
       try {
         const auditOutput = await callAgent(
-          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Find 10 critical failure points in this GHL plan. Look for A2P 10DLC compliance risks, Snapshot collision issues, and API rate-limit bottlenecks.\n${CLEAN_SIGNAL_PROTOCOL}`,
-          "You are the Senior Technical Auditor. You are brutal and technically precise. No markdown.",
+          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Find critical failure points in this GHL plan. Focus on compliance and rate-limits.\n${CLEAN_SIGNAL_PROTOCOL}`,
+          "You are the Senior Technical Auditor. You are brutal and technically precise. No markdown. No all-caps paragraphs.",
           steps[1].modelId
         );
         debateTranscript += `AUDIT ROUND ${r}:\n${auditOutput}\n\n`;
@@ -120,8 +131,8 @@ export const executeNeuralBoardroom = async (
 
       try {
         const refinerOutput = await callAgent(
-          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Refactor the entire architecture to solve the Auditor's findings. Inject advanced appointment-booking psychology into the workflow SMS steps.\n${CLEAN_SIGNAL_PROTOCOL}`,
-          "You are the Strategic Refiner. You solve all technical gaps. No markdown.",
+          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Refactor the entire architecture to solve the Auditor's findings. Inject advanced CRM logic.\n${CLEAN_SIGNAL_PROTOCOL}`,
+          "You are the Strategic Refiner. You solve all technical gaps. No markdown. No all-caps paragraphs.",
           steps[2].modelId
         );
         debateTranscript += `REFINEMENT ROUND ${r}:\n${refinerOutput}\n\n`;
@@ -140,9 +151,10 @@ export const executeNeuralBoardroom = async (
 
     const finalPlan = await callAgent(
       `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the ULTIMATE GHL MASTER BLUEPRINT.
-      REQUIRED STRUCTURE: Output EXACT raw JSON with NO markdown formatting inside strings.
-      { "format": "ui_blocks", "title": "GHL MASTER ARCHITECTURE", "subtitle": "TECHNICAL IMPLEMENTATION GUIDE", "sections": [ { "heading": "CORE LOGIC", "body": [ { "type": "hero", "content": "..." }, { "type": "p", "content": "..." }, { "type": "bullets", "content": ["..."] } ] } ] }`,
-      "You are the Executive Vice President. You turn technical warfare into clean business documents. No markdown.",
+      REQUIRED STRUCTURE: Output EXACT raw JSON with NO markdown formatting inside strings. 
+      IMPORTANT: Ensure all 'content' and 'bullets' use normal sentence case, NOT all-caps.
+      { "format": "ui_blocks", "title": "GHL MASTER ARCHITECTURE", "subtitle": "TECHNICAL IMPLEMENTATION GUIDE", "sections": [ { "heading": "CORE LOGIC", "body": [ { "type": "hero", "content": "Summary of vision" }, { "type": "p", "content": "Detailed para 1" }, { "type": "bullets", "content": ["Step 1", "Step 2"] } ] } ] }`,
+      "You are the Executive Vice President. You turn technical warfare into clean business documents. No markdown. No all-caps paragraphs.",
       steps[3].modelId
     );
 
@@ -153,7 +165,6 @@ export const executeNeuralBoardroom = async (
     return finalPlan;
 
   } catch (error: any) {
-    // Ensure no step remains spinning if an error occurs
     steps.forEach(s => { if (s.status === 'THINKING') s.status = 'FAILED'; });
     updateUI();
     throw error;

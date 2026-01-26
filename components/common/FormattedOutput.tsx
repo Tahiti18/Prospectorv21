@@ -1,6 +1,5 @@
-
 /* =========================================================
-   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V3
+   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V4
    ========================================================= */
 
 import React from 'react';
@@ -34,12 +33,12 @@ const executiveSanitize = (text: string): string => {
   return text
     .replace(/```json/gi, '')
     .replace(/```/gi, '')
-    .replace(/\*\*/g, '') // Remove double asterisks
-    .replace(/###/g, '')  // Remove triple hashes
-    .replace(/##/g, '')   // Remove double hashes
-    .replace(/#/g, '')    // Remove single hashes
-    .replace(/__/g, '')   // Remove double underscores
-    .replace(/_/g, '')    // Remove underscores
+    .replace(/\*\*/g, '') 
+    .replace(/###/g, '')  
+    .replace(/##/g, '')   
+    .replace(/#/g, '')    
+    .replace(/__/g, '')   
+    .replace(/_/g, '')    
     .trim();
 };
 
@@ -116,14 +115,14 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
           return (
             <div key={idx} className="mb-20 p-20 bg-emerald-600 rounded-[80px] shadow-[0_0_100px_rgba(16,185,129,0.3)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] rounded-full -mr-32 -mt-32 group-hover:scale-125 transition-transform duration-1000"></div>
-              <p className="text-5xl font-black text-white italic tracking-tighter leading-tight relative z-10 uppercase">"{cleaned}"</p>
+              <p className="text-5xl font-black text-white italic tracking-tighter leading-tight relative z-10">"{cleaned}"</p>
               <div className="mt-8 flex gap-4 relative z-10 opacity-40">
                 {[1,2,3,4,5].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white"></div>)}
               </div>
             </div>
           );
         case 'p':
-          return <p key={idx} className="text-slate-300 leading-relaxed mb-12 text-2xl font-medium opacity-95 border-l-8 border-emerald-900/30 pl-12 py-4 italic font-serif">"{cleaned}"</p>;
+          return <p key={idx} className="text-slate-300 leading-relaxed mb-12 text-xl font-normal opacity-95 border-l-8 border-emerald-900/30 pl-12 py-4 font-sans">"{cleaned}"</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
@@ -131,7 +130,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
               {list.map((item: string, i: number) => (
                 <div key={i} className="bg-[#0b1021] border-2 border-slate-800 p-8 rounded-[40px] flex items-start gap-6 hover:border-emerald-500/50 transition-all shadow-xl group">
                   <div className="mt-2 w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.8)] group-hover:scale-150 transition-all" />
-                  <span className="font-black text-slate-100 uppercase tracking-tight text-lg leading-tight">{executiveSanitize(item)}</span>
+                  <span className="font-medium text-slate-100 text-lg leading-tight font-sans">{executiveSanitize(item)}</span>
                 </div>
               ))}
             </div>
@@ -146,7 +145,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
             </div>
           );
         default:
-          return <p key={idx} className="text-slate-400 text-lg mb-8 leading-relaxed italic uppercase font-bold tracking-tight">{String(cleaned)}</p>;
+          return <p key={idx} className="text-slate-400 text-lg mb-8 leading-relaxed font-normal font-sans">{String(cleaned)}</p>;
       }
     };
 

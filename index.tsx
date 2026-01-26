@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LayoutZenith } from './components/LayoutZenith';
@@ -156,7 +155,7 @@ const App = () => {
       case 'AI_CONCIERGE': return <AIConcierge lead={lockedLead} />;
       case 'ELEVATOR_PITCH': return <PitchGen lead={lockedLead} />;
       case 'FUNNEL_MAP': return <FunnelMap lead={lockedLead} />;
-      case 'GHL_ARCHITECT': return lockedLead ? <GHLArchitect lead={lockedLead} /> : <div>No Lead Selected</div>;
+      case 'GHL_ARCHITECT': return <GHLArchitect lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
 
       // ADMIN
       case 'AGENCY_PLAYBOOK': return <ScoringRubricView />;
@@ -171,6 +170,7 @@ const App = () => {
       case 'ACTIVITY_LOGS': return <ActivityLogs />;
       case 'TIMELINE': return <TimelineNode />;
       case 'NEXUS_GRAPH': return <NexusGraph leads={leads} />;
+      case 'DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'TASK_MANAGER': return <TaskManager lead={lockedLead} />;
       case 'CALENDAR': return <ActivityLogs />; 
       case 'FACT_CHECK': return <FactCheck lead={lockedLead} />;
