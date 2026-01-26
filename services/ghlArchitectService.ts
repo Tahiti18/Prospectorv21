@@ -1,5 +1,4 @@
 
-import { Type } from "@google/genai";
 import { Lead } from "../types";
 import { dossierStorage } from "./dossierStorage";
 import { pushLog, getStoredKeys, deductCost } from "./geminiService";
@@ -34,7 +33,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
         { role: "system", content: system },
         { role: "user", content: prompt }
       ],
-      temperature: 0.8
+      temperature: 0.85
     })
   });
 
@@ -58,28 +57,27 @@ export const executeNeuralBoardroom = async (
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'ARCHITECT', role: 'System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Technical Red-Team', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'REFINER', role: 'Strategic Polish', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Executive Synthesis', modelLabel: 'ChatGPT (4o-mini)', modelId: 'openai/gpt-4o-mini', status: 'WAITING', currentRound: 1 }
+    { agentName: 'ARCHITECT', role: 'Technical Blueprint Design', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Technical Red-Team / Risk', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'REFINER', role: 'ROI & Strategy Hardening', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
+    { agentName: 'EXECUTIVE', role: 'Executive Client Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ];
 
   onUpdate([...steps]);
 
-  // --- PHASE 1: INITIAL ARCHITECTURE (G3 FLASH) ---
+  // --- PHASE 1: INITIAL MASTER ARCHITECTURE ---
   steps[0].status = 'THINKING';
   onUpdate([...steps]);
   
   const initialDraft = await callAgent(
-    `FOUNDATION DATA: ${context}\n\nTask: Draft a massive, exhaustive GHL technical implementation plan. 
-    REQUIRED DEPTH: 
-    1. Workflow Triggers: List specific GHL triggers (e.g., 'Contact Tag Added', 'Form Submitted').
-    2. Automation Logic: Detailed If/Then branching for speed-to-lead.
-    3. Custom Data Schema: Exact Custom Fields and Custom Values names (e.g., {{contact.ai_sentiment}}).
-    4. Pipeline Stages: 7-stage high-ticket pipeline architecture.
-    5. AI Conversation Prompts: The specific system prompt for the GHL Conversation AI bot.
-    BE EXTREMELY VERBOSE. Output at least 1500 words of technical directives.`,
-    "You are the Apex GHL Solutions Architect. You speak in technical, implementation-ready terms. No fluff, only high-fidelity GoHighLevel settings.",
+    `FOUNDATION DATA: ${context}\n\nTask: Draft an EXHAUSTIVE GHL Master Blueprint for ${lead.businessName}. 
+    YOU MUST PROVIDE 10X DETAIL ON:
+    1. WORKFLOW ARCHITECTURE: Define the exact 'Trigger -> Wait -> Action' paths for 3 primary automations (Speed-to-lead, Long-term Nurture, and Database Reactivation).
+    2. SNAPSHOT SCHEMA: List 10 required Custom Fields and 5 Custom Values (e.g. {{company.ai_bot_name}}).
+    3. PIPELINE GEOMETRY: Define 7 Stages for a High-Ticket sale.
+    4. CONVERSATION AI: Write a 500-word System Instruction for the GHL Bot settings.
+    5. SMART LISTS: Define the specific filter logic for "Hot Intent" daily follow-up.`,
+    "You are the Apex GHL Solutions Architect. Your output is used to build complex GHL sub-accounts. Be technical, verbose, and precise. No generic advice.",
     steps[0].modelId
   );
   
@@ -88,22 +86,22 @@ export const executeNeuralBoardroom = async (
   steps[0].output = initialDraft;
   onUpdate([...steps]);
 
-  // --- PHASE 2: ADVERSARIAL DEBATE LOOP ---
+  // --- PHASE 2: THE RECURSIVE ADVERSARIAL LOOP ---
   for (let r = 1; r <= rounds; r++) {
-    // 2a. AUDITOR'S TURN (LLAMA 70B)
+    // 2a. AUDITOR TEARS IT DOWN
     steps[1].status = 'THINKING';
     steps[1].currentRound = r;
     onUpdate([...steps]);
 
     const auditOutput = await callAgent(
-      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Audit this GHL plan for logic failures. 
-      CRITICAL FOCUS: 
-      - Identify potential automation loops.
-      - Check for missing Custom Values that would break the Snapshot.
-      - Critique the AI Bot prompt for "hallucination risks".
-      - Find 3 revenue leakage points in the follow-up cadence.
-      If this is round ${r} of ${rounds}, be increasingly aggressive and technical.`,
-      "You are a Senior GHL Red-Team Auditor. Your job is to find why this plan will fail in a real sub-account. Be harsh, technical, and precise.",
+      `CURRENT MASTER PLAN & DEBATE HISTORY:\n${debateTranscript}\n\nTask: This is ROUND ${r} of ${rounds}. Tearing down this GHL plan.
+      Look for:
+      - Automation triggers that will loop and ban the client from Twilio.
+      - Gaps in the "Lead Re-engagement" logic.
+      - Hallucination risks in the AI Prompts provided.
+      - ROI flaws. Why won't this convert the $5k+ services?
+      Be extremely blunt and technical.`,
+      "You are a Senior GHL Risk Auditor. You hate weak plans. Your goal is to find why this system will break or fail to produce ROI.",
       steps[1].modelId
     );
 
@@ -112,19 +110,19 @@ export const executeNeuralBoardroom = async (
     steps[1].output = auditOutput;
     onUpdate([...steps]);
 
-    // 2b. REFINER'S TURN (MISTRAL LARGE)
+    // 2b. REFINER BUILDS IT BACK STRONGER
     steps[2].status = 'THINKING';
     steps[2].currentRound = r;
     onUpdate([...steps]);
 
     const refinerOutput = await callAgent(
-      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Refine and rebuild the architecture based on the Auditor's critique. 
-      IMPROVEMENTS: 
-      - Solidify the "Speed-to-Lead" SMS triggers.
-      - Inject advanced "Appointment Booking" psychological triggers into the AI scripts.
-      - Finalize the GHL SmartList filters for "High-Intent" daily follow-up.
-      - Optimize the overall ROI through better conversion geometry.`,
-      "You are the Strategic Growth Refiner. You take raw technical plans and turn them into aggressive, ROI-positive conversion machines.",
+      `CURRENT DEBATE TRANSCRIPT (READ CAREFULLY):\n${debateTranscript}\n\nTask: Rebuild and Refine the GHL Architecture based on the Auditor's critique.
+      - Fix the Twilio/SMS risks mentioned.
+      - Improve the AI Persona for higher conversions.
+      - Update the Workflow logic to be 'fail-safe'.
+      - Inject deeper conversion psychology into the GHL nurture sequences.
+      Ensure this plan is now 100% executable and bulletproof.`,
+      "You are the Strategic Growth Refiner. You take raw technical plans and turn them into aggressive, ROI-positive conversion machines. You fix what the Auditor breaks.",
       steps[2].modelId
     );
 
@@ -133,19 +131,27 @@ export const executeNeuralBoardroom = async (
     steps[2].output = refinerOutput;
     onUpdate([...steps]);
     
-    await new Promise(res => setTimeout(res, 300));
+    await new Promise(res => setTimeout(res, 500));
   }
 
-  // --- PHASE 3: EXECUTIVE SYNTHESIS (CHATGPT) ---
+  // --- PHASE 3: THE EXECUTIVE POLISH (CLIENT READY) ---
   steps[3].status = 'THINKING';
   onUpdate([...steps]);
 
   const finalPlan = await callAgent(
-    `FULL DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: You are the final judge. You have seen ${rounds} rounds of adversarial technical debate. 
-    Synthesize the absolute master GHL Implementation Blueprint into the UI_BLOCKS JSON format. 
-    REQUIREMENT: The response MUST be massive. Ensure every section from the debate is condensed but technical depth is preserved.
-    Output EXACT raw JSON.`,
-    `You are the Executive Synthesizer. Output EXACT JSON using format: { "format": "ui_blocks", "title": "GHL MASTER BLUEPRINT", "sections": [ { "heading": "NAME", "body": [ { "type": "hero", "content": "..." }, { "type": "p", "content": "..." }, { "type": "bullets", "content": ["..."] } ] } ] }`,
+    `FULL ADVERSARIAL DEBATE TRANSCRIPT:\n${debateTranscript}\n\n
+    Task: Synthesize the absolute FINAL GHL MASTER BLUEPRINT for ${lead.businessName}.
+    
+    CRITICAL INSTRUCTION:
+    - THIS IS FOR A HIGH-TICKET CLIENT. 
+    - DO NOT OUTPUT RAW CODE BLOCKS OR JSON.
+    - OUTPUT A VERBOSE, BEAUTIFULLY STRUCTURED BUSINESS PLAN using UI_BLOCKS format.
+    - EVERY SECTION MUST BE RICH IN GHL SPECIFIC DETAIL (Pipelines, Workflows, Bot Settings).
+    - Summarize the ROI impact based on the adversarial refinements.
+    
+    Structure:
+    { "format": "ui_blocks", "title": "GHL MASTER IMPLEMENTATION BLUEPRINT", "sections": [ { "heading": "EXECUTIVE STRATEGY", "body": [{ "type": "hero", "content": "..." }] } ] }`,
+    "You are the Executive Vice President of Strategy. Your job is to take technical debate and turn it into a high-fidelity, comprehensive business document that justifies a $10k+ monthly retainer.",
     steps[3].modelId
   );
 
