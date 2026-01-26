@@ -53,7 +53,13 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return Array.from(values).sort();
   }, [leads, grouping]);
 
-  // 2. PRIMARY FILTER: Pipeline Status (Cold, Sent, etc.)
+  // 2. FULL-LEDGER SUB-TOTAL: Counts matching leads in the ENTIRE 612 database
+  const subTotalCount = useMemo(() => {
+    if (grouping === 'none' || subFilterValue === 'ALL') return 0;
+    return leads.filter(l => getAtomicValue(l[grouping as keyof Lead], grouping) === subFilterValue).length;
+  }, [leads, grouping, subFilterValue]);
+
+  // 3. Initial Filtering (Pipeline Status)
   const statusFilteredLeads = useMemo(() => {
     let filtered = leads;
     if (statusFilter !== 'ALL') {
@@ -62,7 +68,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return filtered;
   }, [leads, statusFilter]);
 
-  // 3. SECONDARY ISOLATION: Filters the list down to the specific chosen City or Niche
+  // 4. SECONDARY ISOLATION: Filters the list down to the specific chosen City or Niche
   const isolatedLeads = useMemo(() => {
     if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
     return statusFilteredLeads.filter(l => {
@@ -71,7 +77,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [statusFilteredLeads, grouping, subFilterValue]);
 
-  // 4. SORTING ENGINE: Reliable numerical/alphabetical sorting
+  // 5. SORTING ENGINE: Reliable numerical/alphabetical sorting
   const sortedLeads = useMemo(() => {
     return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
@@ -91,7 +97,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [isolatedLeads, sortConfig]);
 
-  // 5. VIEW COMPILER: Decides if we show a flat list or grouped headers
+  // 6. VIEW COMPILER: Decides if we show a flat list or grouped headers
   const groupedData = useMemo(() => {
     if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
     
@@ -184,7 +190,18 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER REPOSITORY // {leads.length} RECORDS</p>
+          {/* DUAL-VECTOR COUNTER HEADER: Total Repo vs Isolated City Scope */}
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex items-center gap-3">
+            MASTER REPOSITORY // {leads.length} RECORDS
+            {subFilterValue !== 'ALL' && grouping !== 'none' && (
+              <span className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
+                <span className="text-slate-800">|</span>
+                <span className="text-emerald-500 bg-emerald-500/5 px-3 py-0.5 rounded border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                   {subFilterValue}: {subTotalCount} TOTAL TARGETS
+                </span>
+              </span>
+            )}
+          </p>
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
