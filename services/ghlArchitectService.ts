@@ -32,12 +32,13 @@ async function callAgent(prompt: string, system: string, model: string): Promise
         { role: "system", content: system },
         { role: "user", content: prompt }
       ],
-      temperature: 0.9
+      temperature: 0.8,
+      max_tokens: 3800
     })
   });
 
   const data = await response.json();
-  if (data.error) throw new Error(data.error.message || "Agent Link Fault");
+  if (data.error) throw new Error(data.error.message || "Neural Link Timeout");
   
   const text = data.choices[0].message.content;
   deductCost(model, (prompt.length + text.length));
@@ -50,98 +51,111 @@ export const executeNeuralBoardroom = async (
   onUpdate: (steps: BoardroomStep[]) => void
 ): Promise<string> => {
   const dossier = dossierStorage.getByLead(lead.id);
-  if (!dossier) throw new Error("Strategy Manifest required. Please run Campaign Builder first.");
+  if (!dossier) throw new Error("Strategic Manifest Required. Run Campaign Forge First.");
 
   const context = JSON.stringify(dossier.data);
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'ARCHITECT', role: 'System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Technical Red-Team', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'REFINER', role: 'Strategic Polish', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Executive Client Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'ARCHITECT', role: 'GHL System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Technical Compliance Audit', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'REFINER', role: 'Strategic Hardening', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
+    { agentName: 'EXECUTIVE', role: 'Master Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ];
 
-  onUpdate([...steps]);
+  const updateUI = () => onUpdate([...steps]);
+  updateUI();
 
-  const CLEAN_SIGNAL_DIRECTIVE = `
-  STRICT FORMATTING PROTOCOL:
-  - DO NOT USE MARKDOWN. NO ASTERISKS (**), NO HASHTAGS (###), NO UNDERSCORES (_).
+  const CLEAN_SIGNAL_PROTOCOL = `
+  STRICT OUTPUT PROTOCOL:
+  - DO NOT USE MARKDOWN. NO ASTERISKS, NO HASHTAGS, NO BOLDING SYMBOLS.
   - USE PLAIN TEXT ONLY.
-  - USE ALL CAPS FOR HEADINGS (E.G. WORKFLOW GEOMETRY:).
+  - USE ALL-CAPS HEADINGS FOLLOWED BY A COLON (E.G. TECHNICAL SCHEMATIC:).
   - USE SIMPLE DASHES (-) FOR LIST ITEMS.
-  - BE EXTREMELY VERBOSE. PROVIDE DEEP TECHNICAL DETAIL.
+  - 10X TECHNICAL DEPTH: REFER TO GHL API V2, CUSTOM OBJECTS, WEBHOOKS, AND 10DLC COMPLIANCE.
   `;
 
-  // --- PHASE 1: INITIAL ARCHITECTURE ---
-  steps[0].status = 'THINKING';
-  onUpdate([...steps]);
-  
-  const initialDraft = await callAgent(
-    `DATA CONTEXT: ${context}\n\nTask: Draft a massive GHL technical implementation plan for ${lead.businessName}.\n${CLEAN_SIGNAL_DIRECTIVE}\n\nREQUIRED SECTIONS:\n1. WORKFLOW ARCHITECTURE: List specific triggers and wait-condition branching.\n2. CUSTOM DATA SCHEMA: Define exact custom field names and value keys.\n3. CONVERSATION AI FORGE: Provide a massive system prompt for the GHL AI assistant.\n4. PIPELINE STAGING: Define 7 stages for high-ticket acquisition.\n5. ROI MATHEMATICS: Explain the conversion logic.`,
-    "You are the Apex GHL Solutions Architect. You speak in implementation-ready technical terms. You strictly never use markdown symbols.",
-    steps[0].modelId
-  );
-  
-  debateTranscript += `[ARCHITECT DRAFT]:\n${initialDraft}\n\n`;
-  steps[0].status = 'COMPLETED';
-  steps[0].output = initialDraft;
-  onUpdate([...steps]);
-
-  // --- PHASE 2: THE RECURSIVE ADVERSARIAL LOOP ---
-  for (let r = 1; r <= rounds; r++) {
-    // 2a. AUDITOR'S TURN
-    steps[1].status = 'THINKING';
-    steps[1].currentRound = r;
-    onUpdate([...steps]);
-
-    const auditOutput = await callAgent(
-      `DEBATE HISTORY:\n${debateTranscript}\n\nTask: Round ${r} of ${rounds}. Tearing down this GHL plan. Look for trigger loops, API bottlenecks, Twilio compliance failures, and AI hallucination risks.\n${CLEAN_SIGNAL_DIRECTIVE}`,
-      "You are a Senior Technical Auditor. You find the flaws in every plan. You strictly never use markdown.",
-      steps[1].modelId
-    );
-
-    debateTranscript += `[AUDIT ROUND ${r}]:\n${auditOutput}\n\n`;
-    steps[1].status = 'COMPLETED';
-    steps[1].output = auditOutput;
-    onUpdate([...steps]);
-
-    // 2b. REFINER'S TURN
-    steps[2].status = 'THINKING';
-    steps[2].currentRound = r;
-    onUpdate([...steps]);
-
-    const refinerOutput = await callAgent(
-      `DEBATE HISTORY:\n${debateTranscript}\n\nTask: Rebuild the architecture based on the Auditor's critique. Inject advanced appointment-booking psychology and fail-safe automation logic.\n${CLEAN_SIGNAL_DIRECTIVE}`,
-      "You are the Strategic Refiner. You harden technical plans into ROI engines. You strictly never use markdown.",
-      steps[2].modelId
-    );
-
-    debateTranscript += `[REFINEMENT ROUND ${r}]:\n${refinerOutput}\n\n`;
-    steps[2].status = 'COMPLETED';
-    steps[2].output = refinerOutput;
-    onUpdate([...steps]);
+  try {
+    // --- PHASE 1: INITIAL ARCHITECT ---
+    steps[0].status = 'THINKING';
+    updateUI();
     
-    await new Promise(res => setTimeout(res, 500));
+    const initialDraft = await callAgent(
+      `CONTEXT: ${context}\n\nTask: Architect a massive GHL Technical build for ${lead.businessName}.\n${CLEAN_SIGNAL_PROTOCOL}\n\nREQUIRED FOCUS:\n1. WORKFLOW AUTOMATION MESH: Map 7 complex triggers.\n2. CUSTOM DATA SCHEMA: List 20 specific Custom Fields.\n3. CONVERSATION AI: Write a 1000-word GHL AI System Instruction set.\n4. API INTEGRATION: Define Zapier/Webhook payloads for external ROI reporting.`,
+      "You are the Apex GHL Architect. You speak in technical specifications. You strictly never use markdown.",
+      steps[0].modelId
+    );
+    
+    debateTranscript += `ARCHITECT DRAFT:\n${initialDraft}\n\n`;
+    steps[0].output = initialDraft;
+    steps[0].status = 'COMPLETED';
+    updateUI();
+
+    // --- PHASE 2: ADVERSARIAL LOOPS ---
+    for (let r = 1; r <= rounds; r++) {
+      // AUDITOR
+      steps[1].status = 'THINKING';
+      steps[1].currentRound = r;
+      updateUI();
+
+      try {
+        const auditOutput = await callAgent(
+          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Find 10 critical failure points in this GHL plan. Look for A2P 10DLC compliance risks, Snapshot collision issues, and API rate-limit bottlenecks.\n${CLEAN_SIGNAL_PROTOCOL}`,
+          "You are the Senior Technical Auditor. You are brutal and technically precise. No markdown.",
+          steps[1].modelId
+        );
+        debateTranscript += `AUDIT ROUND ${r}:\n${auditOutput}\n\n`;
+        steps[1].output = auditOutput;
+        steps[1].status = 'COMPLETED';
+      } catch (err) {
+        steps[1].status = 'FAILED';
+        throw err;
+      }
+      updateUI();
+
+      // REFINER
+      steps[2].status = 'THINKING';
+      steps[2].currentRound = r;
+      updateUI();
+
+      try {
+        const refinerOutput = await callAgent(
+          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Refactor the entire architecture to solve the Auditor's findings. Inject advanced appointment-booking psychology into the workflow SMS steps.\n${CLEAN_SIGNAL_PROTOCOL}`,
+          "You are the Strategic Refiner. You solve all technical gaps. No markdown.",
+          steps[2].modelId
+        );
+        debateTranscript += `REFINEMENT ROUND ${r}:\n${refinerOutput}\n\n`;
+        steps[2].output = refinerOutput;
+        steps[2].status = 'COMPLETED';
+      } catch (err) {
+        steps[2].status = 'FAILED';
+        throw err;
+      }
+      updateUI();
+    }
+
+    // --- PHASE 3: EXECUTIVE SYNTHESIS ---
+    steps[3].status = 'THINKING';
+    updateUI();
+
+    const finalPlan = await callAgent(
+      `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the ULTIMATE GHL MASTER BLUEPRINT.
+      REQUIRED STRUCTURE: Output EXACT raw JSON with NO markdown formatting inside strings.
+      { "format": "ui_blocks", "title": "GHL MASTER ARCHITECTURE", "subtitle": "TECHNICAL IMPLEMENTATION GUIDE", "sections": [ { "heading": "CORE LOGIC", "body": [ { "type": "hero", "content": "..." }, { "type": "p", "content": "..." }, { "type": "bullets", "content": ["..."] } ] } ] }`,
+      "You are the Executive Vice President. You turn technical warfare into clean business documents. No markdown.",
+      steps[3].modelId
+    );
+
+    steps[3].status = 'COMPLETED';
+    steps[3].output = finalPlan;
+    updateUI();
+
+    return finalPlan;
+
+  } catch (error: any) {
+    // Ensure no step remains spinning if an error occurs
+    steps.forEach(s => { if (s.status === 'THINKING') s.status = 'FAILED'; });
+    updateUI();
+    throw error;
   }
-
-  // --- PHASE 3: EXECUTIVE SYNTHESIS ---
-  steps[3].status = 'THINKING';
-  onUpdate([...steps]);
-
-  const finalPlan = await callAgent(
-    `FULL DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: You are the final executive judge. Synthesize the debate into a MASTER BLUEPRINT. 
-    You must output a highly professional business plan.
-    DO NOT USE ANY MARKDOWN SYMBOLS.
-    Output EXACT raw JSON with no markdown inside strings.
-    { "format": "ui_blocks", "title": "GHL MASTER ARCHITECTURE", "sections": [ { "heading": "NAME", "body": [ { "type": "hero", "content": "..." }, { "type": "bullets", "content": ["..."] }, { "type": "p", "content": "..." } ] } ] }`,
-    "You are the Executive Vice President of Strategy. You turn technical debate into world-class business plans. You strictly never use markdown symbols like ** or ##.",
-    steps[3].modelId
-  );
-
-  steps[3].status = 'COMPLETED';
-  steps[3].output = finalPlan;
-  onUpdate([...steps]);
-
-  return finalPlan;
 };
