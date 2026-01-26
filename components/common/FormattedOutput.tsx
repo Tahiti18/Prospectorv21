@@ -115,7 +115,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
           return (
             <div key={idx} className="mb-20 p-20 bg-emerald-600 rounded-[80px] shadow-[0_0_100px_rgba(16,185,129,0.3)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] rounded-full -mr-32 -mt-32 group-hover:scale-125 transition-transform duration-1000"></div>
-              <p className="text-5xl font-black text-white italic tracking-tighter leading-tight relative z-10">"{cleaned}"</p>
+              <p className="text-5xl font-black text-white italic tracking-tighter leading-tight relative z-10 font-sans">"{cleaned}"</p>
               <div className="mt-8 flex gap-4 relative z-10 opacity-40">
                 {[1,2,3,4,5].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white"></div>)}
               </div>
@@ -138,7 +138,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
         case 'heading':
           return (
             <div key={idx} className="flex items-center gap-8 mb-12 mt-24 first:mt-0">
-               <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic whitespace-nowrap">{cleaned}</h3>
+               <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic whitespace-nowrap font-sans">{cleaned}</h3>
                <div className="h-1 bg-emerald-500/20 flex-1 rounded-full relative overflow-hidden">
                   <div className="absolute inset-0 bg-emerald-500 w-1/4 animate-[slide_4s_infinite]"></div>
                </div>
@@ -153,8 +153,8 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
       <div className={`space-y-20 animate-in fade-in duration-1000 max-w-6xl mx-auto pb-40 ${className}`}>
         {uiData?.title && (
           <div className="border-b-4 border-slate-800 pb-16 mb-24 text-center">
-            <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none mb-6">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[1em] text-sm italic animate-pulse">{uiData.subtitle}</p>}
+            <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none mb-6 font-sans">{uiData.title}</h1>
+            {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[1em] text-sm italic animate-pulse font-sans">{uiData.subtitle}</p>}
           </div>
         )}
 
@@ -162,7 +162,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
           <section key={sIdx} className="mb-32">
             <div className="flex items-center gap-10 mb-16">
                 <div className="w-16 h-16 bg-emerald-600 rounded-3xl flex items-center justify-center font-black text-white text-2xl italic shadow-2xl">0{sIdx+1}</div>
-                <h2 className="text-4xl font-black text-emerald-400 uppercase tracking-tighter italic whitespace-nowrap">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
+                <h2 className="text-4xl font-black text-emerald-400 uppercase tracking-tighter italic whitespace-nowrap font-sans">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
                 <div className="h-[2px] bg-slate-800 flex-1"></div>
             </div>
             <div className="px-6">
@@ -182,7 +182,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
   } catch (fatalError) {
     return (
       <div className="p-20 border-4 border-dashed border-rose-500/20 rounded-[80px] text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.8em] mb-8">NEURAL_DECODE_FAULT</p>
+        <p className="text-rose-400 font-black uppercase tracking-[0.8em] mb-8 font-sans">NEURAL_DECODE_FAULT</p>
         <div className="bg-black/80 p-12 rounded-[48px] text-slate-400 font-mono text-sm whitespace-pre-wrap text-left shadow-2xl border border-white/5">
           {content}
         </div>
