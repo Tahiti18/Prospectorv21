@@ -1,5 +1,6 @@
+
 /* =========================================================
-   FORMATTED OUTPUT – EXECUTIVE RENDERING V2
+   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V3
    ========================================================= */
 
 import React from 'react';
@@ -26,12 +27,19 @@ interface FormattedOutputProps {
   className?: string;
 }
 
+// Aggressive sanitizer to remove markdown noise
 const executiveSanitize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== 'string') return String(text);
   return text
     .replace(/```json/gi, '')
     .replace(/```/gi, '')
+    .replace(/\*\*/g, '') // Remove double asterisks
+    .replace(/###/g, '')  // Remove triple hashes
+    .replace(/##/g, '')   // Remove double hashes
+    .replace(/#/g, '')    // Remove single hashes
+    .replace(/__/g, '')   // Remove double underscores
+    .replace(/_/g, '')    // Remove underscores
     .trim();
 };
 
@@ -67,7 +75,6 @@ const promoteToStrategicReport = (input: any): UIBlocks => {
     };
   }
 
-  // Deconstruct object keys into sections
   const sections = Object.entries(input).map(([key, val]) => ({
     heading: key.replace(/_/g, ' ').toUpperCase(),
     body: deconstructJsonToBlocks(val)
@@ -107,67 +114,77 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
       switch (block.type) {
         case 'hero':
           return (
-            <div key={idx} className="mb-12 p-12 bg-emerald-600 rounded-[40px] shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:scale-125 transition-transform duration-1000"></div>
-              <p className="text-3xl font-black text-white italic tracking-tight leading-none relative z-10 uppercase">"{cleaned}"</p>
-              <div className="mt-4 flex gap-2 relative z-10 opacity-60">
-                <div className="w-1 h-1 rounded-full bg-white"></div>
-                <div className="w-1 h-1 rounded-full bg-white"></div>
-                <div className="w-1 h-1 rounded-full bg-white"></div>
+            <div key={idx} className="mb-20 p-20 bg-emerald-600 rounded-[80px] shadow-[0_0_100px_rgba(16,185,129,0.3)] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] rounded-full -mr-32 -mt-32 group-hover:scale-125 transition-transform duration-1000"></div>
+              <p className="text-5xl font-black text-white italic tracking-tighter leading-tight relative z-10 uppercase">"{cleaned}"</p>
+              <div className="mt-8 flex gap-4 relative z-10 opacity-40">
+                {[1,2,3,4,5].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-white"></div>)}
               </div>
             </div>
           );
         case 'p':
-          return <p key={idx} className="text-slate-300 leading-relaxed mb-8 text-lg font-medium opacity-90 border-l-4 border-slate-800 pl-8 py-2 italic font-serif">"{cleaned}"</p>;
+          return <p key={idx} className="text-slate-300 leading-relaxed mb-12 text-2xl font-medium opacity-95 border-l-8 border-emerald-900/30 pl-12 py-4 italic font-serif">"{cleaned}"</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
-            <div key={idx} className="grid grid-cols-1 gap-4 mb-12">
+            <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
               {list.map((item: string, i: number) => (
-                <div key={i} className="bg-slate-900 border border-slate-800 p-6 rounded-[24px] flex items-start gap-4 hover:border-emerald-500/30 transition-all shadow-sm">
-                  <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                  <span className="font-bold text-slate-200 uppercase tracking-wide text-xs">{item}</span>
+                <div key={i} className="bg-[#0b1021] border-2 border-slate-800 p-8 rounded-[40px] flex items-start gap-6 hover:border-emerald-500/50 transition-all shadow-xl group">
+                  <div className="mt-2 w-3 h-3 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.8)] group-hover:scale-150 transition-all" />
+                  <span className="font-black text-slate-100 uppercase tracking-tight text-lg leading-tight">{executiveSanitize(item)}</span>
                 </div>
               ))}
             </div>
           );
         case 'heading':
-          return <h3 key={idx} className="text-xl font-black text-emerald-500 uppercase tracking-tighter italic mb-6 mt-12 border-b border-emerald-900/30 pb-3 flex items-center gap-4">
-            <span className="w-8 h-[2px] bg-emerald-500/30"></span>
-            {cleaned}
-          </h3>;
+          return (
+            <div key={idx} className="flex items-center gap-8 mb-12 mt-24 first:mt-0">
+               <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic whitespace-nowrap">{cleaned}</h3>
+               <div className="h-1 bg-emerald-500/20 flex-1 rounded-full relative overflow-hidden">
+                  <div className="absolute inset-0 bg-emerald-500 w-1/4 animate-[slide_4s_infinite]"></div>
+               </div>
+            </div>
+          );
         default:
-          return <p key={idx} className="text-slate-400 text-sm mb-4 leading-relaxed italic">{String(cleaned)}</p>;
+          return <p key={idx} className="text-slate-400 text-lg mb-8 leading-relaxed italic uppercase font-bold tracking-tight">{String(cleaned)}</p>;
       }
     };
 
     return (
-      <div className={`space-y-12 animate-in fade-in duration-700 max-w-4xl mx-auto ${className}`}>
+      <div className={`space-y-20 animate-in fade-in duration-1000 max-w-6xl mx-auto pb-40 ${className}`}>
         {uiData?.title && (
-          <div className="border-b-2 border-slate-800 pb-8 mb-12">
-            <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none mb-3">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[0.5em] text-[9px] italic">{uiData.subtitle}</p>}
+          <div className="border-b-4 border-slate-800 pb-16 mb-24 text-center">
+            <h1 className="text-9xl font-black text-white uppercase tracking-tighter italic leading-none mb-6">{uiData.title}</h1>
+            {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[1em] text-sm italic animate-pulse">{uiData.subtitle}</p>}
           </div>
         )}
 
         {(uiData?.sections || []).map((section, sIdx) => (
-          <section key={sIdx} className="mb-20">
-            <div className="flex items-center gap-6 mb-10">
-                <h2 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em] italic whitespace-nowrap bg-emerald-900/10 px-4 py-1.5 rounded-lg border border-emerald-500/20">{section?.heading || "SEGMENT"}</h2>
-                <div className="h-[1px] bg-slate-800 flex-1"></div>
+          <section key={sIdx} className="mb-32">
+            <div className="flex items-center gap-10 mb-16">
+                <div className="w-16 h-16 bg-emerald-600 rounded-3xl flex items-center justify-center font-black text-white text-2xl italic shadow-2xl">0{sIdx+1}</div>
+                <h2 className="text-4xl font-black text-emerald-400 uppercase tracking-tighter italic whitespace-nowrap">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
+                <div className="h-[2px] bg-slate-800 flex-1"></div>
             </div>
-            <div className="px-2">
+            <div className="px-6">
               {(section?.body || []).map((block, bIdx) => renderBlock(block, bIdx))}
             </div>
           </section>
         ))}
+        
+        <style>{`
+          @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+        `}</style>
       </div>
     );
   } catch (fatalError) {
     return (
-      <div className="p-12 border-2 border-dashed border-rose-500/20 rounded-[40px] text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4">NEURAL RENDERING EXCEPTION</p>
-        <div className="bg-black/50 p-8 rounded-3xl text-slate-400 font-mono text-[11px] whitespace-pre-wrap text-left">
+      <div className="p-20 border-4 border-dashed border-rose-500/20 rounded-[80px] text-center bg-rose-500/5">
+        <p className="text-rose-400 font-black uppercase tracking-[0.8em] mb-8">NEURAL_DECODE_FAULT</p>
+        <div className="bg-black/80 p-12 rounded-[48px] text-slate-400 font-mono text-sm whitespace-pre-wrap text-left shadow-2xl border border-white/5">
           {content}
         </div>
       </div>
