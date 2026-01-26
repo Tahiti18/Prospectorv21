@@ -93,14 +93,14 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
 
       <style>{`
         @media print {
-          @page { size: A4; margin: 15mm; }
+          @page { size: A4; margin: 0; }
           
           html, body, .dossier-container {
             height: auto !important;
             overflow: visible !important;
             background: white !important;
-            width: 100% !important;
-            margin: 0 !important;
+            width: 210mm !important;
+            margin: 0 auto !important;
             padding: 0 !important;
             display: block !important;
           }
@@ -108,15 +108,18 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
           .print-hidden { display: none !important; }
           
           .dossier-page { 
-            page-break-after: always; 
-            min-height: auto !important;
-            height: auto !important;
-            padding: 10mm 0 !important;
-            display: block !important;
+            page-break-after: always !important; 
+            min-height: 297mm !important;
+            height: auto !important; /* Allow growth if content is long */
+            padding: 20mm !important;
+            display: flex !important;
+            flex-direction: column !important;
             width: 100% !important;
+            overflow: visible !important; /* Critical: Prevent clipping */
+            box-sizing: border-box !important;
           }
 
-          .section-break { page-break-before: always; }
+          .section-break { page-break-before: always !important; }
           .break-inside-avoid { page-break-inside: avoid !important; }
 
           h1 { font-size: 32pt !important; }
@@ -127,12 +130,12 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
           .bg-emerald-600 { background: #059669 !important; -webkit-print-color-adjust: exact; }
           .bg-slate-50 { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
           .text-white { color: white !important; }
-          .text-slate-500 { color: #64748b !important; }
+          .text-emerald-500 { color: #10b981 !important; }
           
-          /* Fix Grid cutoffs in print */
+          /* Force layout consistency */
           .grid { display: block !important; }
-          .grid-cols-2 { display: block !important; }
-          .grid-cols-2 > * { width: 100% !important; margin-bottom: 5mm !important; }
+          .grid-cols-1, .grid-cols-2 { display: block !important; }
+          .grid > *, .grid-cols-2 > * { width: 100% !important; margin-bottom: 5mm !important; display: block !important; }
         }
 
         .dossier-page { min-height: 100vh; padding: 4rem; position: relative; border-bottom: 1px solid #f1f5f9; }
@@ -231,7 +234,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">04 // JOURNEY MAPPER</h2>
         <div className="space-y-6">
             {data.funnel?.map((step: any, i: number) => (
-                <div key={i} className="flex gap-6 break-inside-avoid">
+                <div key={i} className="flex gap-6 break-inside-avoid py-2">
                     <div className="w-10 h-10 rounded-xl border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-lg shrink-0">0{i+1}</div>
                     <div className="flex-1 bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
                         <div className="flex justify-between items-center mb-2">
