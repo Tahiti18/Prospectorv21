@@ -28,7 +28,7 @@ const STRATEGIC_CITIES = [
 const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
   const cn = active ? "text-white" : "text-slate-400 group-hover:text-white";
   switch(id) {
-    case 'RESEARCH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>; 
+    case 'RESEARCH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" cy1="21" x2="16.65" y2="16.65"/></svg>; 
     case 'DESIGN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>; 
     case 'MEDIA': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>; 
     case 'OUTREACH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; 
@@ -71,7 +71,7 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
       { id: 'MARKET_TRENDS', label: 'Industry Monitor', desc: 'Real-time news' },
     ],
     "MANAGEMENT": [
-      { id: 'PROSPECT_DATABASE', label: 'Lead Database', desc: 'Contact repository' },
+      { id: 'PROSPECT_DATABASE', label: 'Lead Sourcing', desc: 'Contact repository' },
       { id: 'STRATEGY_CENTER', label: 'Strategic Hub', desc: 'Portfolio audits' },
       { id: 'PIPELINE', label: 'Sales Pipeline', desc: 'Deal tracking' },
       { id: 'ANALYTICS_HUB', label: 'Market Intelligence', desc: 'Aggregate data' },
@@ -171,7 +171,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block font-sans">
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[50] flex items-center bg-[#030712]/95 backdrop-blur-3xl border-slate-800 px-8 print:hidden">
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[100] flex items-center bg-[#030712]/95 backdrop-blur-3xl border-slate-800 px-8 print:hidden">
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
                PROSPECTOR <span className="text-emerald-500 italic">OS</span>
@@ -220,7 +220,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
       </header>
 
       <div className="flex-1 flex overflow-hidden pt-20 print:block print:pt-0">
-         <aside className={`flex-shrink-0 border-r flex flex-col z-[40] transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden relative ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
+         <aside className={`flex-shrink-0 border-r flex flex-col z-[90] transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden relative ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b border-white/5 flex items-center justify-between h-16 shrink-0">
                 {isSidebarExpanded && <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">CAMPAIGN</span>}
                 <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className={`w-10 h-10 rounded-xl border border-slate-800 flex items-center justify-center transition-all hover:bg-slate-800/50 group bg-[#05091a] shadow-xl ${!isSidebarExpanded ? 'mx-auto' : ''}`}>

@@ -63,6 +63,7 @@ const Icon = ({ name }: { name: string }) => {
 };
 
 const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string; icon: string }[] = [
+  // ... module data stays the same ...
   { mode: 'RESEARCH', mod: 'EXECUTIVE_DASHBOARD', label: 'EXECUTIVE DASHBOARD', zone: 'RESEARCH ZONE', icon: 'chart' },
   { mode: 'RESEARCH', mod: 'MARKET_DISCOVERY', label: 'MARKET DISCOVERY', zone: 'RESEARCH ZONE', icon: 'discovery' },
   { mode: 'RESEARCH', mod: 'AUTOMATED_SEARCH', label: 'AUTOMATED SEARCH', zone: 'RESEARCH ZONE', icon: 'search' },
@@ -78,19 +79,26 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
   { mode: 'RESEARCH', mod: 'ANALYTICS_HUB', label: 'MARKET INTEL HUB', zone: 'RESEARCH ZONE', icon: 'analytics' },
   { mode: 'RESEARCH', mod: 'HEATMAP', label: 'OPPORTUNITY HEATMAP', zone: 'RESEARCH ZONE', icon: 'heat' },
   { mode: 'RESEARCH', mod: 'USER_GUIDE', label: 'SYSTEM OVERVIEW', zone: 'RESEARCH ZONE', icon: 'manual' },
+
+  // --- DESIGN ZONE ---
   { mode: 'DESIGN', mod: 'VISUAL_STUDIO', label: 'VISUAL STUDIO', zone: 'DESIGN ZONE', icon: 'studio' },
   { mode: 'DESIGN', mod: 'BRAND_DNA', label: 'BRAND DNA EXTRACTOR', zone: 'DESIGN ZONE', icon: 'dna' },
   { mode: 'DESIGN', mod: 'MOCKUPS_4K', label: 'MOCKUP STUDIO', zone: 'DESIGN ZONE', icon: 'monitor' },
   { mode: 'DESIGN', mod: 'PRODUCT_SYNTHESIS', label: 'OFFER SYNTHESIS', zone: 'DESIGN ZONE', icon: 'architect' },
   { mode: 'DESIGN', mod: 'CONTENT_IDEATION', label: 'CONTENT IDEATION', zone: 'DESIGN ZONE', icon: 'pulse' },
   { mode: 'DESIGN', mod: 'ASSET_LIBRARY', label: 'ASSET LIBRARY', zone: 'DESIGN ZONE', icon: 'vault' },
+
+  // --- MEDIA ZONE ---
   { mode: 'MEDIA', mod: 'VIDEO_PRODUCTION', label: 'VIDEO STUDIO', zone: 'MEDIA ZONE', icon: 'video' },
   { mode: 'MEDIA', mod: 'VIDEO_AUDIT', label: 'VIDEO AUDIT', zone: 'MEDIA ZONE', icon: 'film' },
   { mode: 'MEDIA', mod: 'VIDEO_INSIGHTS', label: 'MEDIA INSIGHTS', zone: 'MEDIA ZONE', icon: 'video' },
   { mode: 'MEDIA', mod: 'MOTION_LAB', label: 'MOTION LAB', zone: 'MEDIA ZONE', icon: 'run' },
   { mode: 'MEDIA', mod: 'SONIC_STUDIO', label: 'SONIC STUDIO', zone: 'MEDIA ZONE', icon: 'audio' },
   { mode: 'MEDIA', mod: 'MEETING_NOTES', label: 'EXECUTIVE SCRIBE', zone: 'MEDIA ZONE', icon: 'pen' },
+
+  // --- OUTREACH ZONE ---
   { mode: 'OUTREACH', mod: 'CAMPAIGN_ORCHESTRATOR', label: 'CAMPAIGN ARCHITECT', zone: 'OUTREACH ZONE', icon: 'manual' },
+  // Comment: Changed 'GHL_GROWTH_BOARDROOM' to canonical 'GROWTH_ADVISORY' to fix SubModule type error
   { mode: 'OUTREACH', mod: 'GROWTH_ADVISORY', label: 'GROWTH BOARDROOM', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'PROPOSALS', label: 'PROPOSAL BUILDER', zone: 'OUTREACH ZONE', icon: 'file' },
   { mode: 'OUTREACH', mod: 'ROI_CALCULATOR', label: 'VALUE PROJECTOR', zone: 'OUTREACH ZONE', icon: 'calc' },
@@ -102,7 +110,10 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
   { mode: 'OUTREACH', mod: 'AI_CONCIERGE', label: 'NEURAL AGENT', zone: 'OUTREACH ZONE', icon: 'concierge' },
   { mode: 'OUTREACH', mod: 'ELEVATOR_PITCH', label: 'PITCH GENERATOR', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'FUNNEL_MAP', label: 'FUNNEL MAPPER', zone: 'OUTREACH ZONE', icon: 'funnel' },
+  // Comment: Changed 'GHL_ARCHITECT' to canonical 'SOLUTIONS_ARCHITECT' to fix SubModule type error
   { mode: 'OUTREACH', mod: 'SOLUTIONS_ARCHITECT', label: 'GHL PLANNER', zone: 'OUTREACH ZONE', icon: 'architect' },
+
+  // --- ADMIN ZONE ---
   { mode: 'ADMIN', mod: 'AGENCY_PLAYBOOK', label: 'AGENCY PLAYBOOK', zone: 'ADMIN ZONE', icon: 'manual' },
   { mode: 'ADMIN', mod: 'BILLING', label: 'FINANCIALS', zone: 'ADMIN ZONE', icon: 'billing' },
   { mode: 'ADMIN', mod: 'AFFILIATE', label: 'PARTNER PROGRAM', zone: 'ADMIN ZONE', icon: 'analytics' },
@@ -148,32 +159,32 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   const zones = Array.from(new Set(filteredItems.map(f => f.zone)));
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6">
-      <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-2xl transition-opacity" onClick={onClose}></div>
+    <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20">
+      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl transition-opacity" onClick={onClose}></div>
       
-      <div className={`relative w-full max-w-3xl border-2 border-slate-800 rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh] ${theme === 'dark' ? 'bg-[#0b1021]' : 'bg-white'}`}>
+      <div className={`relative w-full max-w-3xl border-2 border-slate-800 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh] ${theme === 'dark' ? 'bg-[#0b1021]' : 'bg-white'}`}>
         
         {/* SEARCH HEADER */}
-        <div className="p-8 border-b border-slate-800/50 flex items-center gap-6 shrink-0 bg-slate-900/20">
-          <div className="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/30 shrink-0">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="3" strokeLinecap="round"/></svg>
+        <div className="p-6 border-b border-slate-800/50 flex items-center gap-5 shrink-0">
+          <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/30 shrink-0 animate-pulse">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="3" strokeLinecap="round"/></svg>
           </div>
           <input
             autoFocus
-            className={`w-full bg-transparent placeholder-slate-600 text-3xl outline-none font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
-            placeholder="SEARCH SYSTEM..."
+            className={`w-full bg-transparent placeholder-slate-600 text-2xl outline-none font-black uppercase tracking-tight ${theme === 'dark' ? text-white : 'text-slate-900'}`}
+            placeholder="SEARCH SYSTEM DIRECTORY..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button onClick={onClose} className="px-4 py-2 bg-slate-800 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-all border border-slate-700">ESC</button>
+          <button onClick={onClose} className="px-3 py-1.5 bg-slate-800 rounded-lg text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-all">ESC</button>
         </div>
         
         {/* SCROLLABLE CONTENT */}
-        <div className="overflow-y-auto custom-scrollbar flex-1 relative bg-slate-950/40">
+        <div className="overflow-y-auto custom-scrollbar flex-1 relative bg-slate-950/20">
           {filteredItems.length === 0 && (
-            <div className="py-40 text-center flex flex-col items-center justify-center opacity-30">
-               <svg className="w-16 h-16 mb-6 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm0-14a2 2 0 100 4 2 2 0 000-4z" strokeWidth="2"/></svg>
-               <p className="text-slate-500 font-black uppercase tracking-[0.5em] italic">No Neural Match Located</p>
+            <div className="py-32 text-center flex flex-col items-center justify-center opacity-50">
+               <svg className="w-12 h-12 mb-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm0-14a2 2 0 100 4 2 2 0 000-4z" strokeWidth="2"/></svg>
+               <p className="text-slate-500 font-black uppercase tracking-widest">SIGNAL LOST: NO MODULES FOUND</p>
             </div>
           )}
 
@@ -183,34 +194,35 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
             
             return (
               <div key={zone} className="relative">
-                <div className={`sticky top-0 z-10 px-8 py-3 border-y border-slate-800/50 ${style.headerBg} backdrop-blur-xl flex justify-between items-center shadow-lg`}>
+                {/* STICKY HEADER */}
+                <div className={`sticky top-0 z-10 px-6 py-2 border-y border-slate-800/50 ${style.headerBg} backdrop-blur-md flex justify-between items-center`}>
                   <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${style.headerText}`}>{zone}</span>
-                  <span className={`text-[9px] font-bold ${style.headerText} opacity-40`}>{items.length} NODES</span>
+                  <span className={`text-[9px] font-bold ${style.headerText} opacity-60`}>{items.length} NODES</span>
                 </div>
 
-                <div className="p-3 space-y-1.5">
+                <div className="p-2 space-y-1">
                   {items.map((item) => (
                     <button
                       key={item.mod}
                       onClick={() => { onSelect(item.mode, item.mod); onClose(); }}
-                      className={`w-full text-left px-8 py-5 rounded-[24px] transition-all flex items-center justify-between group ${style.hoverBg} ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}
+                      className={`w-full text-left px-6 py-4 rounded-2xl transition-all flex items-center justify-between group ${style.hoverBg} ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}
                     >
-                      <div className="flex items-center gap-6">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 border-2 border-slate-800 bg-slate-900 group-hover:scale-110 ${style.iconBg}`}>
+                      <div className="flex items-center gap-5">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 border-2 border-slate-800 bg-slate-900 ${style.iconBg}`}>
                           <Icon name={item.icon} />
                         </div>
                         <div className="flex flex-col">
-                          <span className={`text-lg font-black uppercase tracking-widest transition-colors ${style.hoverText} ${theme === 'dark' ? 'text-slate-300' : 'text-slate-800'}`}>
+                          <span className={`text-sm font-black uppercase tracking-widest transition-colors ${style.hoverText} ${theme === 'dark' ? 'text-slate-300' : 'text-slate-800'}`}>
                             {item.label}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em] group-hover:text-slate-500 mt-0.5">
-                            PROTOCOL_{item.mode.slice(0, 3)}
+                          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] group-hover:text-slate-500">
+                            {item.mode} PROTOCOL
                           </span>
                         </div>
                       </div>
-                      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest transition-all translate-x-4 group-hover:translate-x-0">
-                        <span className={style.headerText}>ACTIVATE</span>
-                        <span className="text-xl">→</span>
+                      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-3 text-[9px] font-black uppercase tracking-widest transition-all translate-x-2 group-hover:translate-x-0">
+                        <span className={style.headerText}>INITIALIZE</span>
+                        <span className="text-lg leading-none">→</span>
                       </div>
                     </button>
                   ))}
@@ -221,14 +233,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
         </div>
 
         {/* FOOTER */}
-        <div className={`p-6 border-t border-slate-800/50 flex justify-between items-center bg-slate-950/80 shrink-0`}>
-           <div className="flex gap-8 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-              <span>NAVIGATE: ↑↓</span>
-              <span>SELECT: ENTER</span>
+        <div className={`p-4 border-t border-slate-800/50 flex justify-between items-center bg-slate-950/80 shrink-0`}>
+           <div className="flex gap-6 text-[9px] font-black text-slate-600 uppercase tracking-widest">
+              <span>↑↓ NAVIGATE</span>
+              <span>ENTER SELECT</span>
+              <span>ESC CLOSE</span>
            </div>
-           <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">SYSTEM_ARMED</span>
+           <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">SYSTEM SYNCHRONIZED</span>
            </div>
         </div>
       </div>
