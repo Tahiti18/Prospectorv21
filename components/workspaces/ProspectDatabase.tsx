@@ -18,68 +18,49 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showHyperLaunch, setShowHyperLaunch] = useState(false);
   
-  // Advanced Grouping & Isolation State
+  // Persistent Multi-Vector Isolation State
   const [grouping, setGrouping] = useState<GroupBy>('none');
-  const [subFilterValue, setSubFilterValue] = useState<string>('ALL');
+  const [cityFilter, setCityFilter] = useState<string>('ALL');
+  const [nicheFilter, setNicheFilter] = useState<string>('ALL');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * ATOMIC PARSING: 
-   * Extracts the primary name from strings like "Dubai, UAE" or "New York, NY"
-   * ensures the dropdown is clean and unified.
+   * Helper: Atomic Extraction
+   * Ensures data consistency for dropdowns and headers
    */
-  const getAtomicValue = (val: any, mode: GroupBy): string => {
+  const getAtomicValue = (val: any, mode: 'city' | 'niche'): string => {
     if (typeof val !== 'string' || val.trim() === '') return 'UNCLASSIFIED';
-    if (mode === 'city') {
-        // Take everything before the first comma for clean city names
-        return val.split(',')[0].trim().toUpperCase();
-    }
+    if (mode === 'city') return val.split(',')[0].trim().toUpperCase();
     return val.trim().toUpperCase();
   };
 
-  // 1. DYNAMIC VALUE EXTRACTION: Finds every unique city/niche in the 612 records
-  const representedValues = useMemo(() => {
-    if (grouping === 'none') return [];
-    const values = new Set<string>();
-    
-    leads.forEach(l => {
-        const rawVal = l[grouping as keyof Lead];
-        const atomicVal = getAtomicValue(rawVal, grouping);
-        if (atomicVal !== 'UNCLASSIFIED') {
-            values.add(atomicVal);
-        }
+  // 1. UNIQUE VALUE REGISTRY: Scans database for all available cities and niches
+  const uniqueCities = useMemo(() => {
+    const set = new Set<string>();
+    leads.forEach(l => set.add(getAtomicValue(l.city, 'city')));
+    return Array.from(set).sort();
+  }, [leads]);
+
+  const uniqueNiches = useMemo(() => {
+    const set = new Set<string>();
+    leads.forEach(l => set.add(getAtomicValue(l.niche, 'niche')));
+    return Array.from(set).sort();
+  }, [leads]);
+
+  // 2. STRIKE-READY FILTER CHAIN: Cumulative filtering
+  const filteredLeads = useMemo(() => {
+    return leads.filter(l => {
+      const matchStatus = statusFilter === 'ALL' || (l.outreachStatus ?? l.status ?? 'cold') === statusFilter;
+      const matchCity = cityFilter === 'ALL' || getAtomicValue(l.city, 'city') === cityFilter;
+      const matchNiche = nicheFilter === 'ALL' || getAtomicValue(l.niche, 'niche') === nicheFilter;
+      return matchStatus && matchCity && matchNiche;
     });
-    return Array.from(values).sort();
-  }, [leads, grouping]);
+  }, [leads, statusFilter, cityFilter, nicheFilter]);
 
-  // 2. FULL-LEDGER SUB-TOTAL: Counts matching leads in the ENTIRE 612 database
-  const subTotalCount = useMemo(() => {
-    if (grouping === 'none' || subFilterValue === 'ALL') return 0;
-    return leads.filter(l => getAtomicValue(l[grouping as keyof Lead], grouping) === subFilterValue).length;
-  }, [leads, grouping, subFilterValue]);
-
-  // 3. Initial Filtering (Pipeline Status)
-  const statusFilteredLeads = useMemo(() => {
-    let filtered = leads;
-    if (statusFilter !== 'ALL') {
-        filtered = leads.filter(l => (l.outreachStatus ?? l.status ?? 'cold') === statusFilter);
-    }
-    return filtered;
-  }, [leads, statusFilter]);
-
-  // 4. SECONDARY ISOLATION: Filters the list down to the specific chosen City or Niche
-  const isolatedLeads = useMemo(() => {
-    if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
-    return statusFilteredLeads.filter(l => {
-        const rawVal = l[grouping as keyof Lead];
-        return getAtomicValue(rawVal, grouping) === subFilterValue;
-    });
-  }, [statusFilteredLeads, grouping, subFilterValue]);
-
-  // 5. SORTING ENGINE: Reliable numerical/alphabetical sorting
+  // 3. SORTING ENGINE
   const sortedLeads = useMemo(() => {
-    return [...isolatedLeads].sort((a, b) => {
+    return [...filteredLeads].sort((a, b) => {
       // @ts-ignore
       let aVal = a[sortConfig.key];
       // @ts-ignore
@@ -95,37 +76,27 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       const comparison = aStr > bStr ? 1 : -1;
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [isolatedLeads, sortConfig]);
+  }, [filteredLeads, sortConfig]);
 
-  // 6. VIEW COMPILER: Decides if we show a flat list or grouped headers
+  // 4. VIEW COMPILER: Decides grouping headers
   const groupedData = useMemo(() => {
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
+    if (grouping === 'none') return { 'MASTER DATABASE': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
       const rawVal = lead[grouping as keyof Lead];
-      const displayKey = getAtomicValue(rawVal, grouping);
+      const displayKey = getAtomicValue(rawVal, grouping as 'city' | 'niche');
       if (!groups[displayKey]) groups[displayKey] = [];
       groups[displayKey].push(lead);
     });
     return groups;
-  }, [sortedLeads, grouping, subFilterValue]);
+  }, [sortedLeads, grouping]);
 
   const handleSort = (key: keyof Lead) => {
     setSortConfig(current => ({
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
-  };
-
-  const handleGroupingChange = (newGrouping: GroupBy) => {
-      if (grouping === newGrouping) {
-          setGrouping('none');
-          setSubFilterValue('ALL');
-      } else {
-          setGrouping(newGrouping);
-          setSubFilterValue('ALL'); 
-      }
   };
 
   const toggleSelectAll = () => {
@@ -175,7 +146,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         }
     };
     reader.readAsText(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const SortIcon = ({ col }: { col: keyof Lead }) => {
@@ -190,14 +160,14 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          {/* DUAL-VECTOR COUNTER HEADER: Total Repo vs Isolated City Scope */}
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex items-center gap-3">
+          {/* PRECISION COUNTER HEADER */}
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex flex-wrap items-center gap-3">
             MASTER REPOSITORY // {leads.length} RECORDS
-            {subFilterValue !== 'ALL' && grouping !== 'none' && (
+            {(cityFilter !== 'ALL' || nicheFilter !== 'ALL' || statusFilter !== 'ALL') && (
               <span className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
                 <span className="text-slate-800">|</span>
-                <span className="text-emerald-500 bg-emerald-500/5 px-3 py-0.5 rounded border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                   {subFilterValue}: {subTotalCount} TOTAL TARGETS
+                <span className="text-emerald-500 bg-emerald-500/5 px-3 py-0.5 rounded border border-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                   ISOLATED STRIKE ZONE: {filteredLeads.length} TOTAL TARGETS
                 </span>
               </span>
             )}
@@ -205,33 +175,48 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* ORGANIZE & ISOLATE HUB */}
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex items-center shadow-2xl gap-8">
-             <div className={`flex items-center gap-3 ${grouping !== 'none' ? 'border-r border-slate-800 pr-8' : ''}`}>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE BY:</span>
-                <div className="flex gap-1">
-                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
-                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
-                </div>
+          {/* ISOLATION MATRIX BAR */}
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex flex-wrap items-center shadow-2xl gap-8">
+             {/* ISOLATE CITY */}
+             <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE CITY</span>
+                <select 
+                    value={cityFilter}
+                    onChange={(e) => setCityFilter(e.target.value)}
+                    className="bg-[#020617] border-2 border-slate-800 rounded-xl px-4 py-1.5 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[160px] shadow-inner"
+                >
+                    <option value="ALL">ALL CITIES</option>
+                    {uniqueCities.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
              </div>
 
-             {/* DYNAMIC ISOLATION DROPDOWN */}
-             {grouping !== 'none' && (
-                <div className="flex flex-col animate-in slide-in-from-left-4 duration-300">
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse italic">ISOLATE TARGETS</span>
-                    <select 
-                        value={subFilterValue}
-                        onChange={(e) => setSubFilterValue(e.target.value)}
-                        className="bg-[#020617] border-2 border-emerald-500/30 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] shadow-inner"
-                    >
-                        <option value="ALL">VIEW ALL REPRESENTED {grouping.toUpperCase()}S</option>
-                        {representedValues.map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
+             {/* ISOLATE NICHE */}
+             <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE NICHE</span>
+                <select 
+                    value={nicheFilter}
+                    onChange={(e) => setNicheFilter(e.target.value)}
+                    className="bg-[#020617] border-2 border-slate-800 rounded-xl px-4 py-1.5 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[160px] shadow-inner"
+                >
+                    <option value="ALL">ALL NICHES</option>
+                    {uniqueNiches.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+             </div>
+
+             <div className="h-10 w-px bg-slate-800"></div>
+
+             {/* ORGANIZE BUTTONS */}
+             <div className="flex flex-col">
+                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse italic">ORGANIZE VIEW</span>
+                <div className="flex gap-1">
+                    <button onClick={() => setGrouping('none')} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>FLAT</button>
+                    <button onClick={() => setGrouping('city')} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
+                    <button onClick={() => setGrouping('niche')} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
                 </div>
-             )}
+             </div>
           </div>
 
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex items-center shadow-2xl">
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-4 flex items-center shadow-2xl h-[64px]">
              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-3">PIPELINE:</span>
              <select 
                value={statusFilter}
@@ -243,8 +228,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           </div>
 
           {selectedIds.size > 0 && (
-             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 border-b-4 border-emerald-800">
-               LAUNCH CAMPAIGN ({selectedIds.size})
+             <button onClick={() => setShowHyperLaunch(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 border-b-4 border-emerald-800 h-[64px]">
+               LAUNCH SWARM ({selectedIds.size})
              </button>
           )}
         </div>
@@ -294,14 +279,14 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
                   {/* DYNAMIC GROUP HEADERS */}
-                  {grouping !== 'none' && subFilterValue === 'ALL' && (
+                  {grouping !== 'none' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-8 py-4">
                           <div className="flex items-center gap-4">
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">{groupName}</span>
                              <div className="h-px bg-slate-800 flex-1 ml-4 opacity-30"></div>
-                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES</span>
+                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} SEGMENT TARGETS</span>
                           </div>
                        </td>
                     </tr>
@@ -323,6 +308,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                             <span onClick={() => onInspect(lead.id)} className="text-sm font-bold text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors cursor-pointer">{lead.businessName}</span>
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest bg-slate-950 px-2 py-0.5 rounded">{lead.city}</span>
+                              <span className="text-[9px] font-black text-slate-700 uppercase tracking-widest">{lead.niche}</span>
                             </div>
                           </div>
                         </td>
@@ -345,7 +331,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-32 text-center text-slate-700 italic uppercase tracking-widest text-xs">
-                        TARGET SEGMENT EMPTY. CHECK FILTERS.
+                        NO ENTITIES MATCH THIS FILTER COMBINATION.
                     </td>
                 </tr>
               )}
