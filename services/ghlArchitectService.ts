@@ -20,6 +20,13 @@ INDIGO GHL MASTER KB v1.0:
 - Constraints: Custom field keys must be lowercase_with_underscores and unique.
 `;
 
+const LAYMAN_KNOWLEDGE_BASE = `
+GHL STRATEGIC IMPACT KB v1.0:
+- Goal: Bottom-line revenue and operational freedom.
+- Tools: Smart follow-ups, unified inbox, reputation management, automated booking, VIP nurture sequences.
+- Outcomes: Zero missed leads, 2x conversion lift, 40+ hours saved per month, elite brand authority.
+`;
+
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
   const keys = getStoredKeys();
   const apiKey = keys.openRouter || process.env.API_KEY;
@@ -133,6 +140,92 @@ export const executeNeuralBoardroom = async (
 
     updateUI();
     return finalResult;
+
+  } catch (error: any) {
+    steps.forEach(s => { if (s.status === 'THINKING') s.status = 'FAILED'; });
+    updateUI();
+    throw error;
+  }
+};
+
+export const executeGrowthBoardroom = async (
+  lead: Lead,
+  rounds: number,
+  onUpdate: (steps: BoardroomStep[]) => void
+): Promise<string> => {
+  const dossier = dossierStorage.getByLead(lead.id);
+  if (!dossier) throw new Error("Strategic Manifest Required. Run Campaign Forge First.");
+
+  const context = JSON.stringify(dossier.data);
+  let debateHistory = "";
+
+  const steps: BoardroomStep[] = [
+    { agentName: 'THE VISIONARY', role: 'Brand & Experience Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'PROFIT HACKER', role: 'Revenue Optimization Expert', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'OPS MASTER', role: 'Efficiency Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
+    { agentName: 'MD SYNTHESIS', role: 'Managing Director', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+  ];
+
+  const updateUI = () => onUpdate([...steps]);
+  updateUI();
+
+  const LAYMAN_PROTOCOL = `
+    LAYMAN STRATEGY PROTOCOL:
+    - NO CODE REFERENCES.
+    - NO API TALK.
+    - FOCUS ON BUSINESS VALUE, CUSTOMER JOURNEY, AND REVENUE.
+    - USE ACCESSIBLE, POWERFUL ENGLISH.
+    - KB: ${LAYMAN_KNOWLEDGE_BASE}
+  `;
+
+  try {
+    for (let r = 1; r <= rounds; r++) {
+      // 1. Visionary
+      steps[0].currentRound = r; steps[0].status = 'THINKING'; updateUI();
+      const visionPrompt = `ROUND ${r}: Review ${lead.businessName} context: ${context}. ${debateHistory ? `Previous debate: ${debateHistory}` : ''}. Propose the high-level brand transformation vision. ${LAYMAN_PROTOCOL}`;
+      const visionOut = await callAgent(visionPrompt, "You are THE VISIONARY. Focus on authority and client experience.", steps[0].modelId);
+      debateHistory += `\nVISIONARY (R${r}): ${visionOut}`;
+      steps[0].output = visionOut; steps[0].status = 'COMPLETED'; updateUI();
+
+      // 2. Profit Hacker
+      steps[1].currentRound = r; steps[1].status = 'THINKING'; updateUI();
+      const profitPrompt = `ROUND ${r}: Based on Vision: ${visionOut}. How do we maximize pure revenue and ROI? ${LAYMAN_PROTOCOL}`;
+      const profitOut = await callAgent(profitPrompt, "You are THE PROFIT HACKER. Focus on conversion and money.", steps[1].modelId);
+      debateHistory += `\nPROFIT HACKER (R${r}): ${profitOut}`;
+      steps[1].output = profitOut; steps[1].status = 'COMPLETED'; updateUI();
+
+      // 3. Ops Master
+      steps[2].currentRound = r; steps[2].status = 'THINKING'; updateUI();
+      const opsPrompt = `ROUND ${r}: Vision: ${visionOut}, Profit: ${profitOut}. How do we automate this to save 40+ hours/month? ${LAYMAN_PROTOCOL}`;
+      const opsOut = await callAgent(opsPrompt, "You are THE OPS MASTER. Focus on time and efficiency.", steps[2].modelId);
+      debateHistory += `\nOPS MASTER (R${r}): ${opsOut}`;
+      steps[2].output = opsOut; steps[2].status = 'COMPLETED'; updateUI();
+      
+      if (r < rounds) {
+         steps.forEach(s => { if (s.agentName !== 'MD SYNTHESIS') s.status = 'WAITING'; });
+         updateUI();
+      }
+    }
+
+    // 4. Final Synthesis
+    steps[3].status = 'THINKING'; updateUI();
+    const finalPrompt = `
+      DEBATE HISTORY: ${debateHistory}
+      TASK: Synthesize the DEFINITIVE BUSINESS TRANSFORMATION PLAN for ${lead.businessName} in UI_BLOCKS format.
+      
+      CRITICAL: Focus on:
+      - The Problem (Business Deficiencies)
+      - The Solution (Business Enhancements via GHL)
+      - The Outcomes (Time Saved, Revenue Lift, Scale)
+      
+      Structure: { "format": "ui_blocks", "title": "BUSINESS GROWTH PLAN", "sections": [...] }
+    `;
+    const finalOut = await callAgent(finalPrompt, "You are the Managing Director. Provide the final executive plan.", steps[3].modelId);
+    steps[3].output = "Plan synthesized successfully.";
+    steps[3].status = 'COMPLETED';
+    updateUI();
+
+    return finalOut;
 
   } catch (error: any) {
     steps.forEach(s => { if (s.status === 'THINKING') s.status = 'FAILED'; });

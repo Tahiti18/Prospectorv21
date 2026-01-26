@@ -64,6 +64,7 @@ export type SubModule =
   | 'DASHBOARD'
   | 'ENTERPRISE_DASHBOARD'
   | 'GHL_ARCHITECT'
+  | 'GHL_GROWTH_BOARDROOM'
   | 'EXECUTIVE_DOSSIER';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';

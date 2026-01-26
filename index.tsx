@@ -61,6 +61,7 @@ import { TranslatorNode } from './components/workspaces/TranslatorNode';
 import { VideoAudit } from './components/workspaces/VideoAudit';
 import { ExecutiveDossier } from './components/workspaces/ExecutiveDossier';
 import { GHLArchitect } from './components/workspaces/GHLArchitect';
+import { GHLGrowthBoardroom } from './components/workspaces/GHLGrowthBoardroom';
 
 const App = () => {
   const [activeMode, setActiveMode] = useState<MainMode>('RESEARCH');
@@ -156,6 +157,7 @@ const App = () => {
       case 'ELEVATOR_PITCH': return <PitchGen lead={lockedLead} />;
       case 'FUNNEL_MAP': return <FunnelMap lead={lockedLead} />;
       case 'GHL_ARCHITECT': return <GHLArchitect lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
+      case 'GHL_GROWTH_BOARDROOM': return <GHLGrowthBoardroom lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
 
       // ADMIN
       case 'AGENCY_PLAYBOOK': return <ScoringRubricView />;

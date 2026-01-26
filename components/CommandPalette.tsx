@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MainMode, SubModule } from '../types';
 
@@ -99,6 +98,7 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
 
   // --- OUTREACH ZONE ---
   { mode: 'OUTREACH', mod: 'CAMPAIGN_ORCHESTRATOR', label: 'CAMPAIGN ARCHITECT', zone: 'OUTREACH ZONE', icon: 'manual' },
+  { mode: 'OUTREACH', mod: 'GHL_GROWTH_BOARDROOM', label: 'GROWTH BOARDROOM', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'PROPOSALS', label: 'PROPOSAL BUILDER', zone: 'OUTREACH ZONE', icon: 'file' },
   { mode: 'OUTREACH', mod: 'ROI_CALCULATOR', label: 'VALUE PROJECTOR', zone: 'OUTREACH ZONE', icon: 'calc' },
   { mode: 'OUTREACH', mod: 'SEQUENCER', label: 'ENGAGEMENT SEQUENCE', zone: 'OUTREACH ZONE', icon: 'architect' },
