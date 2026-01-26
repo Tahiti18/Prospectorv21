@@ -14,7 +14,6 @@ export interface BoardroomStep {
   currentRound?: number;
 }
 
-// OpenRouter Call Helper
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
   const keys = getStoredKeys();
   const apiKey = keys.openRouter || process.env.API_KEY;
@@ -35,7 +34,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
         { role: "system", content: system },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7
+      temperature: 0.8
     })
   });
 
@@ -59,22 +58,28 @@ export const executeNeuralBoardroom = async (
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'ARCHITECT', role: 'Technical Design', modelLabel: 'Gemini 2.0 Flash', modelId: 'google/gemini-2.0-flash-001', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Logical Critique', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'ARCHITECT', role: 'System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Technical Red-Team', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
     { agentName: 'REFINER', role: 'Strategic Polish', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Final Synthesis', modelLabel: 'ChatGPT (4o-mini)', modelId: 'openai/gpt-4o-mini', status: 'WAITING', currentRound: 1 }
+    { agentName: 'EXECUTIVE', role: 'Executive Synthesis', modelLabel: 'ChatGPT (4o-mini)', modelId: 'openai/gpt-4o-mini', status: 'WAITING', currentRound: 1 }
   ];
 
   onUpdate([...steps]);
 
-  // --- PHASE 1: INITIAL ARCHITECTURE ---
+  // --- PHASE 1: INITIAL ARCHITECTURE (G3 FLASH) ---
   steps[0].status = 'THINKING';
   onUpdate([...steps]);
-  pushLog(`BOARDROOM: Architect Node (Gemini) drafting initial GHL framework for ${lead.businessName}...`);
   
   const initialDraft = await callAgent(
-    `FOUNDATION DATA: ${context}\n\nTask: Draft a technical GHL implementation plan including specific Workflow triggers, SmartList logic, and AI Bot prompts.`,
-    "You are the GHL Solution Architect. Output technical, specific GHL instructions.",
+    `FOUNDATION DATA: ${context}\n\nTask: Draft a massive, exhaustive GHL technical implementation plan. 
+    REQUIRED DEPTH: 
+    1. Workflow Triggers: List specific GHL triggers (e.g., 'Contact Tag Added', 'Form Submitted').
+    2. Automation Logic: Detailed If/Then branching for speed-to-lead.
+    3. Custom Data Schema: Exact Custom Fields and Custom Values names (e.g., {{contact.ai_sentiment}}).
+    4. Pipeline Stages: 7-stage high-ticket pipeline architecture.
+    5. AI Conversation Prompts: The specific system prompt for the GHL Conversation AI bot.
+    BE EXTREMELY VERBOSE. Output at least 1500 words of technical directives.`,
+    "You are the Apex GHL Solutions Architect. You speak in technical, implementation-ready terms. No fluff, only high-fidelity GoHighLevel settings.",
     steps[0].modelId
   );
   
@@ -85,15 +90,20 @@ export const executeNeuralBoardroom = async (
 
   // --- PHASE 2: ADVERSARIAL DEBATE LOOP ---
   for (let r = 1; r <= rounds; r++) {
-    // 2a. AUDITOR'S TURN
+    // 2a. AUDITOR'S TURN (LLAMA 70B)
     steps[1].status = 'THINKING';
     steps[1].currentRound = r;
     onUpdate([...steps]);
-    pushLog(`BOARDROOM: Round ${r}/${rounds} - Auditor Node (Llama) analyzing risks...`);
 
     const auditOutput = await callAgent(
-      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Find 3 flaws in the current plan and identify 2 missed revenue recovery opportunities. If this is round ${r} of ${rounds}, be increasingly critical.`,
-      "You are a rigorous GHL Auditor. Be blunt. Find logical gaps and technical impossibilities.",
+      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Audit this GHL plan for logic failures. 
+      CRITICAL FOCUS: 
+      - Identify potential automation loops.
+      - Check for missing Custom Values that would break the Snapshot.
+      - Critique the AI Bot prompt for "hallucination risks".
+      - Find 3 revenue leakage points in the follow-up cadence.
+      If this is round ${r} of ${rounds}, be increasingly aggressive and technical.`,
+      "You are a Senior GHL Red-Team Auditor. Your job is to find why this plan will fail in a real sub-account. Be harsh, technical, and precise.",
       steps[1].modelId
     );
 
@@ -102,15 +112,19 @@ export const executeNeuralBoardroom = async (
     steps[1].output = auditOutput;
     onUpdate([...steps]);
 
-    // 2b. REFINER'S TURN
+    // 2b. REFINER'S TURN (MISTRAL LARGE)
     steps[2].status = 'THINKING';
     steps[2].currentRound = r;
     onUpdate([...steps]);
-    pushLog(`BOARDROOM: Round ${r}/${rounds} - Refiner Node (Mistral) updating strategy...`);
 
     const refinerOutput = await callAgent(
-      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Refine the architecture based on the latest audit. Fix the flaws mentioned and improve the ROI projections.`,
-      "You are a Senior Agency Strategist. Refine technical plans for maximum client ROI and conversion speed.",
+      `CURRENT DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: Refine and rebuild the architecture based on the Auditor's critique. 
+      IMPROVEMENTS: 
+      - Solidify the "Speed-to-Lead" SMS triggers.
+      - Inject advanced "Appointment Booking" psychological triggers into the AI scripts.
+      - Finalize the GHL SmartList filters for "High-Intent" daily follow-up.
+      - Optimize the overall ROI through better conversion geometry.`,
+      "You are the Strategic Growth Refiner. You take raw technical plans and turn them into aggressive, ROI-positive conversion machines.",
       steps[2].modelId
     );
 
@@ -119,25 +133,25 @@ export const executeNeuralBoardroom = async (
     steps[2].output = refinerOutput;
     onUpdate([...steps]);
     
-    // Brief delay to prevent rate limit and show visual step
-    await new Promise(res => setTimeout(res, 500));
+    await new Promise(res => setTimeout(res, 300));
   }
 
-  // --- PHASE 3: EXECUTIVE SYNTHESIS ---
+  // --- PHASE 3: EXECUTIVE SYNTHESIS (CHATGPT) ---
   steps[3].status = 'THINKING';
   onUpdate([...steps]);
-  pushLog(`BOARDROOM: Executive Node (ChatGPT) distilling ${rounds} rounds of debate into final blueprint...`);
 
   const finalPlan = await callAgent(
-    `FULL DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: You have seen ${rounds} rounds of debate. Synthesize the absolute best technical GHL Master Blueprint into the UI_BLOCKS JSON format. No markdown, just raw JSON.`,
-    `You are the Executive Synthesizer. Output EXACT JSON using format: { "format": "ui_blocks", "title": "GHL MASTER BLUEPRINT", "sections": [ { "heading": "NAME", "body": [ { "type": "p", "content": "..." } ] } ] }`,
+    `FULL DEBATE TRANSCRIPT:\n${debateTranscript}\n\nTask: You are the final judge. You have seen ${rounds} rounds of adversarial technical debate. 
+    Synthesize the absolute master GHL Implementation Blueprint into the UI_BLOCKS JSON format. 
+    REQUIREMENT: The response MUST be massive. Ensure every section from the debate is condensed but technical depth is preserved.
+    Output EXACT raw JSON.`,
+    `You are the Executive Synthesizer. Output EXACT JSON using format: { "format": "ui_blocks", "title": "GHL MASTER BLUEPRINT", "sections": [ { "heading": "NAME", "body": [ { "type": "hero", "content": "..." }, { "type": "p", "content": "..." }, { "type": "bullets", "content": ["..."] } ] } ] }`,
     steps[3].modelId
   );
 
   steps[3].status = 'COMPLETED';
   steps[3].output = finalPlan;
   onUpdate([...steps]);
-  pushLog("BOARDROOM: Consensus reached. Finalized GHL Blueprint produced.");
 
   return finalPlan;
 };
