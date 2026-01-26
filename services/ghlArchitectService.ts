@@ -12,22 +12,25 @@ export interface BoardroomStep {
   currentRound?: number;
 }
 
-const GHL_FULL_SPEC = `
-GOHIGHLEVEL OPERATIONAL SPECIFICATION:
-1. AI EMPLOYEE SUITE: 
-   - Voice AI (Browser-based receptionist/qualifier), Conversation AI (Natural chat on Web/SMS/WhatsApp), Reviews AI (Sentiment responding), Funnel AI, Content AI (Copy/Image synthesis), Workflow AI.
-2. OMNICHANNEL OUTREACH: 
-   - LC Email/Phone (Native), SMS/MMS, missed-call-text-back, power dialers, call dispositions as triggers.
-3. CONVERSION INFRASTRUCTURE: 
-   - Funnel/Site builder, Surveys/Forms (with custom field mapping), Round-robin calendars, Team distribution.
-4. CRM & PIPELINE OPS: 
-   - Contact record (System of Truth), Multi-stage pipelines (SLA-driven), Tasks/Notifications, Custom Objects.
-5. AUTOMATION (WORKFLOWS): 
-   - Logic branching, Webhooks (OAuth V2), Wait steps, Marketplace extensions.
-6. REPUTATION & SOCIAL: 
-   - GBP/LSA integration, guided review wizards, Social Planner (evergreen scheduling).
-7. SCALE & MONETIZATION: 
-   - SaaS Mode (White-label, rebilling), Snapshots (Portable infrastructure templates), Marketplace commercialization.
+// THE DEFINITIVE GHL OPERATIONAL KNOWLEDGE BASE
+const GHL_MASTER_KB = `
+GOHIGHLEVEL (GHL) ARCHITECTURAL STANDARDS:
+1. AI EMPLOYEE SUITE:
+   - Voice AI: Real-time qualification, after-hours reception, browser-based voice widgets.
+   - Conversation AI: Context-aware multi-channel (Web, SMS, FB, IG, WhatsApp) dialogue.
+   - Reviews AI: Reputation velocity, automated sentiment-based responses, ranking protection.
+   - Content/Funnel AI: Rapid site generation, copy variants, Social Planner automation.
+2. OMNICHANNEL ENGINE:
+   - LC Phone/Email: Native 10DLC A2P compliance, Power Dialer, missed-call-text-back.
+   - CRM Core: Smart Lists, Custom Objects, API V2 (OAuth), Custom Fields mapping.
+3. CONVERSION INFRASTRUCTURE:
+   - Funnels/Sites: Membership portals, Client Portals, Global CSS branding.
+   - Calendars: Round-robin distribution, Team booking, Payment-gated appointments.
+4. AUTOMATION (WORKFLOWS):
+   - Logic Branching: Conditional wait steps, inbound/outbound webhooks, logic gates.
+   - Snapshots: Portable infrastructure templates for repeatability and scale.
+5. MONETIZATION:
+   - SaaS Mode: Pro-plan rebilling, White-label commercialization, Stripe integration.
 `;
 
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
@@ -37,7 +40,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
   if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 90000); 
+  const timeoutId = setTimeout(() => controller.abort(), 120000); // 2-min limit for deep synthesis
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -45,7 +48,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": "https://pomelli.agency",
-        "X-Title": "Prospector OS GHL Boardroom",
+        "X-Title": "Prospector OS Boardroom",
         "Content-Type": "application/json"
       },
       signal: controller.signal,
@@ -55,7 +58,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
           { role: "system", content: system },
           { role: "user", content: prompt }
         ],
-        temperature: 0.8,
+        temperature: 0.75,
         max_tokens: 4000
       })
     });
@@ -69,7 +72,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
     return text;
   } catch (e: any) {
     clearTimeout(timeoutId);
-    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Network saturation reached.");
+    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Cognitive load exceeded GHL processing limits.");
     throw e;
   }
 }
@@ -86,10 +89,10 @@ export const executeNeuralBoardroom = async (
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'ARCHITECT', role: 'GHL System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Technical Compliance Audit', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'ARCHITECT', role: 'Technical Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Risk & Compliance', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
     { agentName: 'REFINER', role: 'Strategic Hardening', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Master Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'EXECUTIVE', role: 'Final Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ];
 
   const updateUI = () => onUpdate([...steps]);
@@ -97,24 +100,22 @@ export const executeNeuralBoardroom = async (
 
   const CLEAN_SIGNAL_PROTOCOL = `
   STRICT OUTPUT PROTOCOL:
-  - NEVER USE ALL-CAPS FOR PARAGRAPHS OR LIST ITEMS.
-  - USE NORMAL SENTENCE CASE (Capitalize only the first letter).
-  - DO NOT USE MARKDOWN (NO ASTERISKS, NO HASHTAGS).
-  - USE ALL-CAPS FOR MAIN HEADINGS ONLY (E.G. TECHNICAL SCHEMATIC:).
-  - EXPAND DETAIL TO THE ABSOLUTE MAXIMUM. COVER EVERY MODULE: ${GHL_FULL_SPEC}
+  - NEVER USE ALL-CAPS FOR PARAGRAPHS OR BULLET POINTS. USE SENTENCE CASE.
+  - DO NOT USE MARKDOWN (NO ASTERISKS, NO HASHTAGS, NO BACKTICKS).
+  - ONLY HEADINGS CAN BE ALL-CAPS.
+  - EXPAND DETAIL TO THE MAX. BE EXHAUSTIVE, NOT REDUNDANT.
+  - REFERENCE GHL SPECIFICS: ${GHL_MASTER_KB}
   `;
 
   try {
     // --- PHASE 1: INITIAL ARCHITECT ---
     steps[0].status = 'THINKING';
     updateUI();
-    
     const initialDraft = await callAgent(
-      `CONTEXT: ${context}\n\nTask: Architect an EXHAUSTIVE GHL Technical Build for ${lead.businessName}. Include funnel mapping, AI stack usage, and workflow logic.\n${CLEAN_SIGNAL_PROTOCOL}`,
-      "You are the Apex GHL Architect. You have an exhaustive knowledge of HighLevel. You speak in implementation-ready sentence case.",
+      `CONTEXT: ${context}\n\nTask: Architect a massive GHL technical build for ${lead.businessName}.\n${CLEAN_SIGNAL_PROTOCOL}`,
+      "You are the Apex GHL Architect. You have total mastery of every sub-module and API endpoint. No markdown.",
       steps[0].modelId
     );
-    
     debateTranscript += `ARCHITECT DRAFT:\n${initialDraft}\n\n`;
     steps[0].output = initialDraft;
     steps[0].status = 'COMPLETED';
@@ -122,60 +123,74 @@ export const executeNeuralBoardroom = async (
 
     // --- PHASE 2: ADVERSARIAL LOOPS ---
     for (let r = 1; r <= rounds; r++) {
-      // AUDITOR
       steps[1].status = 'THINKING';
       steps[1].currentRound = r;
       updateUI();
-      try {
-        const auditOutput = await callAgent(
-          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Find critical failure points in this GHL plan. Check for API limits, compliance (10DLC), and friction in the lead journey.\n${CLEAN_SIGNAL_PROTOCOL}`,
-          "You are the Senior Technical Auditor. You are brutal and technically precise. No markdown. Use sentence case.",
-          steps[1].modelId
-        );
-        debateTranscript += `AUDIT ROUND ${r}:\n${auditOutput}\n\n`;
-        steps[1].output = auditOutput;
-        steps[1].status = 'COMPLETED';
-      } catch (err) {
-        steps[1].status = 'FAILED';
-        throw err;
-      }
+      const auditOutput = await callAgent(
+        `HISTORY:\n${debateTranscript}\n\nTask: Find failure points in this GHL plan. Audit A2P 10DLC, API V2 limits, and conversion friction.\n${CLEAN_SIGNAL_PROTOCOL}`,
+        "You are the Brutal GHL Auditor. You are technically precise. No markdown.",
+        steps[1].modelId
+      );
+      debateTranscript += `AUDIT ROUND ${r}:\n${auditOutput}\n\n`;
+      steps[1].output = auditOutput;
+      steps[1].status = 'COMPLETED';
       updateUI();
 
-      // REFINER
       steps[2].status = 'THINKING';
       steps[2].currentRound = r;
       updateUI();
-      try {
-        const refinerOutput = await callAgent(
-          `HISTORY:\n${debateTranscript}\n\nTask: Round ${r}/${rounds}. Solve all Auditor concerns. Inject high-level logic like Snapshots, Custom Objects, and White-label monetization paths.\n${CLEAN_SIGNAL_PROTOCOL}`,
-          "You are the Strategic Refiner. You solve all gaps. No markdown. Use sentence case.",
-          steps[2].modelId
-        );
-        debateTranscript += `REFINEMENT ROUND ${r}:\n${refinerOutput}\n\n`;
-        steps[2].output = refinerOutput;
-        steps[2].status = 'COMPLETED';
-      } catch (err) {
-        steps[2].status = 'FAILED';
-        throw err;
-      }
+      const refinerOutput = await callAgent(
+        `HISTORY:\n${debateTranscript}\n\nTask: Solve the Audit findings. Re-engineer the architecture for maximum agency ROI.\n${CLEAN_SIGNAL_PROTOCOL}`,
+        "You are the Strategic Refiner. You solve all gaps. No markdown.",
+        steps[2].modelId
+      );
+      debateTranscript += `REFINEMENT ROUND ${r}:\n${refinerOutput}\n\n`;
+      steps[2].output = refinerOutput;
+      steps[2].status = 'COMPLETED';
       updateUI();
     }
 
     // --- PHASE 3: EXECUTIVE SYNTHESIS ---
     steps[3].status = 'THINKING';
     updateUI();
+
     const finalPlan = await callAgent(
       `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the DEFINITIVE GHL MASTER BLUEPRINT.
-      REQUIRED STRUCTURE: Output EXACT raw JSON with NO markdown formatting inside strings.
-      IMPORTANT: Ensure all content and bullets use NORMAL SENTENCE CASE.
-      { "format": "ui_blocks", "title": "GHL MASTER ARCHITECTURE", "subtitle": "TECHNICAL IMPLEMENTATION GUIDE", "sections": [ { "heading": "CORE LOGIC", "body": [ { "type": "hero", "content": "Summary of vision" }, { "type": "p", "content": "Detailed para 1" }, { "type": "bullets", "content": ["Action 1", "Action 2"] } ] } ] }`,
-      "You are the Executive Vice President of GHL Implementation. You deliver exhaustive, JSON-formatted, implementation-ready plans. No markdown. Sentence case only.",
+      INSTRUCTIONS: Cover every area of the build (AI, Outreach, CRM, Funnels, SaaS). 
+      EXPAND DETAIL TO THE ABSOLUTE MAXIMUM. DO NOT SUMMARIZE.
+      OUTPUT EXACT RAW JSON ONLY. NO MARKDOWN BACKTICKS.
+      REQUIRED STRUCTURE:
+      {
+        "format": "ui_blocks",
+        "title": "GHL MASTER ARCHITECTURE",
+        "subtitle": "EXHAUSTIVE IMPLEMENTATION SCHEMATIC",
+        "sections": [
+          {
+            "heading": "SYSTEM INFRASTRUCTURE AND API ORCHESTRATION",
+            "body": [
+              { "type": "hero", "content": "The overall vision for the technical ecosystem." },
+              { "type": "p", "content": "Comprehensive paragraph about the base configuration." },
+              { "type": "bullets", "content": ["Technical step 1", "Technical step 2", "Technical step 3"] }
+            ]
+          },
+          {
+             "heading": "AI EMPLOYEE AND CONVERSATIONAL LAYER",
+             "body": [ { "type": "p", "content": "Exhaustive details on Voice AI and Chat AI config." }, { "type": "bullets", "content": ["AI config point 1", "AI config point 2"] } ]
+          },
+          {
+             "heading": "CRM PIPELINES AND REVENUE OPS",
+             "body": [ { "type": "p", "content": "Deep dive into custom fields, objects, and stages." } ]
+          }
+        ]
+      }`,
+      "You are the Executive Vice President of GHL Implementation. You deliver the most comprehensive, detailed blueprints in the agency world. No markdown. Sentence case body text.",
       steps[3].modelId
     );
 
     steps[3].status = 'COMPLETED';
     steps[3].output = finalPlan;
     updateUI();
+
     return finalPlan;
 
   } catch (error: any) {
