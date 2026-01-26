@@ -39,7 +39,6 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
     }
     setIsExecuting(true);
     setFinalResult(null);
-    // Reset outputs for new session
     setSteps(prev => prev.map(s => ({ ...s, output: "", status: 'WAITING', currentRound: 1 })));
     
     try {
@@ -61,19 +60,19 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
           <h1 className="text-5xl font-black italic text-white uppercase tracking-tighter leading-none">
             GROWTH <span className="text-indigo-500 not-italic">BOARDROOM</span>
           </h1>
-          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Layman Strategic Refinement v1.1 // {lead ? `Client: ${lead.businessName}` : 'AWAITING CLIENT SELECTION'}</p>
+          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Layman Strategic Refinement v1.2 // {lead ? `Client: ${lead.businessName}` : 'AWAITING CLIENT SELECTION'}</p>
         </div>
         
         <div className="flex items-center gap-6 bg-[#0b1021] p-6 rounded-[32px] border border-slate-800 shadow-2xl">
            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">DEBATE INTENSITY</span>
+              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">DEBATE ROUNDS</span>
               <select 
                 value={rounds}
                 onChange={(e) => setRounds(Number(e.target.value))}
                 disabled={isExecuting}
                 className="bg-black border border-slate-800 text-indigo-400 text-[10px] font-black uppercase px-6 py-3 rounded-2xl focus:border-indigo-500 cursor-pointer outline-none transition-all"
               >
-                {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} ROUNDS PER AGENT</option>)}
+                {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} CYCLES OF DEBATE</option>)}
               </select>
            </div>
            
@@ -106,27 +105,27 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {steps.slice(0, 2).map((step, i) => (
-          <div key={i} ref={cardRefs[i]}><AgentNode step={step} isLarge={true} /></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {steps.slice(0, 3).map((step, i) => (
+          <div key={i} ref={cardRefs[i]}><AgentNode step={step} isLarge={false} /></div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {steps.slice(2, 4).map((step, i) => (
-          <div key={i+2} ref={cardRefs[i+2]}><AgentNode step={step} isLarge={false} /></div>
-        ))}
+      <div className="flex justify-center">
+          <div ref={cardRefs[3]} className="max-w-xl w-full">
+            <AgentNode step={steps[3]} isLarge={false} />
+          </div>
       </div>
 
       {finalResult && (
         <div ref={finalRef} className="bg-white border-4 border-emerald-500/50 rounded-[64px] shadow-2xl p-20 animate-in slide-in-from-bottom-20 duration-1000">
            <div className="mb-16 border-b border-slate-200 pb-12 flex justify-between items-end">
              <div>
-                <h2 className="text-5xl font-black italic text-slate-900 uppercase tracking-tighter leading-none mb-4">DEFINITIVE GROWTH <span className="text-emerald-600">SCHEMATIC</span></h2>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">CLIENT TRANSFORMATION BLUEPRINT // {lead?.businessName}</p>
+                <h2 className="text-5xl font-black italic text-slate-900 uppercase tracking-tighter leading-none mb-4">DEFINITIVE TRANSFORMATION <span className="text-emerald-600">PLAN</span></h2>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">CLIENT STRATEGY MANIFEST // {lead?.businessName}</p>
              </div>
              <div className="text-right">
-                <span className="px-6 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">Certified McKinsey Standard</span>
+                <span className="px-6 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">Verified Layman Standards</span>
              </div>
            </div>
            <FormattedOutput content={finalResult} />
@@ -135,17 +134,17 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
               <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">💰</span>
                  <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Revenue Impact</h4>
-                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Projected +25-40% Yearly Lift</p>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Projected +30-50% Lift</p>
               </div>
               <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">⏱️</span>
                  <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Time Reclaimed</h4>
-                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">40+ Hours/Mo Salvaged</p>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">40+ Hours/Mo Saved</p>
               </div>
               <div className="bg-slate-50 p-10 rounded-[40px] text-center space-y-4 shadow-sm border border-slate-100">
                  <span className="text-4xl">📈</span>
-                 <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Scale Readiness</h4>
-                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Infrastructure Optimized</p>
+                 <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Scale Status</h4>
+                 <p className="text-[12px] text-slate-600 font-bold uppercase tracking-tight">Enterprise Optimal</p>
               </div>
            </div>
         </div>
@@ -164,7 +163,7 @@ const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean })
             isActive ? 'border-emerald-500 shadow-[0_0_80px_rgba(16,185,129,0.3)] scale-[1.01] z-10' : 
             isDone ? 'border-slate-800 opacity-100 shadow-xl' : 
             isFailed ? 'border-rose-500/50 opacity-100' : 'border-slate-900 opacity-20'
-          } ${isLarge ? 'min-h-[600px]' : 'min-h-[400px]'}`}>
+          } min-h-[450px]`}>
             
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-8xl font-black italic select-none">
               {step.agentName.slice(0, 1)}
@@ -177,20 +176,20 @@ const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean })
                </div>
                <div className="flex flex-col items-end gap-2">
                  <div className={`px-6 py-2 rounded-xl border-2 text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? 'bg-emerald-500 text-white border-emerald-400 animate-pulse' : 'bg-slate-950 text-slate-600 border-slate-800'}`}>{step.status}</div>
-                 {isActive && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">ROUND {step.currentRound}</span>}
+                 {(isActive || isDone) && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">ROUND {step.currentRound}</span>}
                </div>
             </div>
 
             <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {isActive && (
                    <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6">
-                     <div className="w-16 h-16 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin"></div>
+                     <div className="w-16 h-16 border-4 border-indigo-900 border-t-indigo-500 rounded-full animate-spin"></div>
                      <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.6em] animate-pulse italic">CULTIVATING STRATEGY...</p>
                    </div>
                 )}
                 <div className="h-full overflow-y-auto custom-scrollbar pr-4 space-y-6">
                     {step.output ? step.output.split('\n').filter(l => l.trim() !== '').map((line, idx) => {
-                       const isRoundHeader = line.includes('--- ROUND');
+                       const isRoundHeader = line.startsWith('ROUND');
                        return (
                          <div key={idx} className={isRoundHeader ? "mt-8 border-b border-slate-800 pb-2" : ""}>
                            <p className={`${isRoundHeader ? "text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em]" : "text-[14px] text-slate-300 leading-relaxed font-sans border-l-2 border-indigo-500/20 pl-6 italic"}`}>
