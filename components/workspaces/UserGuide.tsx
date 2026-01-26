@@ -100,8 +100,8 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* FILTER CONTROLS - LOWER Z-INDEX TO ENSURE OVERLAP UNDER NAV BAR */}
-      <div className="sticky top-0 z-30 bg-[#020617]/95 backdrop-blur-3xl p-6 border-2 border-slate-800 rounded-[32px] flex flex-col md:flex-row gap-6 items-center shadow-2xl">
+      {/* FILTER CONTROLS - OFFSET TOP TO PREVENT HEADER OVERLAP */}
+      <div className="sticky top-[-2rem] z-[30] bg-[#020617]/95 backdrop-blur-3xl p-6 border-2 border-slate-800 rounded-[32px] flex flex-col md:flex-row gap-6 items-center shadow-2xl">
          <div className="flex-1 w-full relative">
             <input 
               value={filter} onChange={(e) => setFilter(e.target.value)}
