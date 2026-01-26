@@ -20,16 +20,16 @@ const DossierBlockRenderer: React.FC<{ content: any }> = ({ content }) => {
 
   if (data && data.sections) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         {data.sections.map((section: any, sIdx: number) => (
-          <div key={sIdx} className="space-y-4 break-inside-avoid">
+          <div key={sIdx} className="space-y-3 break-inside-avoid">
             <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest border-b border-emerald-100 pb-1">{section.heading}</h4>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {section.body?.map((block: any, bIdx: number) => {
-                if (block.type === 'hero') return <div key={bIdx} className="p-6 bg-slate-50 border-l-4 border-emerald-500 rounded-r-xl text-slate-900 text-lg font-black italic uppercase tracking-tight">"{block.content}"</div>;
+                if (block.type === 'hero') return <div key={bIdx} className="p-5 bg-slate-50 border-l-4 border-emerald-500 rounded-r-xl text-slate-900 text-base font-black italic uppercase tracking-tight">"{block.content}"</div>;
                 if (block.type === 'p') return <p key={bIdx} className="text-xs text-slate-700 leading-relaxed font-serif italic border-l border-slate-100 pl-4 py-1">"{block.content}"</p>;
                 if (block.type === 'bullets') return (
-                  <ul key={bIdx} className="grid grid-cols-1 gap-2">
+                  <ul key={bIdx} className="space-y-2">
                     {block.content?.map((item: string, i: number) => (
                       <li key={i} className="bg-white border border-slate-100 p-3 rounded-xl flex items-start gap-3 text-[10px] font-bold text-slate-800 uppercase tracking-tight">
                         <span className="text-emerald-500">→</span> {item}
@@ -121,44 +121,58 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
             box-sizing: border-box !important;
           }
 
-          /* Force Cover to be its own page */
+          /* Force Cover to be exactly one page without spilling over */
           .dossier-cover {
             page-break-after: always !important;
-            height: 270mm !important; /* Nearly full A4 height to center content */
+            height: 260mm !important; 
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
+            margin: 0 !important;
           }
 
-          .section-break { 
-            page-break-before: always; 
-            margin-top: 20mm !important;
-          }
-          
           .break-inside-avoid { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important;
           }
 
-          h1 { font-size: 32pt !important; }
-          h2 { font-size: 18pt !important; }
-          p, li { font-size: 10pt !important; }
+          /* Reset all scaling fonts to standard point sizes for print */
+          h1 { font-size: 32pt !important; line-height: 1.1 !important; margin-bottom: 20pt !important; }
+          h2 { font-size: 14pt !important; line-height: 1.2 !important; margin-bottom: 15pt !important; }
+          h3 { font-size: 12pt !important; margin-bottom: 10pt !important; }
+          p, li { font-size: 10pt !important; line-height: 1.4 !important; }
           
+          /* Forced colors for Safari/Chrome */
           .bg-[#020617] { background: #020617 !important; -webkit-print-color-adjust: exact; color: white !important; }
-          .bg-emerald-600 { background: #059669 !important; -webkit-print-color-adjust: exact; }
+          .bg-emerald-600 { background: #059669 !important; -webkit-print-color-adjust: exact; color: white !important; }
           .bg-slate-50 { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
+          .bg-slate-950 { background: #020617 !important; -webkit-print-color-adjust: exact; }
           .text-white { color: white !important; }
           .text-emerald-500 { color: #10b981 !important; }
+          .text-emerald-400 { color: #34d399 !important; }
+          .text-slate-500 { color: #64748b !important; }
+          .text-slate-400 { color: #94a3b8 !important; }
           
-          .grid { display: block !important; }
-          .grid-cols-1, .grid-cols-2 { display: block !important; }
-          .grid > *, .grid-cols-2 > * { width: 100% !important; margin-bottom: 5mm !important; display: block !important; }
+          /* Neutralize Grids to prevent right-side cutoffs */
+          .grid { display: block !important; width: 100% !important; }
+          .grid-cols-1, .grid-cols-2, .grid-cols-3, .grid-cols-4, .lg\:grid-cols-12 { 
+            display: block !important; 
+            width: 100% !important; 
+          }
+          .grid > *, .grid-cols-2 > * { 
+            width: 100% !important; 
+            margin-bottom: 10pt !important; 
+            display: block !important;
+          }
+          
+          /* Max width resets */
+          .max-w-4xl, .max-w-6xl { max-width: 100% !important; }
         }
 
         .dossier-page { min-height: 100vh; padding: 4rem; position: relative; border-bottom: 1px solid #f1f5f9; }
       `}</style>
 
-      {/* PAGE 1: MASTER COVER (Hard Page Break) */}
+      {/* PAGE 1: MASTER COVER */}
       <section className="dossier-page dossier-cover flex flex-col justify-center items-center text-center bg-[#020617] text-white">
         <div className="absolute top-12 left-12 flex items-center gap-3">
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center font-black text-lg">P</div>
@@ -168,8 +182,8 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         <div className="space-y-12">
             <h4 className="text-[10px] font-black uppercase tracking-[0.6em] text-emerald-500">CONFIDENTIAL STRATEGIC ARCHITECTURE</h4>
             <div className="space-y-4">
-                <h1 className="text-7xl font-black italic uppercase tracking-tighter leading-tight text-white">{lead.businessName}</h1>
-                <p className="text-2xl font-serif italic text-slate-400 opacity-80">{lead.niche} // {lead.city.toUpperCase()}</p>
+                <h1 className="text-6xl font-black italic uppercase tracking-tighter leading-tight text-white">{lead.businessName}</h1>
+                <p className="text-xl font-serif italic text-slate-400 opacity-80">{lead.niche} // {lead.city.toUpperCase()}</p>
             </div>
             <div className="w-24 h-1 bg-emerald-600 mx-auto shadow-[0_0_20px_rgba(16,185,129,0.6)]"></div>
             <div className="space-y-1">
@@ -179,24 +193,24 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* SUBSEQUENT SECTIONS (Flow Naturally) */}
-      <div className="max-w-4xl mx-auto space-y-20 py-10">
+      {/* SUBSEQUENT SECTIONS (Flow Naturally with page-break protection) */}
+      <div className="max-w-4xl mx-auto space-y-16 py-12 px-6">
         
         {/* SECTION 01: THESIS */}
         <section className="dossier-page flex flex-col justify-center break-inside-avoid">
-          <h2 className="text-[10px] font-black uppercase tracking-widest mb-12 border-b-2 border-slate-900 pb-2 w-fit italic">01 // THE STRATEGIC THESIS</h2>
+          <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">01 // THE STRATEGIC THESIS</h2>
           <div className="space-y-8">
-              <p className="text-3xl font-serif italic leading-snug text-slate-900">
+              <p className="text-2xl font-serif italic leading-snug text-slate-900">
                  "{data.narrative}"
               </p>
-              <div className="grid grid-cols-1 gap-6 pt-10">
-                  <div className="p-8 bg-slate-50 border border-slate-100 rounded-3xl break-inside-avoid">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">IDENTIFIED MARKET GAP</span>
-                      <p className="text-lg font-bold text-slate-900 uppercase italic tracking-tight">{lead.socialGap}</p>
+              <div className="grid grid-cols-1 gap-6 pt-6">
+                  <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl break-inside-avoid">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">IDENTIFIED MARKET GAP</span>
+                      <p className="text-base font-bold text-slate-900 uppercase italic tracking-tight">{lead.socialGap}</p>
                   </div>
-                  <div className="p-8 bg-emerald-600 rounded-3xl text-white shadow-xl break-inside-avoid">
-                      <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest block mb-2">TRANSFORMATION VECTOR</span>
-                      <p className="text-lg font-bold uppercase italic tracking-tight">{lead.bestAngle}</p>
+                  <div className="p-6 bg-emerald-600 rounded-3xl text-white shadow-xl break-inside-avoid">
+                      <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest block mb-1">TRANSFORMATION VECTOR</span>
+                      <p className="text-base font-bold uppercase italic tracking-tight">{lead.bestAngle}</p>
                   </div>
               </div>
           </div>
@@ -205,23 +219,23 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 02: CAMPAIGN ARCHITECT */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
-          <div className="space-y-10">
-              <div className="p-10 bg-[#020617] text-white rounded-[40px] shadow-xl flex flex-col items-center text-center break-inside-avoid">
+          <div className="space-y-8">
+              <div className="p-8 bg-[#020617] text-white rounded-[40px] shadow-xl flex flex-col items-center text-center break-inside-avoid">
                   <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">VISUAL DNA & BRAND MOOD</span>
-                  <p className="text-2xl font-serif italic max-w-2xl leading-relaxed mb-8">"{data.visualDirection?.brandMood}"</p>
-                  <div className="flex gap-4">
+                  <p className="text-xl font-serif italic max-w-2xl leading-relaxed mb-6">"{data.visualDirection?.brandMood}"</p>
+                  <div className="flex gap-3">
                       {data.visualDirection?.colorPalette?.slice(0, 4).map((c: any, i: number) => (
-                          <div key={i} className="flex flex-col items-center gap-2">
-                              <div className="w-12 h-12 rounded-xl border-2 border-white/10" style={{ backgroundColor: c.hex }}></div>
-                              <span className="text-[8px] font-black opacity-50 uppercase tracking-tighter">{c.color}</span>
+                          <div key={i} className="flex flex-col items-center gap-1.5">
+                              <div className="w-10 h-10 rounded-xl border border-white/10" style={{ backgroundColor: c.hex }}></div>
+                              <span className="text-[7px] font-black opacity-50 uppercase tracking-tighter">{c.color}</span>
                           </div>
                       ))}
                   </div>
               </div>
-              <div className="grid grid-cols-1 gap-6">
-                  {data.contentPack?.map((item: any, i: number) => (
-                      <div key={i} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-4 break-inside-avoid">
-                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1 bg-white border border-emerald-100 rounded-lg w-fit">{item.platform} // {item.type}</span>
+              <div className="grid grid-cols-1 gap-4">
+                  {data.contentPack?.slice(0, 4).map((item: any, i: number) => (
+                      <div key={i} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-3 break-inside-avoid">
+                          <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest px-2 py-1 bg-white border border-emerald-100 rounded-lg w-fit">{item.platform} // {item.type}</span>
                           <p className="text-xs font-medium text-slate-800 italic leading-relaxed border-l-2 border-emerald-500 pl-4">"{item.caption}"</p>
                       </div>
                   ))}
@@ -232,12 +246,12 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 03: DECK ARCHITECT */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">03 // DECK ARCHITECT</h2>
-          <div className="space-y-6">
+          <div className="space-y-4">
              {data.presentation?.slides?.map((slide: any, idx: number) => (
-               <div key={idx} className="p-8 border border-slate-100 rounded-3xl bg-slate-50/50 break-inside-avoid">
-                  <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-2 block">SLIDE_0{idx+1} // {slide.category}</span>
-                  <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 mb-4 italic">{slide.title}</h3>
-                  <ul className="grid grid-cols-1 gap-2">
+               <div key={idx} className="p-6 border border-slate-100 rounded-3xl bg-slate-50/50 break-inside-avoid">
+                  <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1 block">SLIDE_0{idx+1} // {slide.category}</span>
+                  <h3 className="text-base font-black uppercase tracking-tight text-slate-900 mb-2 italic">{slide.title}</h3>
+                  <ul className="space-y-1.5">
                       {slide.bullets?.map((b: string, i: number) => (
                           <li key={i} className="text-[10px] font-bold text-slate-600 flex gap-2 italic">
                               <span className="text-emerald-500">•</span> {b}
@@ -252,16 +266,16 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 04: JOURNEY MAPPER */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">04 // JOURNEY MAPPER</h2>
-          <div className="space-y-6">
+          <div className="space-y-4">
               {data.funnel?.map((step: any, i: number) => (
-                  <div key={i} className="flex gap-6 break-inside-avoid py-2">
-                      <div className="w-10 h-10 rounded-xl border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-lg shrink-0">0{i+1}</div>
-                      <div className="flex-1 bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
-                          <div className="flex justify-between items-center mb-2">
-                              <h4 className="text-md font-black uppercase italic text-slate-900">{step.title}</h4>
-                              <span className="text-[8px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">GOAL: {step.conversionGoal}</span>
+                  <div key={i} className="flex gap-4 break-inside-avoid">
+                      <div className="w-8 h-8 rounded-lg border-2 border-slate-900 bg-white flex items-center justify-center font-black italic text-base shrink-0">0{i+1}</div>
+                      <div className="flex-1 bg-slate-50 border border-slate-100 p-5 rounded-2xl shadow-sm">
+                          <div className="flex justify-between items-center mb-1.5">
+                              <h4 className="text-sm font-black uppercase italic text-slate-900">{step.title}</h4>
+                              <span className="text-[7px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase">GOAL: {step.conversionGoal}</span>
                           </div>
-                          <p className="text-xs text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
+                          <p className="text-[10px] text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
                       </div>
                   </div>
               ))}
@@ -271,7 +285,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 05: PROPOSAL BUILDER */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">05 // PROPOSAL BUILDER</h2>
-          <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
+          <div className="bg-slate-50 border border-slate-100 p-8 rounded-[40px]">
               <DossierBlockRenderer content={data.proposal} />
           </div>
         </section>
@@ -279,15 +293,15 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 06: ENGAGEMENT SEQUENCE */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
-          <div className="space-y-4">
-             {data.outreach?.emailSequence?.map((email: any, i: number) => (
-               <div key={i} className="p-6 border border-slate-100 rounded-2xl space-y-3 bg-slate-50/30 break-inside-avoid">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DAY {email.day || (i*3+1)} // {email.purpose}</span>
+          <div className="space-y-3">
+             {data.outreach?.emailSequence?.slice(0, 3).map((email: any, i: number) => (
+               <div key={i} className="p-5 border border-slate-100 rounded-2xl space-y-2 bg-slate-50/30 break-inside-avoid">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">DAY {email.day || (i*3+1)} // {email.purpose}</span>
                   </div>
-                  <div className="space-y-2">
-                      <p className="text-[10px] font-black text-slate-900 uppercase italic"><span className="text-slate-400 not-italic">RE:</span> {email.subject}</p>
-                      <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l border-slate-200 pl-4">"{email.body}"</p>
+                  <div className="space-y-1.5">
+                      <p className="text-[9px] font-black text-slate-900 uppercase italic"><span className="text-slate-400 not-italic">RE:</span> {email.subject}</p>
+                      <p className="text-[9px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap font-serif border-l border-slate-200 pl-4">"{email.body}"</p>
                   </div>
                </div>
              ))}
@@ -297,16 +311,16 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         {/* SECTION 07: PITCH GENERATOR */}
         <section className="dossier-page break-inside-avoid">
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-10 border-b-2 border-slate-900 pb-2 w-fit italic">07 // PITCH GENERATOR</h2>
-          <div className="bg-slate-50 border border-slate-100 p-10 rounded-[40px]">
+          <div className="bg-slate-50 border border-slate-100 p-8 rounded-[40px]">
               <DossierBlockRenderer content={data.pitch} />
           </div>
         </section>
 
         {/* FOOTER */}
         <section className="dossier-page flex flex-col items-center justify-center text-center py-20 break-inside-avoid">
-               <div className="w-16 h-16 bg-[#020617] rounded-2xl flex items-center justify-center text-2xl mb-8">P</div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">END OF STRATEGIC MANIFEST</p>
-               <p className="text-[8px] font-mono text-slate-300 mt-4 uppercase tracking-widest italic">ARCHIVED SECURELY BY PROSPECTOR OS V3.2</p>
+               <div className="w-12 h-12 bg-[#020617] rounded-2xl flex items-center justify-center text-xl mb-6">P</div>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em]">END OF STRATEGIC MANIFEST</p>
+               <p className="text-[7px] font-mono text-slate-300 mt-2 uppercase tracking-widest italic">ARCHIVED SECURELY BY PROSPECTOR OS V3.2</p>
         </section>
       </div>
     </div>
