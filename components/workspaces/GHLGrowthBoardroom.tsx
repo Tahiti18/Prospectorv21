@@ -34,7 +34,7 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
 
   const handleLaunch = async () => {
     if (!lead) {
-      toast.error("Process Aborted: Client selection required.");
+      toast.error("Selection required to begin analysis.");
       return;
     }
     setIsExecuting(true);
@@ -63,7 +63,7 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em]">STRATEGIC REFINEMENT V1.6 // {lead ? `CLIENT: ${lead.businessName}` : 'AWAITING SELECTION'}</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-[#0b1021] p-6 rounded-[32px] border border-slate-800 shadow-2xl">
+        <div className="flex items-center gap-4 bg-[#0b1021] p-5 rounded-[28px] border border-slate-800 shadow-2xl">
            <div className="flex flex-col items-end">
               <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1.5">ANALYSIS DEPTH</span>
               <select 
@@ -93,19 +93,19 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
              <button 
                 onClick={handleLaunch} 
                 disabled={!lead}
-                className={`px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl transition-all border-b-4 ${
+                className={`px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl transition-all border-b-4 ${
                     lead ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800 active:scale-95' : 'bg-slate-800 text-slate-500 border-slate-900 cursor-not-allowed opacity-50'
                 }`}
              >
-               {lead ? 'CONVENE SESSION' : 'SELECT CLIENT'}
+               {lead ? 'CONVENE' : 'SELECT CLIENT'}
              </button>
            ) : (
-             <button onClick={() => { setFinalResult(null); setSteps(prev => prev.map(s => ({ ...s, output: "", status: 'WAITING' }))); }} className="px-8 py-3 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">NEW SESSION</button>
+             <button onClick={() => { setFinalResult(null); setSteps(prev => prev.map(s => ({ ...s, output: "", status: 'WAITING' }))); }} className="px-6 py-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">NEW SESSION</button>
            )}
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {steps.map((step, i) => (
           <div key={i} ref={cardRefs[i]} className="w-full">
             <AgentNode step={step} />
@@ -114,14 +114,14 @@ export const GHLGrowthBoardroom: React.FC<GHLGrowthBoardroomProps> = ({ lead, le
       </div>
 
       {finalResult && (
-        <div ref={finalRef} className="bg-white border-4 border-emerald-500/50 rounded-[64px] shadow-2xl p-20 animate-in slide-in-from-bottom-10 duration-1000">
-           <div className="mb-16 border-b border-slate-200 pb-12 flex justify-between items-end">
+        <div ref={finalRef} className="bg-white border-4 border-emerald-500/50 rounded-[56px] shadow-2xl p-16 animate-in slide-in-from-bottom-10 duration-1000">
+           <div className="mb-12 border-b border-slate-200 pb-8 flex justify-between items-end">
              <div>
-                <h2 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none mb-4">TRANSFORMATION <span className="text-emerald-600 italic">PLAN</span></h2>
+                <h2 className="text-4xl font-black uppercase tracking-tighter text-slate-900 leading-none mb-3">TRANSFORMATION <span className="text-emerald-600 italic">PLAN</span></h2>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">STRATEGIC MANIFEST // {lead?.businessName}</p>
              </div>
              <div className="text-right">
-                <span className="px-6 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[9px] font-black uppercase tracking-widest">Verified Business Standard</span>
+                <span className="px-5 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[9px] font-black uppercase tracking-widest">Verified Standard</span>
              </div>
            </div>
            <FormattedOutput content={finalResult} />
@@ -137,54 +137,45 @@ const AgentNode = ({ step }: { step: BoardroomStep }) => {
     const isFailed = step.status === 'FAILED';
 
     return (
-        <div className={`bg-[#0b1021] border-4 rounded-[48px] p-10 transition-all duration-700 relative overflow-hidden flex flex-col min-h-[400px] w-full ${
-            isActive ? 'border-emerald-500 shadow-[0_0_100px_rgba(16,185,129,0.15)] scale-[1.002] z-10' : 
+        <div className={`bg-[#0b1021] border-2 rounded-[32px] p-8 transition-all duration-700 relative overflow-hidden flex flex-col min-h-[300px] w-full ${
+            isActive ? 'border-emerald-500 shadow-[0_0_100px_rgba(16,185,129,0.1)] scale-[1.002] z-10' : 
             isDone ? 'border-slate-800 opacity-100 shadow-xl' : 
             isFailed ? 'border-rose-500/50 opacity-100' : 'border-slate-900 opacity-20'
           }`}>
             
-            <div className="absolute top-0 right-0 p-8 opacity-[0.02] text-[150px] font-black italic select-none pointer-events-none uppercase">
-              {step.agentName.slice(0, 1)}
-            </div>
-
-            <div className="flex justify-between items-start mb-10 relative z-10">
-               <div className="space-y-2">
-                  <h3 className="text-2xl font-black uppercase tracking-tighter text-white">{step.agentName}</h3>
+            <div className="flex justify-between items-start mb-6 relative z-10">
+               <div className="space-y-1">
+                  <h3 className="text-xl font-black uppercase tracking-tighter text-white">{step.agentName}</h3>
                   <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.4em] italic">{step.role}</p>
                </div>
                <div className="flex flex-col items-end gap-2">
-                 <div className={`px-6 py-2 rounded-xl border-2 text-[9px] font-black uppercase tracking-[0.2em] ${isActive ? 'bg-emerald-500 text-black border-emerald-400 animate-pulse' : 'bg-slate-950 text-slate-600 border-slate-800'}`}>{step.status}</div>
-                 {(isActive || isDone) && <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">CYCLE {step.currentRound} ANALYSIS</span>}
+                 <div className={`px-4 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-[0.2em] ${isActive ? 'bg-emerald-500 text-black border-emerald-400 animate-pulse' : 'bg-slate-950 text-slate-600 border-slate-800'}`}>{step.status}</div>
+                 {(isActive || isDone) && <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest italic">CYCLE {step.currentRound}</span>}
                </div>
             </div>
 
             <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {isActive && (
-                   <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6 bg-[#0b1021]/60 backdrop-blur-sm rounded-[32px]">
-                     <div className="w-16 h-16 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin"></div>
-                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.6em] animate-pulse italic">Synthesizing Insight...</p>
+                   <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 bg-[#0b1021]/60 backdrop-blur-sm rounded-2xl">
+                     <div className="w-10 h-10 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin"></div>
+                     <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.6em] animate-pulse italic">Inference Active...</p>
                    </div>
                 )}
-                <div className="h-full overflow-y-auto custom-scrollbar pr-8">
+                <div className="h-full overflow-y-auto custom-scrollbar pr-4">
                     {step.output ? step.output.split('\n').filter(l => l.trim() !== '').map((line, idx) => {
-                       const isRoundHeader = line.includes('ROUND');
                        const isHeading = line === line.toUpperCase() && line.length > 5;
                        
-                       if (isRoundHeader) {
-                          return <div key={idx} className="mt-10 mb-6 border-b border-slate-800 pb-2"><p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.4em]">{line.trim()}</p></div>;
-                       }
-                       
                        if (isHeading) {
-                          return <h4 key={idx} className="text-lg font-black text-emerald-400 uppercase tracking-widest mt-8 mb-4">{line.trim()}</h4>;
+                          return <h4 key={idx} className="text-sm font-black text-emerald-400 uppercase tracking-widest mt-6 mb-3">{line.trim()}</h4>;
                        }
 
                        return (
-                         <p key={idx} className="text-[15px] text-slate-400 leading-relaxed font-sans border-l-2 border-emerald-500/10 pl-6 mb-5 italic">
+                         <p key={idx} className="text-[13px] text-slate-400 leading-relaxed font-sans border-l border-emerald-500/10 pl-4 mb-4 italic">
                             {line.trim()}
                          </p>
                        );
                     }) : (
-                      !isActive && <div className="h-full flex items-center justify-center text-slate-800 italic uppercase tracking-[0.4em] text-[10px]">Awaiting sequence...</div>
+                      !isActive && <div className="h-full flex items-center justify-center text-slate-800 italic uppercase tracking-[0.4em] text-[9px]">Awaiting Signal...</div>
                     )}
                 </div>
             </div>

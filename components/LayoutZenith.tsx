@@ -56,7 +56,8 @@ const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
     case 'DESIGN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>; 
     case 'MEDIA': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>; 
     case 'OUTREACH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; 
-    case 'ADMIN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>; 
+    case 'ADMIN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 2 2 2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>; 
+    default: return null;
   }
 }
 
@@ -239,8 +240,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block">
-      {/* FIXED HEADER */}
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-50 flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8 print:hidden">
+      {/* FIXED HEADER - SUPREME Z-INDEX [100] */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[100] flex items-center bg-[#030712]/95 backdrop-blur-3xl border-slate-800 px-8 print:hidden">
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
                PROSPECTOR <span className="text-emerald-500 italic">OS</span>
@@ -274,7 +275,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                onClick={onSearchClick}
                className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
             >
-               <span className="uppercase tracking-wider text-[9px]">NAVIGATION</span>
+               <span className="uppercase tracking-wider text-[9px]">NAV</span>
                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">⌘K</span>
             </button>
 
@@ -300,7 +301,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                                   setMarketExpanded(false);
                                 }
                               }}
-                              placeholder="ENTER REGION..."
+                              placeholder="REGION..."
                               className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-emerald-400 placeholder-slate-700"
                            />
                          </div>
@@ -324,12 +325,26 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
       </header>
 
       <div className="flex-1 flex overflow-hidden pt-20 print:block print:pt-0">
-         <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
-            <div className="flex-1 overflow-y-auto custom-scrollbar pt-8 pb-40 space-y-10">
+         <aside className={`flex-shrink-0 border-r flex flex-col z-[90] transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden relative ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
+            
+            {/* SIDEBAR TOGGLE - INTEGRATED AT TOP */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between h-16 shrink-0">
+                {isSidebarExpanded && <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">NAVIGATE</span>}
+                <button 
+                  onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+                  className={`w-10 h-10 rounded-xl border border-slate-800 flex items-center justify-center transition-all hover:bg-slate-800/50 group bg-[#05091a] shadow-xl ${!isSidebarExpanded ? 'mx-auto' : ''}`}
+                >
+                    <svg className={`w-3 h-3 text-slate-400 group-hover:text-emerald-500 transition-transform duration-500 ${!isSidebarExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-20 space-y-8">
                {Object.entries(groups).map(([groupName, modules]) => (
                   <div key={groupName} className="mb-2">
                      {isSidebarExpanded && (
-                       <h3 className="px-6 text-[11px] font-black text-white uppercase tracking-[0.25em] mb-4 mt-2 border-b-2 border-emerald-500/30 pb-2">{groupName}</h3>
+                       <h3 className="sticky top-0 px-6 text-[10px] font-black text-white/40 uppercase tracking-[0.25em] mb-3 mt-1 border-b border-white/5 pb-2 bg-[#0b1021] z-10 backdrop-blur-md">{groupName}</h3>
                      )}
                      <div className={`space-y-1 ${isSidebarExpanded ? 'px-4' : 'px-2'}`}>
                         {(modules as any[]).map(mod => {
@@ -338,7 +353,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                               <button
                                  key={mod.id}
                                  onClick={() => setActiveModule(mod.id)}
-                                 className={`w-full rounded-xl transition-all flex items-center group ${isSidebarExpanded ? 'px-3 py-2.5 justify-start gap-3' : 'p-3 justify-center'} ${isActive ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 shadow-lg' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
+                                 className={`w-full rounded-xl transition-all flex items-center group ${isSidebarExpanded ? 'px-3 py-2 justify-start gap-3' : 'p-3 justify-center'} ${isActive ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 shadow-md' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                               >
                                  <SubModuleIcon id={mod.id} active={isActive} />
                                  {isSidebarExpanded && (
@@ -354,7 +369,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          </aside>
 
          <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0 print:block print:h-auto print:overflow-visible print:bg-white print:text-black print:p-0">
-            <div className="max-w-[1920px] mx-auto pb-32 print:pb-0">{children}</div>
+            <div className={`fixed inset-0 pointer-events-none opacity-[0.02] bg-emerald-500/5 transition-all duration-1000`}></div>
+            <div className="max-w-[1920px] mx-auto pb-32 print:pb-0 relative z-10">{children}</div>
          </main>
       </div>
     </div>

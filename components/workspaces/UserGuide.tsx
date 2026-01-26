@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainMode, SubModule } from '../../types';
 
@@ -34,29 +33,31 @@ const MODULE_REGISTRY: ModuleDetail[] = [
   { id: 'VIDEO_INSIGHTS', mode: 'RESEARCH', title: 'Media Insights', mission: 'Deep temporal analysis of video content to deconstruct pacing, narrative structure, and hooks. It benchmarks content against industry-leading performance standards.', input: 'Video URL (YouTube/Vimeo)', output: 'Structural Deconstruction', useCase: 'Refining content strategy and identifying media gaps.', tags: ['Video', 'Intel'] },
   { id: 'CONTENT_ANALYSIS', mode: 'RESEARCH', title: 'Content Analysis', mission: 'Hyper-speed synthesis of long-form articles, whitepapers, and competitor documentation into concise executive summaries and strategic action items.', input: 'Source Text or Document URL', output: 'Executive Synthesis', useCase: 'Rapid gathering of competitive and industrial intelligence.', tags: ['Text', 'Synthesis'] },
   { id: 'BENCHMARK', mode: 'RESEARCH', title: 'Reverse Engineer', mission: 'A technical deconstruction tool that analyzes a competitor\'s tech stack, design system, and business model to highlight exploitable infrastructure gaps.', input: 'Competitor Digital Node', output: 'Comparative Gap Analysis', useCase: 'Competitive positioning and market disruption strategy.', tags: ['Analysis', 'Tech'] },
-  { id: 'ANALYTICS_HUB', mode: 'RESEARCH', title: 'Market Intelligence', mission: 'Macro-level data evaluation across entire industry sectors to identify emerging patterns, high-growth niches, and geographic opportunity spikes.', input: 'Aggregated Ledger Data', output: 'Sector-Wide Opportunity Map', useCase: 'Large-scale strategic market evaluation.', tags: ['Macro', 'Data'] },
+  { id: 'ANALYTICS_HUB', mode: 'RESEARCH', title: 'Market Intelligence', mission: 'Macro-level analysis of large datasets to identify emerging industry opportunities.', input: 'Aggregated market data', output: 'Sector-Wide Opportunity Map', useCase: 'Large-scale strategic market evaluation.', tags: ['Macro', 'Data'] },
 
   // --- DESIGN ZONE ---
   { id: 'VISUAL_STUDIO', mode: 'DESIGN', title: 'Creative Studio', mission: 'A high-end asset generation engine producing professional brand imagery, commercial photography, and ad creatives from pure text descriptions.', input: 'Aesthetic Directives & Brand Style', output: '4K Commercial Renders', useCase: 'Producing unique, high-fidelity brand assets for ads.', tags: ['Creative', 'Assets'] },
-  { id: 'BRAND_DNA', mode: 'DESIGN', title: 'Brand DNA', mission: 'Instantly extracts core identity markers—including colors, typography, and archetype—from any URL to ensure total visual consistency in new assets.', input: 'Target Website URL', output: 'Structured Identity Matrix', useCase: 'Ensuring new assets match a client\'s existing brand.', tags: ['Extraction', 'Branding'] },
+  { id: 'BRAND_DNA', mode: 'DESIGN', title: 'Brand DNA', mission: 'Instantly extracts core identity markers—including colors, typography, and archetype—from any URL to ensure total visual consistency in new assets.', input: 'Target Website URL', output: 'Comprehensive brand identity matrix', useCase: 'Client brand alignment.', tags: ['Extraction', 'Branding'] },
   { id: 'MOCKUPS_4K', mode: 'DESIGN', title: 'Mockup Studio', mission: 'A commercial visualization forge that creates photorealistic 4K renders of products or services in premium environment settings.', input: 'Asset Plates & Directives', output: 'Premium Studio Renders', useCase: 'Providing visual proof of brand transformation.', tags: ['Product', '3D'] },
   { id: 'PRODUCT_SYNTHESIS', mode: 'DESIGN', title: 'Offer Architecture', mission: 'Synthesizes market data and client capabilities into high-ticket service bundles, defining price points and value-stack hierarchies.', input: 'Service Data & Niche Context', output: 'Structured Value Diagram', useCase: 'Re-engineering low-value offers into high-ticket sales.', tags: ['Offer', 'Design'] },
-  { id: 'CONTENT_IDEATION', mode: 'DESIGN', title: 'Content Ideation', mission: 'A high-volume brainstorming engine that generates hundreds of creative hooks, viral themes, and editorial concepts for multi-platform social media.', input: 'Strategy Brief & Niche Data', output: 'Categorized Idea Matrix', useCase: 'Planning comprehensive editorial and social calendars.', tags: ['Viral', 'Ideas'] },
-  { id: 'ASSET_LIBRARY', mode: 'DESIGN', title: 'Media Vault', mission: 'The persistent, locally-synchronized repository for every piece of content—images, videos, and scripts—created within the Prospector OS ecosystem.', input: 'Generated Project Assets', output: 'Categorized Media Reservoir', useCase: 'Digital asset management and archival.', tags: ['Storage', 'Management'] },
+  { id: 'CONTENT_IDEATION', mode: 'DESIGN', title: 'Content Ideation', mission: 'A high-volume brainstorming engine that generates hundreds of creative hooks, viral themes, and editorial concepts for multi-platform social media.', input: 'Brand objective, niche context', output: 'Categorized creative concepts', useCase: 'Editorial calendar planning.', tags: ['Ideas', 'Creative'] },
+  { id: 'ASSET_LIBRARY', mode: 'DESIGN', title: 'Media Vault', mission: 'The central reservoir for all images, videos, and text files created in the OS.', input: 'Generated media assets', output: 'Organized asset repository', useCase: 'Digital asset management.', tags: ['Storage', 'Files'] },
 
   // --- MEDIA ZONE ---
-  { id: 'VIDEO_PRODUCTION', mode: 'MEDIA', title: 'Video Studio', mission: 'An ultra-high-resolution cinematic synthesis engine that converts text prompts and reference frames into professional video advertisements.', input: 'Cinematic Narrative & Ref Frames', output: 'High-Fidelity MP4 Payloads', useCase: 'Scalable production of short-form video ads.', tags: ['Motion', 'Veo'] },
-  { id: 'SONIC_STUDIO', mode: 'MEDIA', title: 'Sonic Studio', mission: 'A comprehensive audio engineering lab for generating studio-quality voiceovers, background music, and original brand soundtracks.', input: 'Script, Genre, & Vocal Tones', output: 'PCM Audio / MP3 Files', useCase: 'Adding professional audio to videos and proposals.', tags: ['Audio', 'Suno'] },
-  { id: 'MEETING_NOTES', mode: 'MEDIA', title: 'Note Scribe', mission: 'A high-speed transcription and synthesis engine that converts raw meeting audio or text into executive summaries and actionable mission checklists.', input: 'Raw Meeting Audio or Text', output: 'Executive Scribe Report', useCase: 'Post-meeting synchronization and task tracking.', tags: ['Workflow', 'Scribe'] },
+  { id: 'VIDEO_PRODUCTION', mode: 'MEDIA', title: 'Video Studio', mission: 'Synthesizes high-quality cinematic video clips for advertisements.', input: 'Cinematic script or prompt', output: 'Professional video payloads', useCase: 'Social media ad creation.', tags: ['Video', 'Production'] },
+  { id: 'VIDEO_AUDIT', mode: 'MEDIA', title: 'Video Audit', mission: 'Critiques existing video content for pacing, design, and engagement.', input: 'Video link or raw file', output: 'Professional creative audit', useCase: 'Improving client media quality.', tags: ['Critique', 'Media'] },
+  { id: 'MOTION_LAB', mode: 'MEDIA', title: 'Motion Lab', mission: 'Architects animated storyboards and dynamic plans for video production.', input: 'Narrative script', output: 'Animated storyboard visualization', useCase: 'Pre-production architecture.', tags: ['Animation', 'Storyboard'] },
+  { id: 'SONIC_STUDIO', mode: 'MEDIA', title: 'Sonic Studio', mission: 'Generates professional voiceovers and background soundtracks for media.', input: 'Script, genre, vocal directive', output: 'Studio-quality audio files', useCase: 'Media soundtracking.', tags: ['Audio', 'Music'] },
+  { id: 'MEETING_NOTES', mode: 'MEDIA', title: 'Executive Scribe', mission: 'Converts raw meeting transcripts into organized action items and summaries.', input: 'Meeting transcript/audio', output: 'Executive summary and tasks', useCase: 'Post-meeting synchronization.', tags: ['Workflow', 'Scribe'] },
 
   // --- OUTREACH ZONE ---
-  { id: 'CAMPAIGN_ORCHESTRATOR', mode: 'OUTREACH', title: 'Campaign Architect', mission: 'The master engine for end-to-end campaign deployment. It synchronizes strategy, copy, visuals, and audio into a unified outreach machine.', input: 'Intelligence Dossier & Assets', output: 'Complete Campaign Suite', useCase: 'Launching full-scale agency service packages.', tags: ['Sales', 'Automation'] },
-  { id: 'PROPOSALS', mode: 'OUTREACH', title: 'Proposal Builder', mission: 'Generates high-conversion, interactive sales blueprints delivered via secure "Magic Links," optimized for high-ticket closing scenarios.', input: 'Value Data & Deal Parameters', output: 'Interactive Sales Proposal', useCase: 'Closing complex, high-value agency agreements.', tags: ['Closing', 'Copy'] },
-  { id: 'ROI_CALCULATOR', mode: 'OUTREACH', title: 'Value Projector', mission: 'A logic-based mathematical modeler that quantifies the projected financial impact and revenue lift of your AI transformation services.', input: 'LTV, Lead Volume, & Conv Rates', output: 'Projected ROI Report', useCase: 'Justifying high-ticket service fees to skeptics.', tags: ['Finance', 'Logic'] },
-  { id: 'SEQUENCER', mode: 'OUTREACH', title: 'Outreach Builder', mission: 'Architects multi-day, multi-channel engagement flows designed to maintain continuous presence across Email, LinkedIn, and SMS.', input: 'Core Strategy & Narrative', output: 'Engagement Sequence Schedule', useCase: 'Automating the top-of-funnel outreach process.', tags: ['Drip', 'Email'] },
+  { id: 'CAMPAIGN_ORCHESTRATOR', mode: 'OUTREACH', title: 'Campaign Architect', mission: 'End-to-end orchestration of multi-touch sales campaigns.', input: 'Prospect identity, objectives', output: 'Complete outreach sequence', useCase: 'Scaling client acquisition.', tags: ['Campaigns', 'Automation'] },
+  { id: 'PROPOSALS', mode: 'OUTREACH', title: 'Proposal Builder', mission: 'Generates strategic proposals via interactive high-conversion "Magic Links."', input: 'Deal terms, service scope', output: 'Interactive proposal link', useCase: 'Closing high-ticket deals.', tags: ['Closing', 'Agreements'] },
+  { id: 'ROI_CALCULATOR', mode: 'OUTREACH', title: 'Value Projector', mission: 'Mathematical modeling to quantify the financial impact of transformation.', input: 'Business metrics (LTV, volume)', output: 'ROI and growth report', useCase: 'Financial value justification.', tags: ['Math', 'Finance'] },
+  { id: 'SEQUENCER', mode: 'OUTREACH', title: 'Outreach Builder', mission: 'Architects multi-channel follow-up flows for sustained engagement.', input: 'Initial outreach strategy', output: 'Multi-day engagement schedule', useCase: 'Nurture flow automation.', tags: ['Email', 'Outreach'] },
   { id: 'AI_CONCIERGE', mode: 'OUTREACH', title: 'Virtual Agent', mission: 'An interactive proof-of-concept for autonomous customer engagement. It demonstrates how an AI agent can handle inquiries and book meetings 24/7.', input: 'Agency/Business Knowledge Base', output: 'Nurture Dialogue Simulation', useCase: 'Demonstrating AI service value in a live environment.', tags: ['Agent', 'Demo'] },
   { id: 'ELEVATOR_PITCH', mode: 'OUTREACH', title: 'Pitch Generator', mission: 'Crafts high-impact, 30-second introductory scripts designed to rapidly communicate value and capture interest during cold outreach.', input: 'Business Profile & Offer DNA', output: 'Short-Form Value Script', useCase: 'Cold calling and introductory messaging.', tags: ['Hook', 'Intro'] },
-  { id: 'FUNNEL_MAP', mode: 'OUTREACH', title: 'Funnel Mapper', mission: 'Visualizes the conversion geometry and intent journey for a campaign, mapping every step from initial ad to finalized contract.', input: 'Operational Logic & Conversion Goals', output: 'Visual Funnel Flowchart', useCase: 'Analyzing and optimizing conversion pathways.', tags: ['Map', 'Logic'] }
+  { id: 'FUNNEL_MAP', mode: 'OUTREACH', title: 'Funnel Mapper', mission: 'Visualizes the conversion pathway and intent journey for a campaign, mapping every step from initial ad to finalized contract.', input: 'Operational logic & Conversion goals', output: 'Visual Funnel Flowchart', useCase: 'Analyzing and optimizing conversion pathways.', tags: ['Map', 'Logic'] }
 ];
 
 export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
@@ -99,8 +100,8 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* FILTER CONTROLS */}
-      <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-3xl p-6 border-2 border-slate-800 rounded-[32px] flex flex-col md:flex-row gap-6 items-center shadow-2xl">
+      {/* FILTER CONTROLS - LOWER Z-INDEX TO ENSURE OVERLAP UNDER NAV BAR */}
+      <div className="sticky top-0 z-30 bg-[#020617]/95 backdrop-blur-3xl p-6 border-2 border-slate-800 rounded-[32px] flex flex-col md:flex-row gap-6 items-center shadow-2xl">
          <div className="flex-1 w-full relative">
             <input 
               value={filter} onChange={(e) => setFilter(e.target.value)}
@@ -122,7 +123,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
          </div>
       </div>
 
-      {/* MODULE GRID - UPDATED TO 3 COLUMNS */}
+      {/* MODULE GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
          {filtered.length === 0 ? (
            <div className="col-span-full py-40 text-center opacity-30 border-2 border-dashed border-slate-800 rounded-[56px] flex flex-col items-center justify-center">
@@ -131,7 +132,6 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
            </div>
          ) : filtered.map(m => (
            <div key={m.id} onClick={() => onNavigate(m.mode, m.id)} className="bg-[#0b1021] border-2 border-slate-800/80 rounded-[48px] p-10 flex flex-col group hover:border-emerald-500/50 transition-all cursor-pointer relative overflow-hidden shadow-2xl">
-              {/* Background ID Watermark */}
               <div className="absolute top-0 right-0 p-10 opacity-[0.02] text-9xl font-black italic select-none group-hover:opacity-10 transition-opacity">
                 {m.id.slice(0, 2)}
               </div>
@@ -159,7 +159,6 @@ export const UserGuide: React.FC<UserGuideProps> = ({ onNavigate }) => {
                  </div>
               </div>
 
-              {/* Decorative architectural markers */}
               <div className="absolute top-8 left-8 w-8 h-8 border-t-2 border-l-2 border-slate-800 group-hover:border-emerald-500/30 transition-colors"></div>
               <div className="absolute bottom-8 right-8 w-8 h-8 border-b-2 border-r-2 border-slate-800 group-hover:border-emerald-500/30 transition-colors"></div>
            </div>
