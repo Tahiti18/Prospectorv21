@@ -80,57 +80,44 @@ export const executeGrowthBoardroom = async (
   const LAYMAN_PROTOCOL = `
     STRICT LAYMAN STRATEGY PROTOCOL:
     - ABSOLUTELY NO MARKDOWN (No stars **, no hashtags #, no underscores _, no dashes ---).
-    - ABSOLUTELY NO CODE references.
+    - DO NOT use decorative characters or giant capital letters at start of sentences.
     - STRUCTURE WITH CLEAR PLAIN-TEXT HEADINGS (All caps).
-    - USE MULTIPLE STRAIGHT, CLEAN PARAGRAPHS FOR READABILITY.
-    - SPEAK AS A LUXURY BUSINESS CONSULTANT TO A STAKEHOLDER.
+    - USE STRAIGHT, CLEAN, PROFESSIONAL PARAGRAPHS.
+    - SPEAK AS A LUXURY BUSINESS CONSULTANT.
     - KB: ${LAYMAN_KNOWLEDGE_BASE}
   `;
 
   try {
     for (let r = 1; r <= rounds; r++) {
       // 1. Visionary
-      steps[0].currentRound = r; 
-      steps[0].status = 'THINKING'; 
-      updateUI();
-      const visionOut = await callAgent(`ROUND ${r}/${rounds}: Establish the brand transformation vision for ${lead.businessName}. HISTORY: ${debateHistory || 'None'}. ${LAYMAN_PROTOCOL}`, "You are THE VISIONARY. Output plain text paragraphs only.", steps[0].modelId);
-      steps[0].output += `\n\nROUND ${r} INSIGHTS:\n${visionOut}`;
+      steps[0].currentRound = r; steps[0].status = 'THINKING'; updateUI();
+      const visionOut = await callAgent(`ROUND ${r}/${rounds}: Vision for ${lead.businessName}. HISTORY: ${debateHistory || 'None'}. ${LAYMAN_PROTOCOL}`, "You are THE VISIONARY. Output clean paragraphs.", steps[0].modelId);
+      steps[0].output += `\n\nROUND ${r}:\n${visionOut}`;
       debateHistory += `\nVISIONARY (R${r}): ${visionOut}`;
-      steps[0].status = 'COMPLETED'; 
-      updateUI();
+      steps[0].status = 'COMPLETED'; updateUI();
 
       // 2. Profit Hacker
-      steps[1].currentRound = r; 
-      steps[1].status = 'THINKING'; 
-      updateUI();
-      const profitOut = await callAgent(`ROUND ${r}/${rounds}: Revenue optimization strategy based on current vision for ${lead.businessName}. ${LAYMAN_PROTOCOL}`, "You are THE PROFIT HACKER. Output plain text paragraphs only.", steps[1].modelId);
-      steps[1].output += `\n\nROUND ${r} INSIGHTS:\n${profitOut}`;
+      steps[1].currentRound = r; steps[1].status = 'THINKING'; updateUI();
+      const profitOut = await callAgent(`ROUND ${r}/${rounds}: ROI strategy for ${lead.businessName}. ${LAYMAN_PROTOCOL}`, "You are THE PROFIT HACKER. Output clean paragraphs.", steps[1].modelId);
+      steps[1].output += `\n\nROUND ${r}:\n${profitOut}`;
       debateHistory += `\nPROFIT HACKER (R${r}): ${profitOut}`;
-      steps[1].status = 'COMPLETED'; 
-      updateUI();
+      steps[1].status = 'COMPLETED'; updateUI();
 
       // 3. Ops Master
-      steps[2].currentRound = r; 
-      steps[2].status = 'THINKING'; 
-      updateUI();
-      const opsOut = await callAgent(`ROUND ${r}/${rounds}: Operational automation plan based on current strategy for ${lead.businessName}. ${LAYMAN_PROTOCOL}`, "You are THE OPS MASTER. Output plain text paragraphs only.", steps[2].modelId);
-      steps[2].output += `\n\nROUND ${r} INSIGHTS:\n${opsOut}`;
+      steps[2].currentRound = r; steps[2].status = 'THINKING'; updateUI();
+      const opsOut = await callAgent(`ROUND ${r}/${rounds}: Automation plan for ${lead.businessName}. ${LAYMAN_PROTOCOL}`, "You are THE OPS MASTER. Output clean paragraphs.", steps[2].modelId);
+      steps[2].output += `\n\nROUND ${r}:\n${opsOut}`;
       debateHistory += `\nOPS MASTER (R${r}): ${opsOut}`;
-      steps[2].status = 'COMPLETED'; 
-      updateUI();
+      steps[2].status = 'COMPLETED'; updateUI();
       
       if (r < rounds) {
-         steps[0].status = 'WAITING'; 
-         steps[1].status = 'WAITING'; 
-         steps[2].status = 'WAITING';
+         steps[0].status = 'WAITING'; steps[1].status = 'WAITING'; steps[2].status = 'WAITING';
          updateUI();
-         await new Promise(res => setTimeout(res, 500)); // Small delay for UI clarity
       }
     }
 
     // 4. Final Synthesis
-    steps[3].status = 'THINKING'; 
-    updateUI();
+    steps[3].status = 'THINKING'; updateUI();
     const finalPrompt = `
       DEBATE HISTORY: ${debateHistory}
       TASK: As the Managing Director, synthesize this debate into the DEFINITIVE BUSINESS TRANSFORMATION PLAN for ${lead.businessName}.
@@ -138,21 +125,22 @@ export const executeGrowthBoardroom = async (
       CRITICAL REQUIREMENTS:
       - PROVIDE EXHAUSTIVE DETAIL. This must be a massive, comprehensive plan.
       - EACH SECTION MUST HAVE AT LEAST 4 FULL PARAGRAPHS.
-      - ABSOLUTELY NO MARKDOWN SYMBOLS (No *, #, _, etc.).
+      - NO MARKDOWN SYMBOLS.
+      - NO DECORATIVE FIRST LETTERS.
       - USE "heading" BLOCKS FOR TITLES.
       - USE "p" FOR CLEAN, STRAIGHT PARAGRAPHS.
       - OUTPUT STRICTLY VALID JSON IN UI_BLOCKS FORMAT.
       
-      FORMAT:
+      JSON SCHEMA:
       {
         "format": "ui_blocks",
-        "title": "EXECUTIVE TRANSFORMATION PLAN",
+        "title": "DEFINITIVE TRANSFORMATION PLAN",
         "subtitle": "PREMIUM GROWTH ARCHITECTURE",
         "sections": [
-          { "heading": "THE STRATEGIC DEFICIT", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
-          { "heading": "REVENUE ENGINE PROTOCOLS", "body": [ { "type": "hero", "content": "Master Vision Statement" }, { "type": "p", "content": "4+ detailed paragraphs..." } ] },
-          { "heading": "AUTOMATION & FREEDOM BLUEPRINT", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
-          { "heading": "GROWTH MILESTONES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
+          { "heading": "I. STRATEGIC AUDIT", "body": [ { "type": "p", "content": "Detailed paragraphs..." } ] },
+          { "heading": "II. REVENUE ACCELERATION", "body": [ { "type": "hero", "content": "Master Vision Statement" }, { "type": "p", "content": "Detailed paragraphs..." } ] },
+          { "heading": "III. OPERATIONAL FREEDOM", "body": [ { "type": "p", "content": "Detailed paragraphs..." } ] },
+          { "heading": "IV. PROJECTED OUTCOMES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
         ]
       }
     `;
@@ -160,7 +148,7 @@ export const executeGrowthBoardroom = async (
     
     try {
       JSON.parse(finalOut);
-      steps[3].output = "Synthesis finalized.";
+      steps[3].output = "Synthesis complete.";
       steps[3].status = 'COMPLETED';
     } catch (e) {
       steps[3].status = 'FAILED';
