@@ -108,9 +108,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Remove this target from the ledger?")) {
+    if (window.confirm("Delete lead?")) {
         db.deleteLead(id);
-        toast.info("Target purged.");
+        toast.info("Target purged from ledger.");
     }
   };
 
@@ -349,18 +349,32 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                         </td>
                         <td className="px-6 py-6 max-w-sm"><p className="text-[11px] font-medium text-slate-400 line-clamp-1 italic">"{lead.socialGap}"</p></td>
                         <td className="px-6 py-6 text-right"><span className={`text-3xl font-black italic tracking-tighter ${lead.leadScore > 80 ? 'text-emerald-500' : 'text-slate-600'}`}>{lead.leadScore}</span></td>
-                        <td className="px-8 py-6 text-right flex items-center justify-end gap-3">
-                            {hasDossier && (
+                        <td className="px-8 py-6 text-right flex items-center justify-end gap-4">
+                            {hasDossier ? (
                                 <button 
                                   onClick={() => { onLockLead(lead.id); window.dispatchEvent(new CustomEvent('navigate', { detail: { mode: 'RESEARCH', module: 'EXECUTIVE_DOSSIER' } })); }}
-                                  className="px-4 py-2 bg-emerald-600/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
-                                  title="View Exportable PDF Dossier"
+                                  className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-xl shadow-lg hover:bg-emerald-500 transition-all border-b-2 border-emerald-800"
+                                  title="Strategy Ready (View Dossier)"
                                 >
-                                  DOSSIER
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                </button>
+                            ) : (
+                                <button 
+                                  onClick={() => onInspect(lead.id)}
+                                  className="px-5 py-2.5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                                  title="Analyze Strategy"
+                                >
+                                  STRATEGY
                                 </button>
                             )}
-                            <button onClick={() => onInspect(lead.id)} className="px-5 py-2.5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95">STRATEGY</button>
-                            <button onClick={() => handleDelete(lead.id)} className="p-2 text-slate-800 hover:text-rose-500 transition-colors text-xl">×</button>
+                            
+                            <button 
+                              onClick={() => handleDelete(lead.id)} 
+                              className="w-10 h-10 flex items-center justify-center bg-slate-900 text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-slate-800"
+                              title="Delete Lead"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
                         </td>
                       </tr>
                     );
