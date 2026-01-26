@@ -169,9 +169,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/30 shrink-0 animate-pulse">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="3" strokeLinecap="round"/></svg>
           </div>
+          {/* Fix: Added quotes around text-white to fix variable reference error */}
           <input
             autoFocus
-            className={`w-full bg-transparent placeholder-slate-600 text-2xl outline-none font-black uppercase tracking-tight ${theme === 'dark' ? text-white : 'text-slate-900'}`}
+            className={`w-full bg-transparent placeholder-slate-600 text-2xl outline-none font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
             placeholder="SEARCH SYSTEM DIRECTORY..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

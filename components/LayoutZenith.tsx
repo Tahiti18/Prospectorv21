@@ -64,14 +64,14 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   RESEARCH: {
     "CORE ANALYTICS": [
       { id: 'EXECUTIVE_DASHBOARD', label: 'Agency Overview', desc: 'Main operational center' },
-      { id: 'SYSTEM_CAPABILITIES', label: 'System Capabilities', desc: 'Capability framework' },
+      { id: 'SYSTEM_CAPABILITIES', label: 'Solutions Matrix', desc: 'Capability framework' },
       { id: 'USER_GUIDE', label: 'User Manual', desc: 'Feature documentation' },
       { id: 'MARKET_DISCOVERY', label: 'Lead Discovery', desc: 'Identify new opportunities' },
       { id: 'AUTOMATED_SEARCH', label: 'Auto Analysis', desc: 'Autonomous identification' },
       { id: 'MARKET_TRENDS', label: 'Industry Monitor', desc: 'Real-time news' },
     ],
     "MANAGEMENT": [
-      { id: 'PROSPECT_DATABASE', label: 'Lead Sourcing', desc: 'Contact repository' },
+      { id: 'PROSPECT_DATABASE', label: 'Lead Database', desc: 'Contact repository' },
       { id: 'STRATEGY_CENTER', label: 'Strategic Hub', desc: 'Portfolio audits' },
       { id: 'PIPELINE', label: 'Sales Pipeline', desc: 'Deal tracking' },
       { id: 'ANALYTICS_HUB', label: 'Market Intelligence', desc: 'Aggregate data' },

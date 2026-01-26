@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Lead, OutreachStatus } from '../../types';
 import { AutomationOrchestrator } from '../../services/automation/orchestrator';
@@ -166,10 +165,10 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   return (
     <div className="space-y-6 py-6 max-w-[1600px] mx-auto relative px-6 pb-40 animate-in fade-in duration-700">
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
+      <div className="flex flex-col xl:flex-row justify-between items-end gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
-            PROSPECT <span className="text-emerald-500">DATABASE</span>
+            LEAD <span className="text-emerald-500">DATABASE</span>
           </h1>
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex flex-wrap items-center gap-3">
             MASTER REPOSITORY // {leads.length} RECORDS

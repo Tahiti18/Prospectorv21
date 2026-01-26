@@ -73,7 +73,7 @@ export const executeGrowthBoardroom = async (
     - NO MILITARY OR TECH SLANG (No "Mission", "Target", "Recon", "Inference", "Payload", "Cortex").
     - USE STANDARD BUSINESS TERMS (Prospect, Client, Strategy, Implementation, Efficiency).
     - ABSOLUTELY NO MARKDOWN (No stars **, no hashtags #, no underscores _).
-    - NO decorative characters or giant capital letters at start of sentences.
+    - DO NOT use decorative characters or giant capital letters at start of sentences.
     - STRUCTURE WITH PLAIN TEXT HEADINGS.
     - USE STRAIGHT, PROFESSIONAL PARAGRAPHS.
     - SPEAK AS A SENIOR MANAGEMENT CONSULTANT.
@@ -83,19 +83,19 @@ export const executeGrowthBoardroom = async (
   try {
     for (let r = 1; r <= rounds; r++) {
       steps[0].currentRound = r; steps[0].status = 'ANALYZING'; updateUI();
-      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist.", steps[0].modelId);
+      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist. Output clean paragraphs.", steps[0].modelId);
       steps[0].output += `\n\nROUND ${r}:\n${visionOut}`;
       debateHistory += `\nBRAND STRATEGIST (R${r}): ${visionOut}`;
       steps[0].status = 'COMPLETED'; updateUI();
 
       steps[1].currentRound = r; steps[1].status = 'ANALYZING'; updateUI();
-      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue optimization based on: ${visionOut}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst.", steps[1].modelId);
+      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue optimization based on: ${visionOut}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst. Output clean paragraphs.", steps[1].modelId);
       steps[1].output += `\n\nROUND ${r}:\n${profitOut}`;
       debateHistory += `\nREVENUE ANALYST (R${r}): ${profitOut}`;
       steps[1].status = 'COMPLETED'; updateUI();
 
       steps[2].currentRound = r; steps[2].status = 'ANALYZING'; updateUI();
-      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan based on: ${debateHistory}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director.", steps[2].modelId);
+      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan based on: ${debateHistory}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director. Output clean paragraphs.", steps[2].modelId);
       steps[2].output += `\n\nROUND ${r}:\n${opsOut}`;
       debateHistory += `\nSYSTEMS DIRECTOR (R${r}): ${opsOut}`;
       steps[2].status = 'COMPLETED'; updateUI();
@@ -133,9 +133,15 @@ export const executeGrowthBoardroom = async (
     `;
     const finalOut = await callAgent(finalPrompt, "You are the Managing Director.", steps[3].modelId);
     
-    JSON.parse(finalOut);
-    steps[3].output = "Synthesis complete.";
-    steps[3].status = 'COMPLETED';
+    try {
+      JSON.parse(finalOut);
+      steps[3].output = "Synthesis complete.";
+      steps[3].status = 'COMPLETED';
+    } catch(e) {
+      steps[3].status = 'FAILED';
+      throw new Error("MALFORMED_SYNTHESIS_RETRY_REQUIRED");
+    }
+
     updateUI();
     return finalOut;
 
