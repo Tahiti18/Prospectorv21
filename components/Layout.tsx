@@ -79,11 +79,8 @@ const SUB_MODULES: Record<MainMode, { id: SubModule; label: string }[]> = {
     { id: 'VISUAL_ANALYSIS', label: 'Vision Lab' },
     { id: 'CONTENT_ANALYSIS', label: 'Article Intel' },
     { id: 'BENCHMARK', label: 'Benchmark' },
-    { id: 'ANALYTICS', label: 'Analytics' },
     { id: 'ANALYTICS_HUB', label: 'Dominance Hub' },
     { id: 'HEATMAP', label: 'Heatmap' },
-    { id: 'PROMPT_INTERFACE', label: 'Prompt Interface' },
-    { id: 'MODEL_BENCH', label: 'Model Test' },
     { id: 'FACT_CHECK', label: 'Fact Check' },
     { id: 'TRANSLATOR', label: 'Translator' }
   ],
@@ -105,6 +102,7 @@ const SUB_MODULES: Record<MainMode, { id: SubModule; label: string }[]> = {
   ],
   OUTREACH: [
     { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Orchestrator' },
+    { id: 'GHL_ARCHITECT', label: 'GHL Planner' },
     { id: 'PROPOSALS', label: 'Proposals' },
     { id: 'ROI_CALCULATOR', label: 'ROI Calc' },
     { id: 'SEQUENCER', label: 'Sequencer' },

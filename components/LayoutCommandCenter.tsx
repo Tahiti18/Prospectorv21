@@ -51,13 +51,6 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
       { id: 'BENCHMARK', label: 'Reverse Engineer' },
       { id: 'VISUAL_ANALYSIS', label: 'Vision Analysis' },
       { id: 'STRATEGIC_REASONING', label: 'Deep Analysis' },
-      { id: 'CONTENT_ANALYSIS', label: 'Content Analysis' },
-    ],
-    "Utilities": [
-        { id: 'WORKSPACE', label: 'Gemini Workspace' },
-        { id: 'PROMPT_INTERFACE', label: 'Prompt Interface' },
-        { id: 'MODEL_BENCH', label: 'Model Bench' },
-        { id: 'TRANSLATOR', label: 'Translator' }
     ]
   },
   DESIGN: {
@@ -87,6 +80,7 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   OUTREACH: {
     "Strategy": [
       { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Campaign Builder' },
+      { id: 'GHL_ARCHITECT', label: 'GHL Planner' },
       { id: 'PRESENTATION_BUILDER', label: 'Deck Architect' },
       { id: 'FUNNEL_MAP', label: 'Funnel Map' },
     ],
@@ -301,7 +295,7 @@ export const LayoutCommandCenter: React.FC<LayoutProps> = ({
                <select 
                   value={theater} 
                   onChange={(e) => setTheater(e.target.value)}
-                  className={`bg-transparent text-xs font-bold uppercase focus:outline-none cursor-pointer border-none max-w-[140px] truncate text-slate-300`}
+                  className={`bg-transparent text-xs font-bold uppercase focus:outline-none cursor-pointer border-none max-w-[1400px] truncate text-slate-300`}
                >
                   <option value="CYPRUS">CYPRUS</option>
                   <option value="DUBAI">DUBAI</option>

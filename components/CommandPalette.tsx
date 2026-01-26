@@ -109,6 +109,7 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
   { mode: 'OUTREACH', mod: 'AI_CONCIERGE', label: 'NEURAL AGENT', zone: 'OUTREACH ZONE', icon: 'concierge' },
   { mode: 'OUTREACH', mod: 'ELEVATOR_PITCH', label: 'PITCH GENERATOR', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'FUNNEL_MAP', label: 'FUNNEL MAPPER', zone: 'OUTREACH ZONE', icon: 'funnel' },
+  { mode: 'OUTREACH', mod: 'GHL_ARCHITECT', label: 'GHL PLANNER', zone: 'OUTREACH ZONE', icon: 'architect' },
 
   // --- ADMIN ZONE ---
   { mode: 'ADMIN', mod: 'AGENCY_PLAYBOOK', label: 'AGENCY PLAYBOOK', zone: 'ADMIN ZONE', icon: 'manual' },

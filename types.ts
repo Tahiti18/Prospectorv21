@@ -64,6 +64,7 @@ export type SubModule =
   | 'PROMPT_AI'
   | 'DASHBOARD'
   | 'ENTERPRISE_DASHBOARD'
+  | 'GHL_ARCHITECT'
   | 'EXECUTIVE_DOSSIER';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';

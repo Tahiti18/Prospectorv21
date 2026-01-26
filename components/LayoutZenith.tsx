@@ -104,6 +104,7 @@ const SubModuleIcon = ({ id, active }: { id: SubModule; active: boolean }) => {
     case 'AI_CONCIERGE': return p(["M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2", "M12 7a4 4 0 100-8 4 4 0 000 8z"]);
     case 'ELEVATOR_PITCH': return p(["M18 8a3 3 0 100-6 3 3 0 000 6z", "M6 15a3 3 0 100-6 3 3 0 000 6z"]);
     case 'FUNNEL_MAP': return p(["M22 3H2l8 9.46V19l4 2v-8.54L22 3z"]);
+    case 'GHL_ARCHITECT': return p(["M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71", "M4 12h16"]);
     case 'AGENCY_PLAYBOOK': return p(["M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5z"]);
     case 'BILLING': return p(["M12 1v22", "M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"]);
     case 'SETTINGS': return p(["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33"]);
@@ -165,6 +166,7 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   OUTREACH: {
     "CAMPAIGN": [
       { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Campaign Architect', desc: 'End-to-end deployment' },
+      { id: 'GHL_ARCHITECT', label: 'GHL Planner', desc: 'GHL Blueprint boardroom' },
       { id: 'PRESENTATION_BUILDER', label: 'Deck Architect', desc: 'Presentation design' },
       { id: 'FUNNEL_MAP', label: 'Journey Mapper', desc: 'Conversion path visual' },
     ],

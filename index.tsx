@@ -61,6 +61,7 @@ import { FactCheck } from './components/workspaces/FactCheck';
 import { TranslatorNode } from './components/workspaces/TranslatorNode';
 import { VideoAudit } from './components/workspaces/VideoAudit';
 import { ExecutiveDossier } from './components/workspaces/ExecutiveDossier';
+import { GHLArchitect } from './components/workspaces/GHLArchitect';
 
 const App = () => {
   const [activeMode, setActiveMode] = useState<MainMode>('RESEARCH');
@@ -155,6 +156,7 @@ const App = () => {
       case 'AI_CONCIERGE': return <AIConcierge lead={lockedLead} />;
       case 'ELEVATOR_PITCH': return <PitchGen lead={lockedLead} />;
       case 'FUNNEL_MAP': return <FunnelMap lead={lockedLead} />;
+      case 'GHL_ARCHITECT': return lockedLead ? <GHLArchitect lead={lockedLead} /> : <div>No Lead Selected</div>;
 
       // ADMIN
       case 'AGENCY_PLAYBOOK': return <ScoringRubricView />;
