@@ -11,12 +11,12 @@ interface GHLArchitectProps {
 }
 
 export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockLead }) => {
-  const [rounds, setRounds] = useState(3);
+  const [rounds, setRounds] = useState(1); // Standard consensus usually reached in 1 cycle with current prompts
   const [steps, setSteps] = useState<BoardroomStep[]>([
-    { agentName: 'ARCHITECT', role: 'GHL System Architecture', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Technical Compliance Audit', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
-    { agentName: 'REFINER', role: 'Strategic Hardening', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Master Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'PLANNER', role: 'Architectural Strategist', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Compliance & Risk Auditor', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'ENGINEER', role: 'Workflow & Logic Specialist', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
+    { agentName: 'EXECUTIVE', role: 'Master Synthesis Executive', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [finalResult, setFinalResult] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
     try {
       const result = await executeNeuralBoardroom(lead, rounds, setSteps);
       setFinalResult(result);
-      toast.success("TECHNICAL CONSENSUS ACHIEVED.");
+      toast.success("INDIGO CONSENSUS ACHIEVED.");
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -58,9 +58,9 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
       <div className="flex flex-col md:flex-row justify-between items-end border-b-2 border-emerald-500/20 pb-12 gap-8">
         <div className="space-y-3">
           <h1 className="text-5xl font-black italic text-white uppercase tracking-tighter leading-none">
-            GHL <span className="text-emerald-500 not-italic">PLANNER</span>
+            INDIGO <span className="text-emerald-500 not-italic">GHL PLANNER</span>
           </h1>
-          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Neural Boardroom Engine // {lead ? `Target: ${lead.businessName}` : 'AWAITING TARGET SELECTION'}</p>
+          <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] italic">Neural Boardroom Engine v1.0 // {lead ? `Target: ${lead.businessName}` : 'AWAITING TARGET SELECTION'}</p>
         </div>
         
         <div className="flex items-center gap-6 bg-[#0b1021] p-6 rounded-[32px] border border-slate-800 shadow-2xl">
@@ -74,18 +74,6 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
               >
                 <option value="">-- NO TARGET SELECTED --</option>
                 {leads.map(l => <option key={l.id} value={l.id}>{l.businessName}</option>)}
-              </select>
-           </div>
-
-           <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">DEBATE INTENSITY</span>
-              <select 
-                value={rounds}
-                onChange={(e) => setRounds(parseInt(e.target.value))}
-                disabled={isExecuting}
-                className="bg-black border border-slate-800 text-emerald-400 text-[10px] font-black uppercase px-6 py-3 rounded-2xl focus:border-emerald-500 cursor-pointer outline-none transition-all"
-              >
-                {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} CYCLES OF DEBATE</option>)}
               </select>
            </div>
 
@@ -107,7 +95,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
 
       {/* STAGGERED COMMAND GRID */}
       <div className="space-y-12">
-          {/* ROW 1: THE POWER DUO */}
+          {/* ROW 1: THE STRATEGISTS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {steps.slice(0, 2).map((step, i) => (
               <div key={i} ref={cardRefs[i]}>
@@ -116,7 +104,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
             ))}
           </div>
 
-          {/* ROW 2: THE REFINEMENT DUO */}
+          {/* ROW 2: THE EXECUTORS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {steps.slice(2, 4).map((step, i) => (
               <div key={i+2} ref={cardRefs[i+2]}>
@@ -133,7 +121,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
            <div className="mb-16 border-b border-slate-800 pb-12 flex justify-between items-center">
               <div className="space-y-3">
                 <h2 className="text-5xl font-black italic text-white uppercase tracking-tighter leading-none">GHL MASTER <span className="text-emerald-500">BLUEPRINT</span></h2>
-                <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.6em] mt-2">TECHNICAL SYNERGY ACHIEVED // STATE PERSISTED</p>
+                <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.6em] mt-2">TECHNICAL SYNERGY ACHIEVED // INDIGO v1.0 COMPLIANT</p>
               </div>
               <button 
                 onClick={() => { navigator.clipboard.writeText(finalResult); toast.success("Schematic Copied."); }}
