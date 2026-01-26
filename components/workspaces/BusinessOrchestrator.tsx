@@ -21,7 +21,7 @@ interface BusinessOrchestratorProps {
   onNavigate: (mode: MainMode, mod: SubModule) => void;
   onLockLead: (id: string) => void;
   onUpdateLead: (id: string, updates: Partial<Lead>) => void;
-  theater: string; // Added theater to props for contextual manual entry
+  theater: string;
 }
 
 export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead, theater }) => {
@@ -29,6 +29,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualName, setManualName] = useState('');
   const [manualUrl, setManualUrl] = useState('');
+  const [manualCity, setManualCity] = useState(theater || ''); // New state for explicit city entry
   
   const [packageData, setPackageData] = useState<any>(null);
   const [currentDossier, setCurrentDossier] = useState<StrategicDossier | null>(null);
@@ -37,11 +38,18 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [activeTab, setActiveTab] = useState<'strategy' | 'narrative' | 'content' | 'outreach' | 'visual' | 'funnel'>('strategy');
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   
+  // Sync manual city with theater when switching to manual mode if it's empty
+  useEffect(() => {
+    if (isManualMode && !manualCity) {
+      setManualCity(theater);
+    }
+  }, [isManualMode, theater]);
+
   // Local target calculation
   const targetLead = useMemo(() => {
     if (isManualMode) {
       if (!manualName || !manualUrl) return null;
-      // We check if a lead with this URL already exists in our list
+      
       const existing = leads.find(l => {
           if (!l.websiteUrl) return false;
           const n1 = l.websiteUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
@@ -55,7 +63,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         businessName: manualName,
         websiteUrl: manualUrl,
         niche: 'Manual Entry',
-        city: theater || 'Global', // Inherit theater to prevent filtering loss
+        city: manualCity || theater || 'Global', // Use explicit manual city
         rank: 0,
         leadScore: 95,
         assetGrade: 'A',
@@ -65,7 +73,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
       } as Lead;
     }
     return leads.find(l => l.id === (selectedLeadId || lockedLead?.id));
-  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, lockedLead, theater]);
+  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, manualCity, lockedLead, theater]);
   
   const leadAssets = useMemo(() => {
     if (!targetLead) return [];
@@ -87,7 +95,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
 
   const handleOrchestrate = async () => {
     if (!targetLead) {
-        toast.info(isManualMode ? "Identity and Website required." : "Business selection required.");
+        toast.info(isManualMode ? "Identity, Website and Location required." : "Business selection required.");
         return;
     }
 
@@ -97,11 +105,9 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
     try {
       let finalLead = targetLead;
 
-      // 1. If in manual mode, we MUST persist and resolve the correct ID
       if (isManualMode) {
         toast.neural("PROTOCOL: Persisting custom business to ledger...");
         const result = db.upsertLeads([targetLead]);
-        // The result.upsertedLeads[0] will have the correct ID even if it was a duplicate
         finalLead = result.upsertedLeads[0];
         
         onLockLead(finalLead.id); 
@@ -244,6 +250,15 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                         onChange={(e) => setManualUrl(e.target.value)}
                         placeholder="https://example.com"
                         className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all placeholder-slate-700 shadow-inner"
+                      />
+                   </div>
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">LOCATION (CITY/STATE)</label>
+                      <input 
+                        value={manualCity}
+                        onChange={(e) => setManualCity(e.target.value)}
+                        placeholder="CITY, STATE..."
+                        className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all uppercase placeholder-slate-700 shadow-inner"
                       />
                    </div>
                 </div>
