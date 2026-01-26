@@ -12,25 +12,61 @@ export interface BoardroomStep {
   currentRound?: number;
 }
 
-// THE DEFINITIVE GHL OPERATIONAL KNOWLEDGE BASE
-const GHL_MASTER_KB = `
-GOHIGHLEVEL (GHL) ARCHITECTURAL STANDARDS:
-1. AI EMPLOYEE SUITE:
-   - Voice AI: Real-time qualification, after-hours reception, browser-based voice widgets.
-   - Conversation AI: Context-aware multi-channel (Web, SMS, FB, IG, WhatsApp) dialogue.
-   - Reviews AI: Reputation velocity, automated sentiment-based responses, ranking protection.
-   - Content/Funnel AI: Rapid site generation, copy variants, Social Planner automation.
-2. OMNICHANNEL ENGINE:
-   - LC Phone/Email: Native 10DLC A2P compliance, Power Dialer, missed-call-text-back.
-   - CRM Core: Smart Lists, Custom Objects, API V2 (OAuth), Custom Fields mapping.
+/**
+ * THE DEFINITIVE GOHIGHLEVEL MASTER KNOWLEDGE BASE
+ * Integrated from production-grade operational schema.
+ */
+const GHL_FULL_SPEC = `
+GOHIGHLEVEL OPERATIONAL INFRASTRUCTURE (MASTER KB):
+
+0. GLOBAL PRINCIPLES:
+- Speed-to-lead + automated follow-up > traffic volume.
+- Revenue-first, automation-heavy, human-in-the-loop only where necessary.
+
+1. NATIVE AI EMPLOYEE SUITE:
+- Voice AI: Browser-based widgets, real-time qualification, after-hours receptionist, deflection.
+- Conversation AI: Adaptive chat on Web, SMS, FB, IG, WhatsApp.
+- Reviews AI: Google/FB automation, sentiment triage, auto-response.
+- Funnel/Website AI: Generative deployment.
+- Content AI: Multi-channel copy (SMS/Email/Ad/Social) + image synthesis.
+- Workflow AI: Logic-branching assistance.
+
+2. OMNICHANNEL OUTREACH ENGINE:
+- SMS/MMS: Speed-to-lead, 2-way sales chat, nudges.
+- LC Email: Deliverability focus, domain warming, high-volume sequences.
+- LC Phone/Calling: Native telephony, Power Dialer, Call Dispositions as triggers.
+- Voicemail Drops: Missed Call Text Back (MCTB) automation.
+
 3. CONVERSION INFRASTRUCTURE:
-   - Funnels/Sites: Membership portals, Client Portals, Global CSS branding.
-   - Calendars: Round-robin distribution, Team booking, Payment-gated appointments.
-4. AUTOMATION (WORKFLOWS):
-   - Logic Branching: Conditional wait steps, inbound/outbound webhooks, logic gates.
-   - Snapshots: Portable infrastructure templates for repeatability and scale.
-5. MONETIZATION:
-   - SaaS Mode: Pro-plan rebilling, White-label commercialization, Stripe integration.
+- Funnels/Sites: Offer pages, membership/client portals.
+- Forms & Surveys: intake logic, custom field/tag mapping.
+- Calendars: Round-robin, team distribution, payment-gated booking.
+
+4. CRM & PIPELINE OPS:
+- Contact Record: Unified Inbox, Custom Objects, Smart Lists.
+- Pipelines: Standardized journeys (New Lead -> Qualified -> Booked -> Won).
+- Task Mgmt: Internal notifications, SLA-driven follow-ups.
+
+5. SCALE & MONETIZATION:
+- Snapshots: Portable infrastructure templates (Workflows, Funnels, Fields).
+- SaaS Mode: White-labeling, rebilling, marketplace integration.
+- Payments: Stripe/PayPal, deposits, recurring subscriptions, automated invoicing.
+
+6. REPUTATION & SOCIAL:
+- GBP Integration: Review velocity management, local SEO ranking protection.
+- Social Planner: Evergreen scheduling, AI-assisted content cadence.
+`;
+
+const IMPLEMENTATION_SCHEMA = `
+REQUIRED OUTPUT STRUCTURE (GHL MASTER BLUEPRINT):
+1. Business Objectives (Revenue goals, close rates, speed-to-lead SLAs).
+2. Offer Architecture (Primary/Secondary offers, pricing, guarantees).
+3. Acquisition & Conversion Assets (Funnel map, form fields, widget placement).
+4. Routing & Pipeline Design (Round-robin logic, stage entry/exit rules).
+5. Workflow Library (Speed-to-lead, MCTB, No-show recovery, Review requests).
+6. AI Usage Policy (Voice/Chat handoff thresholds, compliance constraints).
+7. Snapshot & Scale Strategy (Niche-specific deployment, SaaS tier mapping).
+8. 90-Day Optimization Roadmap (Weekly KPIs, performance tuning).
 `;
 
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
@@ -40,7 +76,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
   if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000); // 2-min limit for deep synthesis
+  const timeoutId = setTimeout(() => controller.abort(), 120000); 
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -48,7 +84,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": "https://pomelli.agency",
-        "X-Title": "Prospector OS Boardroom",
+        "X-Title": "Prospector OS GHL Architect",
         "Content-Type": "application/json"
       },
       signal: controller.signal,
@@ -58,7 +94,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
           { role: "system", content: system },
           { role: "user", content: prompt }
         ],
-        temperature: 0.75,
+        temperature: 0.8,
         max_tokens: 4000
       })
     });
@@ -72,7 +108,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
     return text;
   } catch (e: any) {
     clearTimeout(timeoutId);
-    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Cognitive load exceeded GHL processing limits.");
+    if (e.name === 'AbortError') throw new Error("AGENT_TIMED_OUT: Cognitive complexity peaked.");
     throw e;
   }
 }
@@ -89,10 +125,10 @@ export const executeNeuralBoardroom = async (
   let debateTranscript = "";
   
   const steps: BoardroomStep[] = [
-    { agentName: 'ARCHITECT', role: 'Technical Lead', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
-    { agentName: 'AUDITOR', role: 'Risk & Compliance', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
+    { agentName: 'ARCHITECT', role: 'System Infrastructure', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
+    { agentName: 'AUDITOR', role: 'Technical Compliance', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
     { agentName: 'REFINER', role: 'Strategic Hardening', modelLabel: 'Mistral Large 2', modelId: 'mistralai/mistral-large', status: 'WAITING', currentRound: 1 },
-    { agentName: 'EXECUTIVE', role: 'Final Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
+    { agentName: 'EXECUTIVE', role: 'Master Synthesis', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 }
   ];
 
   const updateUI = () => onUpdate([...steps]);
@@ -100,11 +136,10 @@ export const executeNeuralBoardroom = async (
 
   const CLEAN_SIGNAL_PROTOCOL = `
   STRICT OUTPUT PROTOCOL:
-  - NEVER USE ALL-CAPS FOR PARAGRAPHS OR BULLET POINTS. USE SENTENCE CASE.
-  - DO NOT USE MARKDOWN (NO ASTERISKS, NO HASHTAGS, NO BACKTICKS).
-  - ONLY HEADINGS CAN BE ALL-CAPS.
-  - EXPAND DETAIL TO THE MAX. BE EXHAUSTIVE, NOT REDUNDANT.
-  - REFERENCE GHL SPECIFICS: ${GHL_MASTER_KB}
+  - DO NOT USE ALL-CAPS FOR PARAGRAPHS. USE SENTENCE CASE.
+  - DO NOT USE MARKDOWN (NO ASTERISKS, NO BACKTICKS, NO HASHTAGS).
+  - ONLY MAIN HEADINGS CAN BE ALL-CAPS.
+  - BE EXHAUSTIVE AND SPECIFIC TO GHL MODULES: ${GHL_FULL_SPEC}
   `;
 
   try {
@@ -112,8 +147,8 @@ export const executeNeuralBoardroom = async (
     steps[0].status = 'THINKING';
     updateUI();
     const initialDraft = await callAgent(
-      `CONTEXT: ${context}\n\nTask: Architect a massive GHL technical build for ${lead.businessName}.\n${CLEAN_SIGNAL_PROTOCOL}`,
-      "You are the Apex GHL Architect. You have total mastery of every sub-module and API endpoint. No markdown.",
+      `CONTEXT: ${context}\n\nTask: Architect an exhaustive GHL implementation plan for ${lead.businessName}. Focus on Voice AI receptionists, Snapshots, and complex Workflow trees.\n${CLEAN_SIGNAL_PROTOCOL}`,
+      "You are the Lead GHL Architect. You have total technical recall of every GoHighLevel module. No markdown.",
       steps[0].modelId
     );
     debateTranscript += `ARCHITECT DRAFT:\n${initialDraft}\n\n`;
@@ -123,12 +158,13 @@ export const executeNeuralBoardroom = async (
 
     // --- PHASE 2: ADVERSARIAL LOOPS ---
     for (let r = 1; r <= rounds; r++) {
+      // Auditor
       steps[1].status = 'THINKING';
       steps[1].currentRound = r;
       updateUI();
       const auditOutput = await callAgent(
-        `HISTORY:\n${debateTranscript}\n\nTask: Find failure points in this GHL plan. Audit A2P 10DLC, API V2 limits, and conversion friction.\n${CLEAN_SIGNAL_PROTOCOL}`,
-        "You are the Brutal GHL Auditor. You are technically precise. No markdown.",
+        `HISTORY:\n${debateTranscript}\n\nTask: Find failure points in this GHL plan. Check for A2P 10DLC compliance, API webhook limits, and friction in the lead journey.\n${CLEAN_SIGNAL_PROTOCOL}`,
+        "You are the Brutal GHL Auditor. You find hidden flaws. No markdown.",
         steps[1].modelId
       );
       debateTranscript += `AUDIT ROUND ${r}:\n${auditOutput}\n\n`;
@@ -136,11 +172,12 @@ export const executeNeuralBoardroom = async (
       steps[1].status = 'COMPLETED';
       updateUI();
 
+      // Refiner
       steps[2].status = 'THINKING';
       steps[2].currentRound = r;
       updateUI();
       const refinerOutput = await callAgent(
-        `HISTORY:\n${debateTranscript}\n\nTask: Solve the Audit findings. Re-engineer the architecture for maximum agency ROI.\n${CLEAN_SIGNAL_PROTOCOL}`,
+        `HISTORY:\n${debateTranscript}\n\nTask: Solve all Auditor concerns. Re-engineer the build for maximum agency ROI via Snapshots and SaaS Mode optimization.\n${CLEAN_SIGNAL_PROTOCOL}`,
         "You are the Strategic Refiner. You solve all gaps. No markdown.",
         steps[2].modelId
       );
@@ -150,40 +187,37 @@ export const executeNeuralBoardroom = async (
       updateUI();
     }
 
-    // --- PHASE 3: EXECUTIVE SYNTHESIS ---
+    // --- PHASE 3: EXECUTIVE MASTER SYNTHESIS ---
     steps[3].status = 'THINKING';
     updateUI();
 
     const finalPlan = await callAgent(
-      `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the DEFINITIVE GHL MASTER BLUEPRINT.
-      INSTRUCTIONS: Cover every area of the build (AI, Outreach, CRM, Funnels, SaaS). 
-      EXPAND DETAIL TO THE ABSOLUTE MAXIMUM. DO NOT SUMMARIZE.
-      OUTPUT EXACT RAW JSON ONLY. NO MARKDOWN BACKTICKS.
-      REQUIRED STRUCTURE:
+      `TRANSCRIPT:\n${debateTranscript}\n\nTask: Synthesize the DEFINITIVE MASTER BLUEPRINT for ${lead.businessName}.
+      INSTRUCTIONS:
+      - Cover EVERY area of the GHL stack: AI Suite, Outreach, CRM, Funnels, SaaS, and Monetization.
+      - BE EXHAUSTIVE. Write massive, detailed paragraphs for each section. 
+      - DO NOT REDUNDANTLY LIST IDEAS; MERGE THEM into a single superior plan.
+      - FOLLOW THIS EXACT SCHEMA: ${IMPLEMENTATION_SCHEMA}
+      - OUTPUT EXACT RAW JSON ONLY. DO NOT USE MARKDOWN CODE BLOCKS.
+      - ENSURE ALL "content" STRINGS ARE MASSIVE AND HIGH-DETAIL.
+
+      REQUIRED JSON STRUCTURE:
       {
         "format": "ui_blocks",
         "title": "GHL MASTER ARCHITECTURE",
-        "subtitle": "EXHAUSTIVE IMPLEMENTATION SCHEMATIC",
+        "subtitle": "EXHAUSTIVE TECHNICAL SCHEMATIC",
         "sections": [
           {
-            "heading": "SYSTEM INFRASTRUCTURE AND API ORCHESTRATION",
+            "heading": "SYSTEM INFRASTRUCTURE & API ORCHESTRATION",
             "body": [
-              { "type": "hero", "content": "The overall vision for the technical ecosystem." },
-              { "type": "p", "content": "Comprehensive paragraph about the base configuration." },
-              { "type": "bullets", "content": ["Technical step 1", "Technical step 2", "Technical step 3"] }
+              { "type": "hero", "content": "Master vision of the implementation." },
+              { "type": "p", "content": "Detailed, multi-para implementation strategy in sentence case." },
+              { "type": "bullets", "content": ["Action item 1", "Action item 2", "API Endpoint config"] }
             ]
-          },
-          {
-             "heading": "AI EMPLOYEE AND CONVERSATIONAL LAYER",
-             "body": [ { "type": "p", "content": "Exhaustive details on Voice AI and Chat AI config." }, { "type": "bullets", "content": ["AI config point 1", "AI config point 2"] } ]
-          },
-          {
-             "heading": "CRM PIPELINES AND REVENUE OPS",
-             "body": [ { "type": "p", "content": "Deep dive into custom fields, objects, and stages." } ]
           }
         ]
       }`,
-      "You are the Executive Vice President of GHL Implementation. You deliver the most comprehensive, detailed blueprints in the agency world. No markdown. Sentence case body text.",
+      "You are the Executive Vice President of GHL Implementation. You synthesize massive, detailed technical blueprints in raw JSON format. No markdown.",
       steps[3].modelId
     );
 
