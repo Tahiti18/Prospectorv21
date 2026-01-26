@@ -22,6 +22,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const [grouping, setGrouping] = useState<GroupBy>('none');
   const [cityFilter, setCityFilter] = useState<string>('ALL');
   const [nicheFilter, setNicheFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,9 +63,10 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       const matchStatus = statusFilter === 'ALL' || (l.outreachStatus ?? l.status ?? 'cold') === statusFilter;
       const matchCity = cityFilter === 'ALL' || getAtomicValue(l.city, 'city') === cityFilter;
       const matchNiche = nicheFilter === 'ALL' || getAtomicValue(l.niche, 'niche') === nicheFilter;
-      return matchStatus && matchCity && matchNiche;
+      const matchSearch = searchQuery.trim() === '' || l.businessName.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchStatus && matchCity && matchNiche && matchSearch;
     });
-  }, [leads, statusFilter, cityFilter, nicheFilter]);
+  }, [leads, statusFilter, cityFilter, nicheFilter, searchQuery]);
 
   // 3. SORTING ENGINE
   const sortedLeads = useMemo(() => {
@@ -130,7 +132,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     a.href = url;
     a.download = `PROSPECTOR_LEDGER_EXPORT_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
-    a.href = url;
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
@@ -165,6 +166,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   // Helper to generate a clean intersection label for the header
   const getStrikeZoneLabel = () => {
     const parts = [];
+    if (searchQuery.trim() !== '') parts.push(`"${searchQuery.toUpperCase()}"`);
     if (cityFilter !== 'ALL') parts.push(cityFilter);
     if (nicheFilter !== 'ALL') parts.push(nicheFilter);
     if (statusFilter !== 'ALL') parts.push(statusFilter.toUpperCase());
@@ -183,7 +185,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           {/* PRECISION COUNTER HEADER */}
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex flex-wrap items-center gap-3">
             MASTER REPOSITORY // {leads.length} RECORDS
-            {(cityFilter !== 'ALL' || nicheFilter !== 'ALL' || statusFilter !== 'ALL') && (
+            {(cityFilter !== 'ALL' || nicheFilter !== 'ALL' || statusFilter !== 'ALL' || searchQuery.trim() !== '') && (
               <span className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
                 <span className="text-slate-800">|</span>
                 <span className="text-emerald-500 bg-emerald-500/5 px-3 py-0.5 rounded border border-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
@@ -197,6 +199,22 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         <div className="flex flex-wrap gap-4 items-center">
           {/* ISOLATION MATRIX BAR */}
           <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex flex-wrap items-center shadow-2xl gap-8">
+             {/* SEARCH ENTITY */}
+             <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">SEARCH IDENTITY</span>
+                <div className="relative group">
+                  <input 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="BUSINESS NAME..."
+                    className="bg-[#020617] border-2 border-slate-800 rounded-xl px-4 py-1.5 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 min-w-[200px] shadow-inner transition-all placeholder:text-slate-700"
+                  />
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="3" strokeLinecap="round"/></svg>
+                </div>
+             </div>
+
+             <div className="h-10 w-px bg-slate-800"></div>
+
              {/* ISOLATE CITY */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE CITY</span>
