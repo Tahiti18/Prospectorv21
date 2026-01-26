@@ -285,7 +285,7 @@ export async function generatePitch(lead: Lead): Promise<string> {
 }
 
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
-  pushLog(`FORGE: Packaging 25-day multi-dimensional blueprint for ${lead.businessName}...`);
+  pushLog(`FORGE: Packaging full-scale intelligence dossier for ${lead.businessName}...`);
   const prompt = `Perform exhaustive strategic architecture for ${lead.businessName}. 
   Analyze their digital presence and synthesize a complete agency service package.
   Return EXACT JSON with NO empty fields:
@@ -331,7 +331,26 @@ export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord
       "colorPalette": [{ "hex": "#HEX", "color": "Name" }], 
       "typography": { "heading": "Font Name", "body": "Font Name" }, 
       "aiImagePrompts": [{ "use_case": "Hero", "prompt": "Exhaustive 4K prompt" }] 
-    } 
+    },
+    "proposal": {
+      "format": "ui_blocks",
+      "title": "EXECUTIVE ARCHITECTURE PLAN",
+      "subtitle": "TRANSFORMATION STRATEGY FOR ${lead.businessName.toUpperCase()}",
+      "sections": [
+        { "heading": "THE DIGITAL DEFICIT", "body": [{ "type": "p", "content": "3-para audit" }, { "type": "bullets", "content": ["Weakness 1", "Weakness 2", "Weakness 3"] }] },
+        { "heading": "AI TRANSFORMATION ROADMAP", "body": [{ "type": "hero", "content": "Vision statement" }, { "type": "p", "content": "Step details" }] },
+        { "heading": "ECONOMIC CALCULUS", "body": [{ "type": "p", "content": "ROI and lift projection details" }] }
+      ]
+    },
+    "pitch": {
+      "format": "ui_blocks",
+      "title": "PITCH ARCHITECTURE",
+      "sections": [
+        { "heading": "30-SECOND ELEVATOR HOOK", "body": [{ "type": "hero", "content": "The Core Hook" }, { "type": "p", "content": "Pacing instructions" }] },
+        { "heading": "DISCOVERY SESSION FLOW", "body": [{ "type": "bullets", "content": ["Question 1", "Question 2", "Question 3"] }] },
+        { "heading": "OBJECTION HANDLING", "body": [{ "type": "p", "content": "Strategies for price and risk concerns" }] }
+      ]
+    }
   }`;
   const result = await callOpenRouter(prompt);
   return result.ok ? extractJSON(result.text) : null;
