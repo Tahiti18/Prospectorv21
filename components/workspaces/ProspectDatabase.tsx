@@ -6,6 +6,7 @@ import { RunStatus } from '../automation/RunStatus';
 import { HyperLaunchModal } from '../automation/HyperLaunchModal';
 import { db } from '../../services/automation/db';
 import { toast } from '../../services/toastManager';
+import { dossierStorage } from '../../services/dossierStorage';
 
 const STATUS_FILTER_OPTIONS: (OutreachStatus | 'ALL')[] = ['ALL', 'cold', 'queued', 'sent', 'opened', 'replied', 'booked', 'won', 'lost', 'paused'];
 
@@ -18,7 +19,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showHyperLaunch, setShowHyperLaunch] = useState(false);
   
-  // Persistent Multi-Vector Isolation State
   const [grouping, setGrouping] = useState<GroupBy>('none');
   const [cityFilter, setCityFilter] = useState<string>('ALL');
   const [nicheFilter, setNicheFilter] = useState<string>('ALL');
@@ -26,18 +26,12 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Helper: Atomic Extraction
-   * Ensures data consistency for dropdowns and headers
-   */
   const getAtomicValue = (val: any, mode: 'city' | 'niche'): string => {
     if (typeof val !== 'string' || val.trim() === '') return 'UNCLASSIFIED';
     if (mode === 'city') return val.split(',')[0].trim().toUpperCase();
     return val.trim().toUpperCase();
   };
 
-  // 1. CONTEXTUAL OPTION DISCOVERY (Cascading logic)
-  // Get cities available based on current Niche selection
   const availableCities = useMemo(() => {
     const set = new Set<string>();
     leads.forEach(l => {
@@ -47,7 +41,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return Array.from(set).sort();
   }, [leads, nicheFilter]);
 
-  // Get niches available based on current City selection
   const availableNiches = useMemo(() => {
     const set = new Set<string>();
     leads.forEach(l => {
@@ -57,7 +50,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return Array.from(set).sort();
   }, [leads, cityFilter]);
 
-  // 2. STRIKE-READY FILTER CHAIN: Cumulative filtering
   const filteredLeads = useMemo(() => {
     return leads.filter(l => {
       const matchStatus = statusFilter === 'ALL' || (l.outreachStatus ?? l.status ?? 'cold') === statusFilter;
@@ -68,7 +60,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [leads, statusFilter, cityFilter, nicheFilter, searchQuery]);
 
-  // 3. SORTING ENGINE
   const sortedLeads = useMemo(() => {
     return [...filteredLeads].sort((a, b) => {
       // @ts-ignore
@@ -88,7 +79,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [filteredLeads, sortConfig]);
 
-  // 4. VIEW COMPILER: Decides grouping headers
   const groupedData = useMemo(() => {
     if (grouping === 'none') return { 'MASTER DATABASE': sortedLeads };
     
@@ -163,7 +153,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return <span className="text-emerald-500 ml-2 text-[10px] font-black">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
   };
 
-  // Helper to generate a clean intersection label for the header
   const getStrikeZoneLabel = () => {
     const parts = [];
     if (searchQuery.trim() !== '') parts.push(`"${searchQuery.toUpperCase()}"`);
@@ -182,7 +171,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          {/* PRECISION COUNTER HEADER */}
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic flex flex-wrap items-center gap-3">
             MASTER REPOSITORY // {leads.length} RECORDS
             {(cityFilter !== 'ALL' || nicheFilter !== 'ALL' || statusFilter !== 'ALL' || searchQuery.trim() !== '') && (
@@ -197,9 +185,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* ISOLATION MATRIX BAR */}
           <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex flex-wrap items-center shadow-2xl gap-8">
-             {/* SEARCH ENTITY */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">SEARCH IDENTITY</span>
                 <div className="relative group">
@@ -215,7 +201,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
              <div className="h-10 w-px bg-slate-800"></div>
 
-             {/* ISOLATE CITY */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE CITY</span>
                 <select 
@@ -232,7 +217,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 </select>
              </div>
 
-             {/* ISOLATE NICHE - Now dynamically filtered by city selection */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE NICHE</span>
                 <select 
@@ -251,7 +235,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
              <div className="h-10 w-px bg-slate-800"></div>
 
-             {/* ORGANIZE BUTTONS */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse italic">ORGANIZE VIEW</span>
                 <div className="flex gap-1">
@@ -324,7 +307,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             <tbody className="divide-y-2 divide-slate-800/50">
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
-                  {/* DYNAMIC GROUP HEADERS */}
                   {grouping !== 'none' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-8 py-4">
@@ -339,6 +321,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                   )}
                   {groupLeads.map((lead) => {
                     const displayStatus = lead.outreachStatus ?? lead.status ?? 'cold';
+                    const hasDossier = dossierStorage.getByLead(lead.id) !== null;
+                    
                     return (
                       <tr key={lead.id} className={`group hover:bg-white/5 transition-all ${selectedIds.has(lead.id) ? 'bg-emerald-900/10' : ''}`}>
                         <td className="px-8 py-6 text-center">
@@ -366,6 +350,15 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                         <td className="px-6 py-6 max-w-sm"><p className="text-[11px] font-medium text-slate-400 line-clamp-1 italic">"{lead.socialGap}"</p></td>
                         <td className="px-6 py-6 text-right"><span className={`text-3xl font-black italic tracking-tighter ${lead.leadScore > 80 ? 'text-emerald-500' : 'text-slate-600'}`}>{lead.leadScore}</span></td>
                         <td className="px-8 py-6 text-right flex items-center justify-end gap-3">
+                            {hasDossier && (
+                                <button 
+                                  onClick={() => { onLockLead(lead.id); window.dispatchEvent(new CustomEvent('navigate', { detail: { mode: 'RESEARCH', module: 'EXECUTIVE_DOSSIER' } })); }}
+                                  className="px-4 py-2 bg-emerald-600/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+                                  title="View Exportable PDF Dossier"
+                                >
+                                  DOSSIER
+                                </button>
+                            )}
                             <button onClick={() => onInspect(lead.id)} className="px-5 py-2.5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95">STRATEGY</button>
                             <button onClick={() => handleDelete(lead.id)} className="p-2 text-slate-800 hover:text-rose-500 transition-colors text-xl">×</button>
                         </td>
@@ -386,7 +379,6 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
       </div>
 
-      {/* DATA CONTROLS FOOTER */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-12 p-10 bg-[#0b1021]/80 border-2 border-slate-800 rounded-[48px] shadow-2xl">
          <div className="flex gap-4">
             <button 

@@ -76,7 +76,18 @@ const App = () => {
     const unsub = db.subscribe((updatedLeads) => {
       setLeads(updatedLeads);
     });
-    return () => unsub();
+
+    const handleGlobalNav = (e: any) => {
+        if (e.detail?.mode && e.detail?.module) {
+            handleNavigate(e.detail.mode, e.detail.module);
+        }
+    };
+    window.addEventListener('navigate', handleGlobalNav);
+
+    return () => {
+        unsub();
+        window.removeEventListener('navigate', handleGlobalNav);
+    };
   }, []);
 
   const lockedLead = useMemo(() => leads.find(l => l.id === lockedLeadId), [leads, lockedLeadId]);
@@ -103,7 +114,7 @@ const App = () => {
       case 'TRANSFORMATION_BLUEPRINT': return <TransformationBlueprint onNavigate={handleNavigate} />;
       case 'USER_GUIDE': return <UserGuide onNavigate={handleNavigate} />;
       case 'MARKET_DISCOVERY': return <MarketDiscovery market={activeMarket} onLeadsGenerated={handleLeadsGenerated} />;
-      case 'AUTOMATED_SEARCH': return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
+      case 'AUTOMATED_SEARCH' : return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
       case 'MARKET_TRENDS': return <ViralPulse lead={lockedLead} />;
       case 'PROSPECT_DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'STRATEGY_CENTER': return <StrategyCenter lead={lockedLead} onUpdateLead={handleUpdateLead} onNavigate={handleNavigate} />;
