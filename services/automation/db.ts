@@ -1,5 +1,6 @@
 import { AutomationRun, isAutomationRun } from './types';
-import { Lead, GHLCredentials, GHLBuildStatus } from '../../types';
+// Comment: Fix error: Module '"../../types"' has no exported member 'GHLCredentials'. Replaced with 'GhlOAuthTokens'.
+import { Lead, GhlOAuthTokens, GHLBuildStatus } from '../../types';
 import { toast } from '../toastManager';
 
 const DB_KEY = 'pomelli_automation_db_v1';
@@ -230,11 +231,13 @@ export const db = {
 
   // --- GHL SPECIFIC STORAGE ---
 
-  getGHLCreds: (): GHLCredentials | null => {
-    return safeParse(localStorage.getItem(GHL_CRED_KEY)) as GHLCredentials | null;
+  // Comment: Replaced non-existent GHLCredentials with GhlOAuthTokens
+  getGHLCreds: (): GhlOAuthTokens | null => {
+    return safeParse(localStorage.getItem(GHL_CRED_KEY)) as GhlOAuthTokens | null;
   },
 
-  saveGHLCreds: (creds: GHLCredentials) => {
+  // Comment: Replaced non-existent GHLCredentials with GhlOAuthTokens
+  saveGHLCreds: (creds: GhlOAuthTokens) => {
     localStorage.setItem(GHL_CRED_KEY, JSON.stringify(creds));
   },
 

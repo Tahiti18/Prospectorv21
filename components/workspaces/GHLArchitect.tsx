@@ -13,7 +13,6 @@ interface GHLArchitectProps {
 }
 
 export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockLead }) => {
-  const [rounds] = useState(1);
   const [steps, setSteps] = useState<BoardroomStep[]>([
     { agentName: 'PLANNER', role: 'Architectural Strategist', modelLabel: 'Gemini 3.0 Flash', modelId: 'google/gemini-3-flash-preview', status: 'WAITING', currentRound: 1 },
     { agentName: 'AUDITOR', role: 'Compliance & Risk Auditor', modelLabel: 'Llama 3.1 70B', modelId: 'meta-llama/llama-3.1-70b-instruct', status: 'WAITING', currentRound: 1 },
@@ -22,7 +21,9 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
   ]);
   
   const [isExecuting, setIsExecuting] = useState(false);
-  const [finalResult, setFinalResult] = useState<string | null>(null);
+  const [finalResultRaw, setFinalResultRaw] = useState<string | null>(null);
+  const [uiContent, setUiContent] = useState<any>(null);
+  const [techBlueprint, setTechBlueprint] = useState<any>(null);
   const [buildLogs, setBuildLogs] = useState<string[]>([]);
   const [isBuilding, setIsBuilding] = useState(false);
   const [isAuth, setIsAuth] = useState(!!db.getGHLCreds());
@@ -43,11 +44,18 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
       return;
     }
     setIsExecuting(true);
-    setFinalResult(null);
+    setFinalResultRaw(null);
+    setUiContent(null);
+    setTechBlueprint(null);
     setBuildLogs([]);
     try {
-      const result = await executeNeuralBoardroom(lead, rounds, setSteps);
-      setFinalResult(result);
+      const result = await executeNeuralBoardroom(lead, 1, setSteps);
+      const parsed = JSON.parse(result);
+      
+      setFinalResultRaw(result);
+      setUiContent(parsed.ui_blocks);
+      setTechBlueprint(parsed.technical_blueprint);
+      
       toast.success("INDIGO CONSENSUS ACHIEVED.");
     } catch (e: any) {
       toast.error(e.message);
@@ -57,13 +65,9 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
   };
 
   const handleDryRun = async () => {
-    if (!finalResult) return;
+    if (!techBlueprint) return;
     try {
-       const parsed = JSON.parse(finalResult);
-       const blueprint = parsed.technical_blueprint;
-       if (!blueprint) throw new Error("TECHNICAL_BLUEPRINT_MISSING");
-       
-       const logs = await ghlAutoBuilder.dryRun(blueprint);
+       const logs = await ghlAutoBuilder.dryRun(techBlueprint);
        setBuildLogs(logs);
        toast.info("GHL SIMULATION COMPLETE.");
     } catch (e: any) {
@@ -72,12 +76,10 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
   };
 
   const handleExecuteBuild = async () => {
-    if (!finalResult) return;
+    if (!techBlueprint) return;
     setIsBuilding(true);
     try {
-       const parsed = JSON.parse(finalResult);
-       const blueprint = parsed.technical_blueprint;
-       await ghlAutoBuilder.executeBuild(blueprint, (msg) => {
+       await ghlAutoBuilder.executeBuild(techBlueprint, (msg) => {
          setBuildLogs(prev => [...prev, `[BUILD] ${msg}`]);
        });
        toast.success("GHL SUB-ACCOUNT PROVISIONED.");
@@ -121,7 +123,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
               </select>
            </div>
 
-           {!isExecuting && !finalResult ? (
+           {!isExecuting && !uiContent ? (
              <button 
                 onClick={handleLaunch} 
                 disabled={!lead}
@@ -132,7 +134,7 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
                {lead ? 'INITIALIZE BOARDROOM' : 'TARGET REQUIRED'}
              </button>
            ) : (
-             <button onClick={() => { setFinalResult(null); setBuildLogs([]); }} className="px-10 py-4 bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">RE-INITIALIZE</button>
+             <button onClick={() => { setUiContent(null); setTechBlueprint(null); setBuildLogs([]); }} className="px-10 py-4 bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">RE-INITIALIZE</button>
            )}
         </div>
       </div>
@@ -149,15 +151,21 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
         ))}
       </div>
 
-      {finalResult && (
+      {uiContent && (
         <div ref={finalRef} className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in slide-in-from-bottom-20 duration-1000">
            {/* LEFT: VISUAL SCHEMATIC */}
            <div className="lg:col-span-8 bg-black border-4 border-emerald-500/50 rounded-[64px] shadow-2xl p-20 relative overflow-hidden">
-              <div className="mb-16 border-b border-slate-800 pb-12">
-                <h2 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none mb-4">GHL MASTER <span className="text-emerald-500">SCHEMATIC</span></h2>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">VISUAL DEPLOYMENT PREVIEW</p>
+              <div className="mb-16 border-b border-slate-800 pb-12 flex justify-between items-end">
+                <div>
+                    <h2 className="text-4xl font-black italic text-white uppercase tracking-tighter leading-none mb-4">GHL MASTER <span className="text-emerald-500">SCHEMATIC</span></h2>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">VISUAL DEPLOYMENT PREVIEW // {techBlueprint?.meta?.target_business}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1">PLAN_HASH</p>
+                    <code className="text-[10px] font-black text-emerald-500/60 bg-emerald-500/5 px-3 py-1 rounded-lg border border-emerald-500/10 italic">{techBlueprint?.meta?.plan_hash}</code>
+                </div>
               </div>
-              <FormattedOutput content={finalResult} />
+              <FormattedOutput content={JSON.stringify(uiContent)} />
            </div>
 
            {/* RIGHT: AUTO-BUILDER CONSOLE */}
@@ -184,12 +192,12 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
                     </button>
                  </div>
 
-                 <div className="flex-1 bg-black border border-slate-800 rounded-3xl p-6 font-mono text-[10px] h-[400px] overflow-y-auto custom-scrollbar space-y-2 shadow-inner">
+                 <div className="flex-1 bg-black border border-slate-800 rounded-3xl p-6 font-mono text-[10px] h-[500px] overflow-y-auto custom-scrollbar space-y-2 shadow-inner">
                     {buildLogs.length === 0 ? (
                        <div className="h-full flex items-center justify-center text-slate-800 italic uppercase">Awaiting Action Node...</div>
                     ) : (
                        buildLogs.map((log, i) => (
-                          <div key={i} className={`truncate ${log.includes('SUCCESS') ? 'text-emerald-400' : log.includes('ERROR') ? 'text-rose-400' : 'text-slate-500'}`}>
+                          <div key={i} className={`pb-2 border-b border-white/5 last:border-0 ${log.includes('SUCCESS') ? 'text-emerald-400' : log.includes('ERROR') ? 'text-rose-400' : 'text-slate-500'}`}>
                              {log}
                           </div>
                        ))

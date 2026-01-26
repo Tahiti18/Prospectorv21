@@ -1,4 +1,4 @@
-import { Lead } from "../types";
+import { Lead, IndigoTechnicalBlueprint } from "../types";
 import { dossierStorage } from "./dossierStorage";
 import { getStoredKeys, deductCost } from "./geminiService";
 
@@ -12,22 +12,17 @@ export interface BoardroomStep {
   currentRound?: number;
 }
 
-/**
- * INDIGO GHL PLANNER — MASTER KNOWLEDGE BASE
- */
 const INDIGO_KNOWLEDGE_BASE = `
-INDIGO GHL Master specification for automated execution:
-
-- Automation Engine: Workflows only (Campaigns/Triggers deprecated).
-- AI Suite: Voice AI, Conversation AI, Reviews AI, Funnel AI, Content AI, Workflow AI.
-- Object Model: Contacts, Custom Fields, Tags, Pipelines, Stages.
-- Action Dictionary: send_sms, send_email, make_call, assign_user, add_tag, update_custom_field, move_pipeline_stage, webhook.
+INDIGO GHL MASTER KB v1.0:
+- Data Layer: Contacts, Custom Fields, Tags, Pipelines.
+- Logic Layer: Workflows (native only).
+- Action Set: send_sms, send_email, move_pipeline_stage, update_field.
+- Constraints: Custom field keys must be lowercase_with_underscores and unique.
 `;
 
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
   const keys = getStoredKeys();
   const apiKey = keys.openRouter || process.env.API_KEY;
-
   if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -40,10 +35,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
     },
     body: JSON.stringify({
       model: model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt }
-      ],
+      messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 4000
     })
@@ -63,7 +55,7 @@ export const executeNeuralBoardroom = async (
   onUpdate: (steps: BoardroomStep[]) => void
 ): Promise<string> => {
   const dossier = dossierStorage.getByLead(lead.id);
-  if (!dossier) throw new Error("Strategic Manifest Required. Run Campaign Forge First.");
+  if (!dossier) throw new Error("Strategic Manifest Required.");
 
   const context = JSON.stringify(dossier.data);
   let debateTranscript = "";
@@ -78,67 +70,69 @@ export const executeNeuralBoardroom = async (
   const updateUI = () => onUpdate([...steps]);
   updateUI();
 
-  const PROTOCOL_HEADER = `
-  STRICT INDIGO PROTOCOL:
-  - NO MARKDOWN.
-  - USE SENTENCE CASE.
-  - KB: ${INDIGO_KNOWLEDGE_BASE}
-  `;
+  const PROTOCOL = `STRICT INDIGO PROTOCOL: NO MARKDOWN. KB: ${INDIGO_KNOWLEDGE_BASE}`;
 
   try {
-    // --- PHASE 1-3 AGENT CALLS ---
-    steps[0].status = 'THINKING';
-    updateUI();
-    const plannerOut = await callAgent(`CONTEXT: ${context}\nTASK: Architect GHL deployment for ${lead.businessName}. ${PROTOCOL_HEADER}`, "You are the PLANNER agent.", steps[0].modelId);
+    // Stage 1: Planner
+    steps[0].status = 'THINKING'; updateUI();
+    const plannerOut = await callAgent(`CONTEXT: ${context}\nTASK: Architect sub-account for ${lead.businessName}. ${PROTOCOL}`, "You are the PLANNER agent.", steps[0].modelId);
     debateTranscript += `PLANNER:\n${plannerOut}\n\n`;
     steps[0].output = plannerOut; steps[0].status = 'COMPLETED'; updateUI();
 
-    steps[1].status = 'THINKING';
-    updateUI();
-    const auditorOut = await callAgent(`HISTORY: ${debateTranscript}\nTASK: Compliance audit. ${PROTOCOL_HEADER}`, "You are the AUDITOR agent.", steps[1].modelId);
+    // Stage 2: Auditor
+    steps[1].status = 'THINKING'; updateUI();
+    const auditorOut = await callAgent(`HISTORY: ${debateTranscript}\nTASK: Compliance/Risk audit. ${PROTOCOL}`, "You are the AUDITOR agent.", steps[1].modelId);
     debateTranscript += `AUDITOR:\n${auditorOut}\n\n`;
     steps[1].output = auditorOut; steps[1].status = 'COMPLETED'; updateUI();
 
-    steps[2].status = 'THINKING';
-    updateUI();
-    const engineerOut = await callAgent(`HISTORY: ${debateTranscript}\nTASK: Define workflow logic. ${PROTOCOL_HEADER}`, "You are the ENGINEER agent.", steps[2].modelId);
+    // Stage 3: Engineer
+    steps[2].status = 'THINKING'; updateUI();
+    const engineerOut = await callAgent(`HISTORY: ${debateTranscript}\nTASK: Atomic workflow logic. ${PROTOCOL}`, "You are the ENGINEER agent.", steps[2].modelId);
     debateTranscript += `ENGINEER:\n${engineerOut}\n\n`;
     steps[2].output = engineerOut; steps[2].status = 'COMPLETED'; updateUI();
 
-    // --- PHASE 4: EXECUTIVE MASTER SYNTHESIS ---
-    steps[3].status = 'THINKING';
-    updateUI();
+    // Stage 4: Executive Synthesis (STRICT JSON OUTPUT)
+    steps[3].status = 'THINKING'; updateUI();
     const execPrompt = `
       TRANSCRIPT: ${debateTranscript}
       TASK: Synthesize the DEFINITIVE INDIGO MASTER BLUEPRINT for ${lead.businessName}.
       
-      OUTPUT FORMAT (STRICT):
-      Return a single JSON object with two main top-level keys:
-      1. "format": "ui_blocks" (The visual schematic for the user)
-      2. "technical_blueprint": The Indigo Canonical GHL Object Model for automated execution.
+      CRITICAL: You must output a single valid JSON object with the following structure. Do not include any text outside this JSON.
       
-      TECHNICAL BLUEPRINT SCHEMA:
       {
-         "meta": { "plan_hash": "deterministic_string" },
-         "custom_fields": [{ "name": "Field Name", "dataType": "TEXT|NUMBER", "key": "unique_ghl_key" }],
-         "tags": ["tag_1", "tag_2"],
-         "pipelines": [{ "name": "Name", "stages": ["Stage 1", "Stage 2"] }]
-      }
-      
-      UI_BLOCKS SCHEMA:
-      {
-         "format": "ui_blocks",
-         "title": "GHL MASTER ARCHITECTURE",
-         "sections": [ ... ]
+        "ui_blocks": {
+          "format": "ui_blocks",
+          "title": "GHL MASTER ARCHITECTURE",
+          "subtitle": "INDIGO BLUEPRINT v1.0",
+          "sections": [ ... ]
+        },
+        "technical_blueprint": {
+          "schema_version": "1.0",
+          "meta": { "plan_hash": "deterministic_sha256_mock", "target_business": "${lead.businessName}" },
+          "data_model": {
+            "custom_fields": [ { "name": "", "dataType": "TEXT", "key": "lowercase_key" } ],
+            "tags": [ "string" ]
+          },
+          "pipelines": [ { "name": "", "stages": ["string"] } ],
+          "workflows_manifest": [],
+          "qa_requirements": []
+        }
       }
     `;
-    const finalBlueprint = await callAgent(execPrompt, "You are the EXECUTIVE authority. Emit raw JSON combining visual schematic and technical blueprint.", steps[3].modelId);
+    const finalResult = await callAgent(execPrompt, "You are the EXECUTIVE authority. Output ONLY valid JSON matching the requested schema.", steps[3].modelId);
     
-    steps[3].status = 'COMPLETED';
-    steps[3].output = finalBlueprint;
-    updateUI();
+    // Verify JSON before returning
+    try {
+      JSON.parse(finalResult);
+      steps[3].status = 'COMPLETED';
+      steps[3].output = "Synthesis complete. Blueprint generated.";
+    } catch (e) {
+      steps[3].status = 'FAILED';
+      throw new Error("EXECUTIVE_SYNTHESIS_MALFORMED_JSON");
+    }
 
-    return finalBlueprint;
+    updateUI();
+    return finalResult;
 
   } catch (error: any) {
     steps.forEach(s => { if (s.status === 'THINKING') s.status = 'FAILED'; });
