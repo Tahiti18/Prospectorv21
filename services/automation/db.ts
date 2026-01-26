@@ -1,15 +1,15 @@
-
 import { AutomationRun, isAutomationRun } from './types';
-import { Lead } from '../../types';
+import { Lead, GHLCredentials, GHLBuildStatus } from '../../types';
 import { toast } from '../toastManager';
 
 const DB_KEY = 'pomelli_automation_db_v1';
 const STORAGE_KEY_LEADS = 'pomelli_os_leads_v14_final';
 const MUTEX_KEY = 'pomelli_automation_mutex_v1';
+const GHL_CRED_KEY = 'indigo_ghl_creds_v1';
+const GHL_BUILD_STATE_KEY = 'indigo_ghl_build_state_v1';
 
 type DbV1 = { version: 1; runs: Record<string, AutomationRun> };
 
-// Event Bus for Leads
 type Listener = (leads: Lead[]) => void;
 const listeners = new Set<Listener>();
 
@@ -23,9 +23,6 @@ function safeParse(raw: string | null): unknown {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
-/**
- * Normalizes URLs for fingerprinting (removes protocol, www, and trailing slashes)
- */
 function normalizeUrl(url: string = ''): string {
   return url
     .toLowerCase()
@@ -137,11 +134,6 @@ export const db = {
     }
   },
 
-  /**
-   * HIGH-FIDELITY UPSERT ENGINE
-   * Implements multi-vector deduplication based on URL and Identity Fingerprints.
-   * Returns the final leads that were upserted so the UI can track the correct ID.
-   */
   upsertLeads: (newLeads: Lead[]): { added: number, updated: number, upsertedLeads: Lead[] } => {
     const current = db.getLeads();
     const currentMap = new Map<string, Lead>();
@@ -234,5 +226,26 @@ export const db = {
     localStorage.removeItem(DB_KEY);
     localStorage.removeItem(MUTEX_KEY);
     toast.success("Automation Database Cleared.");
+  },
+
+  // --- GHL SPECIFIC STORAGE ---
+
+  getGHLCreds: (): GHLCredentials | null => {
+    return safeParse(localStorage.getItem(GHL_CRED_KEY)) as GHLCredentials | null;
+  },
+
+  saveGHLCreds: (creds: GHLCredentials) => {
+    localStorage.setItem(GHL_CRED_KEY, JSON.stringify(creds));
+  },
+
+  getGHLBuildStatus: (locationId: string): GHLBuildStatus | null => {
+    const all = safeParse(localStorage.getItem(GHL_BUILD_STATE_KEY)) as Record<string, GHLBuildStatus> | null;
+    return all ? all[locationId] : null;
+  },
+
+  saveGHLBuildStatus: (locationId: string, status: GHLBuildStatus) => {
+    const all = (safeParse(localStorage.getItem(GHL_BUILD_STATE_KEY)) || {}) as Record<string, GHLBuildStatus>;
+    all[locationId] = status;
+    localStorage.setItem(GHL_BUILD_STATE_KEY, JSON.stringify(all));
   }
 };
