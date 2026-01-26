@@ -153,7 +153,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
       <div className={`space-y-20 animate-in fade-in duration-1000 max-w-6xl mx-auto pb-40 ${className}`}>
         {uiData?.title && (
           <div className="border-b-4 border-slate-800 pb-16 mb-24 text-center">
-            <h1 className="text-9xl font-black text-white uppercase tracking-tighter italic leading-none mb-6">{uiData.title}</h1>
+            <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none mb-6">{uiData.title}</h1>
             {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[1em] text-sm italic animate-pulse">{uiData.subtitle}</p>}
           </div>
         )}
