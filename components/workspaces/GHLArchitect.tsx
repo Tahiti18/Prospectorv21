@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Lead } from '../../types';
-import { executeNeuralBoardroom, BoardroomStep } from '../../services/ghlArchitectService';
+// Comment: Fixed error: Module '"../../services/ghlArchitectService"' has no exported member 'executeNeuralBoardroom'. Using 'executeGrowthBoardroom' which is available.
+import { executeGrowthBoardroom, BoardroomStep } from '../../services/ghlArchitectService';
 import { ghlAutoBuilder } from '../../services/ghlAutoBuilderService';
 import { FormattedOutput } from '../common/FormattedOutput';
 import { toast } from '../../services/toastManager';
@@ -32,7 +33,8 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
   const finalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const activeIdx = steps.findIndex(s => s.status === 'THINKING');
+    // Comment: Fixed comparison error. BoardroomStep.status uses 'ANALYZING' instead of 'THINKING'.
+    const activeIdx = steps.findIndex(s => s.status === 'ANALYZING');
     if (activeIdx !== -1 && cardRefs[activeIdx].current) {
       cardRefs[activeIdx].current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -49,7 +51,8 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
     setTechBlueprint(null);
     setBuildLogs([]);
     try {
-      const result = await executeNeuralBoardroom(lead, 1, setSteps);
+      // Comment: Fixed function name to 'executeGrowthBoardroom'.
+      const result = await executeGrowthBoardroom(lead, 1, setSteps);
       const parsed = JSON.parse(result);
       
       setFinalResultRaw(result);
@@ -212,7 +215,8 @@ export const GHLArchitect: React.FC<GHLArchitectProps> = ({ lead, leads, onLockL
 };
 
 const AgentNode = ({ step, isLarge }: { step: BoardroomStep, isLarge: boolean }) => {
-    const isActive = step.status === 'THINKING';
+    // Comment: Fixed comparison error. BoardroomStep.status uses 'ANALYZING' instead of 'THINKING'.
+    const isActive = step.status === 'ANALYZING';
     const isDone = step.status === 'COMPLETED';
     const isFailed = step.status === 'FAILED';
 

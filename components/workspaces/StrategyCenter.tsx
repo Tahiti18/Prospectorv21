@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Lead, OutreachStatus, MainMode, SubModule } from '../../types';
 import { dossierStorage } from '../../services/dossierStorage';
@@ -13,10 +12,10 @@ interface StrategyCenterProps {
 const STATUS_OPTIONS: OutreachStatus[] = ['cold', 'queued', 'sent', 'opened', 'replied', 'booked', 'won', 'lost', 'paused'];
 
 const OPPORTUNITIES = [
-  { label: "Automated Visual Content Lab", target: { mode: 'MEDIA' as MainMode, mod: 'VIDEO_PRODUCTION' as SubModule } },
-  { id: 'CONCIERGE', label: "AI Engagement Simulation", target: { mode: 'OUTREACH' as MainMode, mod: 'AI_CONCIERGE' as SubModule } },
-  { label: "High-Res Mockup Studio", target: { mode: 'DESIGN' as MainMode, mod: 'MOCKUPS_4K' as SubModule } },
-  { label: "Strategic Sequence Architect", target: { mode: 'OUTREACH' as MainMode, mod: 'SEQUENCER' as SubModule } }
+  { label: "Automated Content Studio", target: { mode: 'MEDIA' as MainMode, mod: 'VIDEO_PRODUCTION' as SubModule } },
+  { id: 'CONCIERGE', label: "Client Response Simulation", target: { mode: 'OUTREACH' as MainMode, mod: 'AI_CONCIERGE' as SubModule } },
+  { label: "Commercial Visualization Lab", target: { mode: 'DESIGN' as MainMode, mod: 'MOCKUPS_4K' as SubModule } },
+  { label: "Engagement Sequence Architect", target: { mode: 'OUTREACH' as MainMode, mod: 'SEQUENCER' as SubModule } }
 ];
 
 export const StrategyCenter: React.FC<StrategyCenterProps> = ({ lead, onUpdateLead, onNavigate }) => {
@@ -37,25 +36,25 @@ export const StrategyCenter: React.FC<StrategyCenterProps> = ({ lead, onUpdateLe
   };
 
   const handleActivate = (opp: any) => {
-    toast.info(`INITIATING HUB: ${opp.label}`);
+    toast.info(`Initializing: ${opp.label}`);
     if (onNavigate) {
       setTimeout(() => onNavigate(opp.target.mode, opp.target.mod), 500);
     }
   };
 
-  if (!lead) return <div className="h-96 flex flex-col items-center justify-center opacity-50 uppercase font-black text-[10px] tracking-[0.4em]">Awaiting Target Selection</div>;
+  if (!lead) return <div className="h-96 flex flex-col items-center justify-center opacity-50 uppercase font-black text-[10px] tracking-[0.4em]">Awaiting Selection</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h1 className="text-5xl font-black uppercase tracking-tighter text-white leading-none">
-            STRATEGY <span className="text-emerald-500">HUB</span>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
+            STRATEGIC <span className="text-emerald-500">HUB</span>
           </h1>
-          <p className="text-xl font-medium text-slate-400 italic">Target: {lead.businessName}</p>
+          <p className="text-xl font-medium text-slate-400 italic">Portfolio: {lead.businessName}</p>
         </div>
         <div className="flex gap-3">
-          <a href={lead.websiteUrl} target="_blank" rel="noopener noreferrer" className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all">Visit Domain</a>
+          <a href={lead.websiteUrl} target="_blank" rel="noopener noreferrer" className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all">Visit Site</a>
           <button className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg">Executive Brief</button>
         </div>
       </div>
@@ -64,27 +63,27 @@ export const StrategyCenter: React.FC<StrategyCenterProps> = ({ lead, onUpdateLe
         <div className="lg:col-span-2 space-y-8">
           {dossier ? (
             <div className="bg-[#0b1021] border border-emerald-500/30 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-               <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">Current Solution Blueprint</h3>
+               <h3 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">Strategic Blueprint</h3>
                <p className="text-lg text-slate-300 font-serif italic mb-8">"{dossier.data.narrative}"</p>
-               <button onClick={() => onNavigate?.('OUTREACH', 'CAMPAIGN_ORCHESTRATOR')} className="text-[10px] font-black text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg hover:bg-emerald-500 hover:text-white transition-all">REVIEW ARCHITECTURE →</button>
+               <button onClick={() => onNavigate?.('OUTREACH', 'CAMPAIGN_ORCHESTRATOR')} className="text-[10px] font-black text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg hover:bg-emerald-500 hover:text-white transition-all">REVIEW ANALYSIS →</button>
             </div>
           ) : (
             <div className="bg-slate-900/30 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
-               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Awaiting Campaign Architect initialization.</p>
+               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Awaiting strategy initialization.</p>
             </div>
           )}
 
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-8">
              <h3 className="font-bold text-white mb-6 uppercase tracking-widest text-xs flex items-center gap-2">
                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-               Solution Pathways
+               Growth Frameworks
              </h3>
              <div className="space-y-3">
                 {OPPORTUNITIES.map((opp, i) => (
                   <button key={i} onClick={() => handleActivate(opp)} className="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 transition-all group text-left">
                     <div className="w-8 h-8 rounded-lg bg-emerald-600/10 flex items-center justify-center font-black text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all">{i+1}</div>
                     <span className="text-slate-300 font-medium group-hover:text-white">{opp.label}</span>
-                    <span className="ml-auto text-[8px] font-black text-slate-600 uppercase tracking-widest group-hover:text-emerald-500">INITIALIZE</span>
+                    <span className="ml-auto text-[8px] font-black text-slate-600 uppercase tracking-widest group-hover:text-emerald-500">INITIATE</span>
                   </button>
                 ))}
              </div>
@@ -93,16 +92,16 @@ export const StrategyCenter: React.FC<StrategyCenterProps> = ({ lead, onUpdateLe
 
         <div className="space-y-8">
           <div className="bg-[#0b1021] border border-slate-800 rounded-3xl p-8 shadow-xl">
-             <h3 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Strategist Notes</h3>
+             <h3 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Analysis Notes</h3>
              <textarea 
                 value={localNotes}
                 onChange={handleNotesChange}
                 className="w-full h-64 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs text-slate-300 outline-none focus:border-emerald-500 resize-none font-medium leading-relaxed"
-                placeholder="Record project observations..."
+                placeholder="Record strategic observations..."
              />
           </div>
           <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-3xl p-8">
-             <h3 className="font-bold text-emerald-400 mb-4 uppercase tracking-widest text-xs">Relationship Status</h3>
+             <h3 className="font-bold text-emerald-400 mb-4 uppercase tracking-widest text-xs">Engagement Status</h3>
              <select 
                 value={lead.outreachStatus || 'cold'} 
                 onChange={(e) => onUpdateLead?.(lead.id, { outreachStatus: e.target.value as any })}

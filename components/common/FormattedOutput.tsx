@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V8
+   FORMATTED OUTPUT – PROFESSIONAL CLEAN RENDERING V10
    ========================================================= */
 
 import React from 'react';
@@ -26,7 +26,7 @@ interface FormattedOutputProps {
   className?: string;
 }
 
-const executiveSanitize = (text: string): string => {
+const professionalSanitize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== 'string') return String(text);
   return text
@@ -68,7 +68,7 @@ const promoteToStrategicReport = (input: any): UIBlocks => {
     return {
       format: 'ui_blocks',
       title: "Strategy Overview",
-      subtitle: "NEURAL SYNTHESIS",
+      subtitle: "EXECUTIVE SUMMARY",
       sections: [{ heading: "STRATEGIC OVERVIEW", body: [{ type: 'p', content: input }] }]
     };
   }
@@ -76,7 +76,7 @@ const promoteToStrategicReport = (input: any): UIBlocks => {
     heading: key.replace(/_/g, ' ').toUpperCase(),
     body: deconstructJsonToBlocks(val)
   }));
-  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "STRUCTURAL DECONSTRUCTION", sections };
+  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "DATA SYNTHESIS", sections };
 };
 
 export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, className = "" }) => {
@@ -101,26 +101,26 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
 
     const renderBlock = (block: UIBlock, idx: number) => {
       if (!block) return null;
-      const cleaned = typeof block.content === 'string' ? executiveSanitize(block.content) : block.content;
+      const cleaned = typeof block.content === 'string' ? professionalSanitize(block.content) : block.content;
 
       switch (block.type) {
         case 'hero':
           return (
             <div key={idx} className="mb-10 p-8 bg-emerald-600 rounded-[32px] shadow-xl relative overflow-hidden group border-b-8 border-emerald-800">
-              <p className="text-xl font-black text-white italic tracking-tighter leading-tight relative z-10 font-sans">"{cleaned}"</p>
+              <p className="text-xl font-bold text-white tracking-tight leading-tight relative z-10 font-sans">"{cleaned}"</p>
               <div className="mt-3 flex gap-2 relative z-10 opacity-20 font-black text-[8px] uppercase tracking-widest text-white">STRATEGIC_ANCHOR</div>
             </div>
           );
         case 'p':
-          return <p key={idx} className="text-slate-800 leading-relaxed mb-6 text-base font-medium border-l-4 border-emerald-500/10 pl-6 py-0.5 font-sans">{cleaned}</p>;
+          return <p key={idx} className="text-slate-800 leading-relaxed mb-6 text-base font-normal border-l-4 border-emerald-500/10 pl-6 py-0.5 font-sans">{cleaned}</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
             <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               {list.map((item: string, i: number) => (
                 <div key={i} className="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex items-start gap-3 hover:border-emerald-500/20 transition-all shadow-sm group">
-                  <div className="mt-1.5 w-1 h-1 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                  <span className="font-bold text-slate-700 text-[12px] leading-snug uppercase tracking-tight font-sans">{executiveSanitize(item)}</span>
+                  <div className="mt-1.5 w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="font-bold text-slate-700 text-[12px] leading-snug uppercase tracking-tight font-sans">{professionalSanitize(item)}</span>
                 </div>
               ))}
             </div>
@@ -142,7 +142,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
         {uiData?.title && (
           <div className="border-b border-slate-100 pb-8 mb-12 text-center">
             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none mb-3 font-sans">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.6em] text-[9px] italic font-sans">{uiData.subtitle}</p>}
+            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.5em] text-[9px] font-sans">{uiData.subtitle}</p>}
           </div>
         )}
 
@@ -150,7 +150,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
           <section key={sIdx} className="mb-16">
             <div className="flex items-center gap-4 mb-8">
                 <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-white text-base italic shadow-lg shrink-0">0{sIdx+1}</div>
-                <h2 className="text-xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
+                <h2 className="text-xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{professionalSanitize(section?.heading || "SEGMENT")}</h2>
                 <div className="h-px bg-slate-100 flex-1"></div>
             </div>
             <div className="px-2">
@@ -163,7 +163,7 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
   } catch (fatalError) {
     return (
       <div className="p-12 border-2 border-rose-500/10 rounded-[32px] text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4 font-sans text-[10px]">SYNTHESIS_PARSING_FAULT</p>
+        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4 font-sans text-[10px]">ANALYSIS_FAULT</p>
         <div className="bg-black/90 p-8 rounded-[24px] text-slate-400 font-mono text-xs whitespace-pre-wrap text-left shadow-xl border border-white/5 overflow-auto max-h-64">
           {content}
         </div>
