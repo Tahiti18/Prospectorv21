@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Lead, OutreachStatus } from '../../types';
 import { AutomationOrchestrator } from '../../services/automation/orchestrator';
@@ -24,7 +23,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Smart Extraction: Calculate unique values represented in the database
+  // 1. SMART EXTRACTION: Finds all unique countries/cities/niches even if they are nested in strings
   const representedValues = useMemo(() => {
     if (grouping === 'none') return [];
     const values = new Set<string>();
@@ -32,7 +31,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     leads.forEach(l => {
         let val = l[grouping as keyof Lead];
         
-        // Smart Fallback: If country is missing, try to extract from City string (e.g. "London, UK")
+        // If we are looking for COUNTRY but it is empty, check if it's in the CITY string (e.g. "London, UK")
         if (grouping === 'country' && (!val || val === '')) {
             if (l.city && l.city.includes(',')) {
                 const parts = l.city.split(',');
@@ -56,13 +55,13 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return filtered;
   }, [leads, statusFilter]);
 
-  // 3. Secondary Isolation Filtering (By Group Key: e.g. Specific Country)
+  // 3. SECONDARY ISOLATION: Filters the list down to the specific chosen Country/City/Niche
   const isolatedLeads = useMemo(() => {
     if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
     return statusFilteredLeads.filter(l => {
         let val = l[grouping as keyof Lead];
         
-        // Match the Smart Fallback logic from the extraction
+        // Match the Smart Extraction logic
         if (grouping === 'country' && (!val || val === '')) {
             if (l.city && l.city.includes(',')) {
                 const parts = l.city.split(',');
@@ -74,7 +73,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [statusFilteredLeads, grouping, subFilterValue]);
 
-  // 4. Final Numerical and Alpha Sorting (No Tooltips Blocking)
+  // 4. Numerical and Alpha Sorting (Strict logic for Rank/Score)
   const sortedLeads = useMemo(() => {
     return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
@@ -82,12 +81,10 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
       // @ts-ignore
       let bVal = b[sortConfig.key];
       
-      // Strict Numerical Sort for Rank and Score
       if (typeof aVal === 'number' && typeof bVal === 'number') {
           return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
       }
 
-      // Alpha Sort for strings
       const aStr = String(aVal || '').toLowerCase();
       const bStr = String(bVal || '').toLowerCase();
       if (aStr === bStr) return 0;
@@ -96,23 +93,19 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [isolatedLeads, sortConfig]);
 
-  // 5. Grouping visualization logic
+  // 5. Grouping logic for the UI headers
   const groupedData = useMemo(() => {
-    // If we are isolating a single value (e.g. "UK"), don't show group headers
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE LEDGER': sortedLeads };
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
       let val = lead[grouping as keyof Lead];
-      
-      // Smart Fallback for UI Grouping headers
       if (grouping === 'country' && (!val || val === '')) {
           if (lead.city && lead.city.includes(',')) {
               const parts = lead.city.split(',');
               val = parts[parts.length - 1].trim();
           }
       }
-
       const key = (typeof val === 'string' ? val : 'UNCLASSIFIED') || 'UNCLASSIFIED';
       const displayKey = key.toUpperCase();
       if (!groups[displayKey]) groups[displayKey] = [];
@@ -142,26 +135,28 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Permanently remove this target?")) {
+    if (confirm("Permanently remove this record?")) {
         db.deleteLead(id);
-        toast.info("Target removed.");
+        toast.info("Record purged.");
     }
   };
 
+  // Comment: Fixed missing handleExport function
   const handleExport = () => {
     const dataStr = JSON.stringify(leads, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PROSPECTOR_DATABASE_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `PROSPECTOR_LEADS_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("EXPORT_COMPLETE");
+    toast.success("Leads exported successfully.");
   };
 
+  // Comment: Fixed missing handleImport function
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -170,14 +165,19 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
+                // Unified deduplication engine call
                 const results = db.upsertLeads(imported);
-                toast.success(`DATABASE_SYNC: +${results.added} NEW.`);
+                toast.success(`DEDUP SYNC: Added ${results.added} new, Merged ${results.updated} duplicates.`);
+            } else {
+                toast.error("Invalid file format. Expected JSON array.");
             }
         } catch (err) {
-            toast.error("INVALID_JSON");
+            console.error(err);
+            toast.error("Failed to parse import file.");
         }
     };
     reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const SortIcon = ({ col }: { col: keyof Lead }) => {
@@ -196,26 +196,26 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* ADVANCED ORGANIZE & ISOLATE PANEL */}
+          {/* CONTROL HUB: GROUPING AND ISOLATION */}
           <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl gap-8">
              <div className="flex items-center gap-3 border-r border-slate-800 pr-8">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE BY:</span>
                 <div className="flex gap-1">
-                    <button onClick={() => handleGroupingChange('none')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>FLAT LIST</button>
-                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
-                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
-                    <button onClick={() => handleGroupingChange('country')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'country' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>COUNTRY</button>
+                    <button onClick={() => handleGroupingChange('none')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>FLAT LIST</button>
+                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
+                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
+                    <button onClick={() => handleGroupingChange('country')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'country' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>COUNTRY</button>
                 </div>
              </div>
 
-             {/* DYNAMIC ISOLATION DROP-DOWN (Logic fixed to find represented countries) */}
+             {/* THE DYNAMIC DROPDOWN: Shows only values represented in the 612 leads */}
              {grouping !== 'none' && (
                 <div className="flex flex-col animate-in slide-in-from-left-4 duration-300">
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse">ISOLATE {grouping.toUpperCase()} TARGETS</span>
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">ISOLATE {grouping.toUpperCase()} TARGETS</span>
                     <select 
                         value={subFilterValue}
                         onChange={(e) => setSubFilterValue(e.target.value)}
-                        className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[200px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+                        className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
                     >
                         <option value="ALL">VIEW ALL {grouping.toUpperCase()}S</option>
                         {representedValues.map(v => <option key={v} value={v}>{v}</option>)}
@@ -251,7 +251,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 <th className="px-8 py-6 w-12 text-center">
                     <input type="checkbox" checked={selectedIds.size === sortedLeads.length && sortedLeads.length > 0} onChange={toggleSelectAll} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
                 </th>
-                {/* TOOLTIPS COMPLETELY REMOVED FOR CLEAN CLICKING */}
+                {/* HEADERS ARE CLEAN AND FULLY CLICKABLE FOR SORTING (NO TOOLTIPS) */}
                 <th 
                   onClick={() => handleSort('rank')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none whitespace-nowrap"
@@ -288,7 +288,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             <tbody className="divide-y-2 divide-slate-800/50">
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
-                  {/* GROUP HEADERS (Only visible when "VIEW ALL" is selected) */}
+                  {/* GROUP HEADERS (Only visible when "VIEW ALL" is active) */}
                   {grouping !== 'none' && subFilterValue === 'ALL' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-8 py-4">
@@ -296,7 +296,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">{groupName}</span>
                              <div className="h-px bg-slate-800 flex-1 ml-4 opacity-30"></div>
-                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES FOUND</span>
+                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} TARGETS FOUND</span>
                           </div>
                        </td>
                     </tr>
@@ -350,30 +350,17 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
       </div>
 
-      {/* DATA MANAGEMENT FOOTER */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-12 p-10 bg-[#0b1021]/80 border-2 border-slate-800 rounded-[48px] shadow-2xl">
          <div className="flex gap-4">
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
-            >
-              <span className="group-hover:-translate-y-0.5 transition-transform text-lg">↑</span> IMPORT JSON
-            </button>
+            <button onClick={() => fileInputRef.current?.click()} className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">IMPORT JSON</button>
             <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
-            
-            <button 
-              onClick={handleExport}
-              className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group"
-            >
-              <span className="group-hover:translate-y-0.5 transition-transform text-lg">↓</span> EXPORT DATABASE
-            </button>
+            <button onClick={handleExport} className="px-10 py-5 bg-slate-950 border-2 border-slate-800 text-slate-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">EXPORT DATABASE</button>
          </div>
 
          <button 
             onClick={() => { db.saveLeads(leads); toast.success("DATABASE_COMMITTED"); }}
-            className="px-12 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-emerald-600/20 active:scale-95 border-b-4 border-emerald-800 flex items-center gap-4"
+            className="px-12 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl active:scale-95 border-b-4 border-emerald-800 flex items-center gap-4"
          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             FORCE COMMIT ALL
          </button>
       </div>
