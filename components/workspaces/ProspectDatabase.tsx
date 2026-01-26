@@ -24,14 +24,24 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Calculate unique values represented in the database for the active grouping key (Country, City, or Niche)
+  // 1. Smart Extraction: Calculate unique values represented in the database
   const representedValues = useMemo(() => {
     if (grouping === 'none') return [];
     const values = new Set<string>();
+    
     leads.forEach(l => {
-        const val = l[grouping as keyof Lead];
+        let val = l[grouping as keyof Lead];
+        
+        // Smart Fallback: If country is missing, try to extract from City string (e.g. "London, UK")
+        if (grouping === 'country' && (!val || val === '')) {
+            if (l.city && l.city.includes(',')) {
+                const parts = l.city.split(',');
+                val = parts[parts.length - 1].trim();
+            }
+        }
+
         if (typeof val === 'string' && val.trim() !== '') {
-            values.add(val.trim());
+            values.add(val.trim().toUpperCase());
         }
     });
     return Array.from(values).sort();
@@ -50,12 +60,21 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const isolatedLeads = useMemo(() => {
     if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
     return statusFilteredLeads.filter(l => {
-        const val = l[grouping as keyof Lead];
-        return typeof val === 'string' && val.trim() === subFilterValue;
+        let val = l[grouping as keyof Lead];
+        
+        // Match the Smart Fallback logic from the extraction
+        if (grouping === 'country' && (!val || val === '')) {
+            if (l.city && l.city.includes(',')) {
+                const parts = l.city.split(',');
+                val = parts[parts.length - 1].trim();
+            }
+        }
+
+        return typeof val === 'string' && val.trim().toUpperCase() === subFilterValue;
     });
   }, [statusFilteredLeads, grouping, subFilterValue]);
 
-  // 4. Final Numerical and Alpha Sorting
+  // 4. Final Numerical and Alpha Sorting (No Tooltips Blocking)
   const sortedLeads = useMemo(() => {
     return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
@@ -80,11 +99,20 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   // 5. Grouping visualization logic
   const groupedData = useMemo(() => {
     // If we are isolating a single value (e.g. "UK"), don't show group headers
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE': sortedLeads };
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE LEDGER': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
-      const val = lead[grouping as keyof Lead];
+      let val = lead[grouping as keyof Lead];
+      
+      // Smart Fallback for UI Grouping headers
+      if (grouping === 'country' && (!val || val === '')) {
+          if (lead.city && lead.city.includes(',')) {
+              const parts = lead.city.split(',');
+              val = parts[parts.length - 1].trim();
+          }
+      }
+
       const key = (typeof val === 'string' ? val : 'UNCLASSIFIED') || 'UNCLASSIFIED';
       const displayKey = key.toUpperCase();
       if (!groups[displayKey]) groups[displayKey] = [];
@@ -164,7 +192,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
             PROSPECT <span className="text-emerald-500">DATABASE</span>
           </h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">LEDGER MASTER // {leads.length} RECORDS</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em] mt-2 italic">MASTER REPOSITORY // {leads.length} RECORDS</p>
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
@@ -176,11 +204,11 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                     <button onClick={() => handleGroupingChange('none')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>FLAT LIST</button>
                     <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
                     <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
-                    <button onClick={() => handleGroupingChange('country')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'country' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>COUNTRY 🇩🇪🇬🇧</button>
+                    <button onClick={() => handleGroupingChange('country')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'country' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>COUNTRY</button>
                 </div>
              </div>
 
-             {/* DYNAMIC ISOLATION DROP-DOWN (Appears when a category is selected) */}
+             {/* DYNAMIC ISOLATION DROP-DOWN (Logic fixed to find represented countries) */}
              {grouping !== 'none' && (
                 <div className="flex flex-col animate-in slide-in-from-left-4 duration-300">
                     <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse">ISOLATE {grouping.toUpperCase()} TARGETS</span>
@@ -189,8 +217,8 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                         onChange={(e) => setSubFilterValue(e.target.value)}
                         className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[200px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
                     >
-                        <option value="ALL">VIEW ALL REPRESENTED {grouping.toUpperCase()}S</option>
-                        {representedValues.map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
+                        <option value="ALL">VIEW ALL {grouping.toUpperCase()}S</option>
+                        {representedValues.map(v => <option key={v} value={v}>{v}</option>)}
                     </select>
                 </div>
              )}
@@ -223,7 +251,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                 <th className="px-8 py-6 w-12 text-center">
                     <input type="checkbox" checked={selectedIds.size === sortedLeads.length && sortedLeads.length > 0} onChange={toggleSelectAll} className="accent-emerald-500 w-4 h-4 cursor-pointer" />
                 </th>
-                {/* TOOLTIPS REMOVED TO PREVENT INTERFERENCE WITH CLICKS */}
+                {/* TOOLTIPS COMPLETELY REMOVED FOR CLEAN CLICKING */}
                 <th 
                   onClick={() => handleSort('rank')} 
                   className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none whitespace-nowrap"
@@ -313,7 +341,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-32 text-center text-slate-700 italic uppercase tracking-widest text-xs">
-                        Ledger segment empty. Refine your search or clear filters.
+                        DATABASE SEGMENT EMPTY. CHECK FILTERS.
                     </td>
                 </tr>
               )}
