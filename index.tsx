@@ -144,7 +144,7 @@ const App = () => {
       case 'MEETING_NOTES': return <LiveScribe />;
 
       // OUTREACH
-      case 'CAMPAIGN_ORCHESTRATOR': return <BusinessOrchestrator leads={leads} lockedLead={lockedLead} onNavigate={handleNavigate} onLockLead={setLockedLeadId} onUpdateLead={handleUpdateLead} />;
+      case 'CAMPAIGN_ORCHESTRATOR': return <BusinessOrchestrator leads={leads} lockedLead={lockedLead} onNavigate={handleNavigate} onLockLead={setLockedLeadId} onUpdateLead={handleUpdateLead} theater={activeMarket} />;
       case 'PROPOSALS': return <ProposalDrafting lead={lockedLead} />;
       case 'ROI_CALCULATOR': return <ROICalc leads={leads} />;
       case 'SEQUENCER': return <Sequencer lead={lockedLead} />;

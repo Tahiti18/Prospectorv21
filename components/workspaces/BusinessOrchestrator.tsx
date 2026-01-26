@@ -21,9 +21,10 @@ interface BusinessOrchestratorProps {
   onNavigate: (mode: MainMode, mod: SubModule) => void;
   onLockLead: (id: string) => void;
   onUpdateLead: (id: string, updates: Partial<Lead>) => void;
+  theater: string; // Added theater to props for contextual manual entry
 }
 
-export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead }) => {
+export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead, theater }) => {
   const [selectedLeadId, setSelectedLeadId] = useState<string>(lockedLead?.id || '');
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualName, setManualName] = useState('');
@@ -41,7 +42,12 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
     if (isManualMode) {
       if (!manualName || !manualUrl) return null;
       // We check if a lead with this URL already exists in our list
-      const existing = leads.find(l => l.websiteUrl === manualUrl);
+      const existing = leads.find(l => {
+          if (!l.websiteUrl) return false;
+          const n1 = l.websiteUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+          const n2 = manualUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+          return n1 === n2;
+      });
       if (existing) return existing;
 
       return {
@@ -49,7 +55,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         businessName: manualName,
         websiteUrl: manualUrl,
         niche: 'Manual Entry',
-        city: 'Global',
+        city: theater || 'Global', // Inherit theater to prevent filtering loss
         rank: 0,
         leadScore: 95,
         assetGrade: 'A',
@@ -59,7 +65,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
       } as Lead;
     }
     return leads.find(l => l.id === (selectedLeadId || lockedLead?.id));
-  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, lockedLead]);
+  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, lockedLead, theater]);
   
   const leadAssets = useMemo(() => {
     if (!targetLead) return [];
@@ -89,21 +95,26 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
     setPackageData(null); 
     
     try {
-      // 1. If in manual mode, we MUST persist and lock this target globally so other modules function
+      let finalLead = targetLead;
+
+      // 1. If in manual mode, we MUST persist and resolve the correct ID
       if (isManualMode) {
         toast.neural("PROTOCOL: Persisting custom business to ledger...");
-        db.upsertLeads([targetLead]);
-        onLockLead(targetLead.id); // Triggers global system lock
-        setSelectedLeadId(targetLead.id);
-        setIsManualMode(false); // Switch back to ledger mode now that it's in the DB
+        const result = db.upsertLeads([targetLead]);
+        // The result.upsertedLeads[0] will have the correct ID even if it was a duplicate
+        finalLead = result.upsertedLeads[0];
+        
+        onLockLead(finalLead.id); 
+        setSelectedLeadId(finalLead.id);
+        setIsManualMode(false); 
       } else {
-        onLockLead(targetLead.id); // Ensure existing lead is also locked
+        onLockLead(targetLead.id); 
       }
 
-      toast.neural(`BUILDER: Initiating Neural Synthesis for ${targetLead.businessName}...`);
-      const result = await orchestrateBusinessPackage(targetLead, leadAssets);
+      toast.neural(`BUILDER: Initiating Neural Synthesis for ${finalLead.businessName}...`);
+      const result = await orchestrateBusinessPackage(finalLead, leadAssets);
       
-      const saved = dossierStorage.save(targetLead, result, leadAssets.map(a => a.id));
+      const saved = dossierStorage.save(finalLead, result, leadAssets.map(a => a.id));
       setPackageData(result);
       setCurrentDossier(saved);
       toast.success("BUILDER: Strategic Intelligence Mesh Synchronized globally.");

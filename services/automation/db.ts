@@ -140,12 +140,12 @@ export const db = {
   /**
    * HIGH-FIDELITY UPSERT ENGINE
    * Implements multi-vector deduplication based on URL and Identity Fingerprints.
+   * Returns the final leads that were upserted so the UI can track the correct ID.
    */
-  upsertLeads: (newLeads: Lead[]): { added: number, updated: number } => {
+  upsertLeads: (newLeads: Lead[]): { added: number, updated: number, upsertedLeads: Lead[] } => {
     const current = db.getLeads();
     const currentMap = new Map<string, Lead>();
     
-    // Create a lookup map for current leads using normalized URL as the primary key
     current.forEach(l => {
       const key = l.websiteUrl ? normalizeUrl(l.websiteUrl) : `name-${normalizeName(l.businessName)}-${normalizeName(l.city)}`;
       currentMap.set(key, l);
@@ -153,26 +153,27 @@ export const db = {
 
     let added = 0;
     let updated = 0;
+    const upsertedLeads: Lead[] = [];
 
     newLeads.forEach(nl => {
       const key = nl.websiteUrl ? normalizeUrl(nl.websiteUrl) : `name-${normalizeName(nl.businessName)}-${normalizeName(nl.city)}`;
       
       if (currentMap.has(key)) {
-        // MERGE: Keep existing ID and non-destructive fields (notes, tags, etc)
         const existing = currentMap.get(key)!;
-        currentMap.set(key, { 
+        const merged: Lead = { 
           ...nl, 
-          ...existing, // Prioritize existing CRM data like notes/tags
+          ...existing, 
           id: existing.id,
-          // Always take the newest contact info if provided
           email: nl.email || existing.email,
           phone: nl.phone || existing.phone,
           outreachStatus: existing.outreachStatus || nl.outreachStatus || 'cold'
-        });
+        };
+        currentMap.set(key, merged);
+        upsertedLeads.push(merged);
         updated++;
       } else {
-        // NEW: Add to database
         currentMap.set(key, nl);
+        upsertedLeads.push(nl);
         added++;
       }
     });
@@ -180,7 +181,7 @@ export const db = {
     const finalLeads = Array.from(currentMap.values());
     db.saveLeads(finalLeads);
     
-    return { added, updated };
+    return { added, updated, upsertedLeads };
   },
 
   deleteLead: (id: string) => {
