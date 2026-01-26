@@ -22,14 +22,14 @@ STRATEGIC GROWTH KNOWLEDGE BASE v2.0:
 async function callAgent(prompt: string, system: string, model: string): Promise<string> {
   const keys = getStoredKeys();
   const apiKey = keys.openRouter || process.env.API_KEY;
-  if (!apiKey) throw new Error("OPENROUTER_KEY_MISSING");
+  if (!apiKey) throw new Error("AUTHORIZATION_REQUIRED");
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "HTTP-Referer": "https://pomelli.agency",
-      "X-Title": "Prospector OS Strategy Lab",
+      "X-Title": "Prospector OS Strategy Hub",
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -41,7 +41,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
   });
 
   const data = await response.json();
-  if (data.error) throw new Error(data.error.message || "Strategic Link Timeout");
+  if (data.error) throw new Error(data.error.message || "Connection fault.");
   
   const text = data.choices[0].message.content;
   deductCost(model, (prompt.length + text.length));
@@ -54,7 +54,7 @@ export const executeGrowthBoardroom = async (
   onUpdate: (steps: BoardroomStep[]) => void
 ): Promise<string> => {
   const dossier = dossierStorage.getByLead(lead.id);
-  if (!dossier) throw new Error("Strategic Framework Required. Run Business Architect First.");
+  if (!dossier) throw new Error("Strategic framework required.");
 
   let debateHistory = "";
 
@@ -70,8 +70,8 @@ export const executeGrowthBoardroom = async (
 
   const PROFESSIONAL_PROTOCOL = `
     STRICT BUSINESS STRATEGY PROTOCOL:
-    - NO MILITARY SLANG (No "Attack", "Strike", "Mission", "Recon", "Target", "Cortex", "Uplink", "Payload").
-    - USE BUSINESS TERMS (Analysis, Strategy, Prospect, Client, Engagement, Implementation).
+    - NO MILITARY OR TECH SLANG (No "Mission", "Target", "Recon", "Inference", "Payload", "Cortex").
+    - USE STANDARD BUSINESS TERMS (Prospect, Client, Strategy, Implementation, Efficiency).
     - ABSOLUTELY NO MARKDOWN (No stars **, no hashtags #, no underscores _).
     - NO decorative characters or giant capital letters at start of sentences.
     - STRUCTURE WITH PLAIN TEXT HEADINGS.
@@ -82,24 +82,21 @@ export const executeGrowthBoardroom = async (
 
   try {
     for (let r = 1; r <= rounds; r++) {
-      // 1. Brand Strategist
       steps[0].currentRound = r; steps[0].status = 'ANALYZING'; updateUI();
-      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand positioning for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist.", steps[0].modelId);
-      steps[0].output += `\n\nANALYSIS ROUND ${r}:\n${visionOut}`;
+      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist.", steps[0].modelId);
+      steps[0].output += `\n\nROUND ${r}:\n${visionOut}`;
       debateHistory += `\nBRAND STRATEGIST (R${r}): ${visionOut}`;
       steps[0].status = 'COMPLETED'; updateUI();
 
-      // 2. Revenue Analyst
       steps[1].currentRound = r; steps[1].status = 'ANALYZING'; updateUI();
-      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst.", steps[1].modelId);
-      steps[1].output += `\n\nANALYSIS ROUND ${r}:\n${profitOut}`;
+      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue optimization based on: ${visionOut}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst.", steps[1].modelId);
+      steps[1].output += `\n\nROUND ${r}:\n${profitOut}`;
       debateHistory += `\nREVENUE ANALYST (R${r}): ${profitOut}`;
       steps[1].status = 'COMPLETED'; updateUI();
 
-      // 3. Systems Director
       steps[2].currentRound = r; steps[2].status = 'ANALYZING'; updateUI();
-      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director.", steps[2].modelId);
-      steps[2].output += `\n\nANALYSIS ROUND ${r}:\n${opsOut}`;
+      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan based on: ${debateHistory}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director.", steps[2].modelId);
+      steps[2].output += `\n\nROUND ${r}:\n${opsOut}`;
       debateHistory += `\nSYSTEMS DIRECTOR (R${r}): ${opsOut}`;
       steps[2].status = 'COMPLETED'; updateUI();
       
@@ -109,17 +106,14 @@ export const executeGrowthBoardroom = async (
       }
     }
 
-    // 4. Final Executive Summary
     steps[3].status = 'ANALYZING'; updateUI();
     const finalPrompt = `
       HISTORY: ${debateHistory}
-      TASK: Synthesize this into the DEFINITIVE BUSINESS TRANSFORMATION PLAN for ${lead.businessName}.
+      TASK: Synthesize the definitive BUSINESS TRANSFORMATION PLAN for ${lead.businessName}.
       
-      REQUIREMENTS:
-      - PROVIDE EXHAUSTIVE DETAIL (Min 4 paragraphs per section).
-      - NO MILITARY TERMINOLOGY.
-      - NO DECORATIVE FIRST LETTERS.
-      - NO MARKDOWN.
+      CRITICAL REQUIREMENTS:
+      - PROVIDE EXHAUSTIVE DETAIL. Min 4 full paragraphs per section.
+      - NO MILITARY SLANG. NO MARKDOWN. NO STARS. NO HASHTAGS.
       - USE "heading" BLOCKS FOR TITLES.
       - USE "p" FOR CLEAN PARAGRAPHS.
       - OUTPUT STRICTLY VALID JSON IN UI_BLOCKS FORMAT.
@@ -128,19 +122,19 @@ export const executeGrowthBoardroom = async (
       {
         "format": "ui_blocks",
         "title": "BUSINESS TRANSFORMATION PLAN",
-        "subtitle": "PREMIUM GROWTH STRATEGY",
+        "subtitle": "PREMIUM GROWTH ARCHITECTURE",
         "sections": [
-          { "heading": "STRATEGIC AUDIT", "body": [ { "type": "p", "content": "Professional analysis..." } ] },
-          { "heading": "REVENUE GROWTH PROTOCOL", "body": [ { "type": "hero", "content": "Master Vision" }, { "type": "p", "content": "Growth detail..." } ] },
-          { "heading": "OPERATIONAL EXCELLENCE", "body": [ { "type": "p", "content": "Efficiency detail..." } ] },
-          { "heading": "EXPECTED OUTCOMES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
+          { "heading": "I. STRATEGIC AUDIT", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "II. REVENUE GROWTH PROTOCOL", "body": [ { "type": "hero", "content": "Master Vision" }, { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "III. OPERATIONAL EXCELLENCE", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "IV. EXPECTED OUTCOMES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
         ]
       }
     `;
     const finalOut = await callAgent(finalPrompt, "You are the Managing Director.", steps[3].modelId);
     
     JSON.parse(finalOut);
-    steps[3].output = "Transformation plan complete.";
+    steps[3].output = "Synthesis complete.";
     steps[3].status = 'COMPLETED';
     updateUI();
     return finalOut;

@@ -80,7 +80,8 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   OUTREACH: {
     "Strategy": [
       { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Campaign Builder' },
-      { id: 'GHL_ARCHITECT', label: 'GHL Planner' },
+      // Comment: Changed 'GHL_ARCHITECT' to canonical 'SOLUTIONS_ARCHITECT' to fix SubModule type error
+      { id: 'SOLUTIONS_ARCHITECT', label: 'GHL Planner' },
       { id: 'PRESENTATION_BUILDER', label: 'Deck Architect' },
       { id: 'FUNNEL_MAP', label: 'Funnel Map' },
     ],

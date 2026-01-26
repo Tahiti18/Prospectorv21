@@ -21,32 +21,8 @@ const STRATEGIC_CITIES = [
   { city: "LONDON, UK", rank: 2 },
   { city: "DUBAI, UAE", rank: 3 },
   { city: "SINGAPORE", rank: 4 },
-  { city: "ZURICH, SWI", rank: 5 },
-  { city: "MONACO", rank: 6 },
   { city: "MIAMI, USA", rank: 7 },
-  { city: "LOS ANGELES, USA", rank: 8 },
-  { city: "AUSTIN, USA", rank: 9 },
-  { city: "HONG KONG", rank: 10 },
-  { city: "PARIS, FRA", rank: 11 },
-  { city: "GENEVA, SWI", rank: 12 },
-  { city: "SYDNEY, AUS", rank: 13 },
-  { city: "SAN FRANCISCO, USA", rank: 14 },
-  { city: "TOKYO, JPN", rank: 15 },
-  { city: "BERLIN, GER", rank: 16 },
-  { city: "AMSTERDAM, NL", rank: 17 },
-  { city: "TORONTO, CAN", rank: 18 },
-  { city: "DUBLIN, IRE", rank: 19 },
-  { city: "CHICAGO, USA", rank: 20 },
-  { city: "RIYADH, KSA", rank: 21 },
-  { city: "DOHA, QATAR", rank: 22 },
-  { city: "TEL AVIV, ISR", rank: 23 },
-  { city: "OSLO, NOR", rank: 24 },
-  { city: "STOCKHOLM, SWE", rank: 25 },
-  { city: "MUNICH, GER", rank: 26 },
-  { city: "BARCELONA, ESP", rank: 27 },
-  { city: "VIENNA, AUT", rank: 28 },
-  { city: "MELBOURNE, AUS", rank: 29 },
-  { city: "LUXEMBOURG", rank: 30 }
+  { city: "LOS ANGELES, USA", rank: 8 }
 ];
 
 const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
@@ -56,7 +32,7 @@ const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
     case 'DESIGN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>; 
     case 'MEDIA': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>; 
     case 'OUTREACH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; 
-    case 'ADMIN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 2 2 2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>; 
+    case 'ADMIN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/></svg>; 
     default: return null;
   }
 }
@@ -71,49 +47,15 @@ const SubModuleIcon = ({ id, active }: { id: SubModule; active: boolean }) => {
 
   switch(id) {
     case 'EXECUTIVE_DASHBOARD': return p(["M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z", "M9 22V12h6v10"]);
-    case 'TRANSFORMATION_BLUEPRINT': return p(["M12 2L2 7l10 5 10-5-10-5z", "M2 17l10 5 10-5", "M2 12l10 5 10-5"]);
-    case 'USER_GUIDE': return p(["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"]);
-    case 'MARKET_DISCOVERY': return p(["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", "M12 8v4", "M12 16h.01"]);
-    case 'AUTOMATED_SEARCH': return p(["M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z", "M12 7v5l3 3"]);
-    case 'PROSPECT_DATABASE': return p(["M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"]);
+    case 'SYSTEM_CAPABILITIES': return p(["M12 2L2 7l10 5 10-5-10-5z", "M2 17l10 5 10-5"]);
+    case 'USER_GUIDE': return p(["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"]);
+    case 'MARKET_DISCOVERY': return p(["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"]);
+    case 'AUTOMATED_SEARCH': return p(["M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"]);
     case 'PIPELINE': return p(["M12 20V10", "M18 20V4", "M6 20v-4"]);
-    case 'STRATEGY_CENTER': return p(["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"]);
-    case 'ANALYTICS_HUB': return p(["M21.21 15.89A10 10 0 118 2.83", "M22 12A10 10 0 0012 2v10z"]);
-    case 'BENCHMARK': return p(["M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6", "M15 3h6v6", "M10 14L21 3"]);
-    case 'VISUAL_ANALYSIS': return p(["M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z"]);
-    case 'STRATEGIC_REASONING': return p(["M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"]);
-    case 'MARKET_TRENDS': return p(["M23 6l-9.5 9.5-5-5L1 18", "M17 6h6v6"]);
-    case 'VISUAL_STUDIO': return p(["M12 19l7-7 3 3-7 7-3-3z", "M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"]);
-    case 'BRAND_DNA': return p(["M4.5 16.5c-1.5 1.26-2 3.5-2 3.5s2.24-.5 3.5-2L16.5 7.5L13.5 4.5z", "M15 6l3 3"]);
-    case 'MOCKUPS_4K': return p(["M2 8a2 2 0 012-2h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8z", "M6 14h12"]);
-    case 'PRODUCT_SYNTHESIS': return p(["M12 2L2 7l10 5 10-5-10-5z", "M2 17l10 5 10-5"]);
-    case 'CONTENT_IDEATION': return p(["M9.663 17h4.673", "M12 3v1", "M21 12h-1", "M4 12H3", "M12 18v2"]);
-    case 'ASSET_LIBRARY': return p(["M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"]);
-    case 'VIDEO_PRODUCTION': return p(["M23 7l-7 5 7 5V7z", "M1 5h15v14H1z"]);
-    case 'VIDEO_AUDIT': return p(["M15 10l5 5-5 5", "M4 4v16h16V4H4z"]);
-    case 'VIDEO_INSIGHTS': return p(["M2 12h20", "M12 2v20"]);
-    case 'MOTION_LAB': return p(["M13 2L3 14h9l-1 8 10-12h-9l1-8z"]);
-    case 'SONIC_STUDIO': return p(["M9 18V5l12-2v13", "M9 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"]);
-    case 'MEETING_NOTES': return p(["M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7", "M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"]);
+    case 'BRAND_DNA': return p(["M4.5 16.5c-1.5 1.26-2 3.5-2 3.5s2.24-.5 3.5-2L16.5 7.5"]);
     case 'CAMPAIGN_ORCHESTRATOR': return p(["M22 2L11 13", "M22 2l-7 20-4-9-9-4 20-7z"]);
-    case 'PROPOSALS': return p(["M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z", "M14 2v6h6"]);
-    case 'SEQUENCER': return p(["M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"]);
-    case 'ROI_CALCULATOR': return p(["M4 2h16a2 2 0 012 2v16a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm4 4h8", "M8 10h8", "M8 14h8", "M8 18h8"]);
-    case 'PRESENTATION_BUILDER': return p(["M2 16h20", "M2 16v2a2 2 0 002 2h16a2 2 0 002-2v-2", "M2 16V4a2 2 0 012-2h16a2 2 0 012 2v12"]);
-    case 'DEMO_SANDBOX': return p(["M5 3v18l15-9L5 3z"]);
-    case 'AI_CONCIERGE': return p(["M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2", "M12 7a4 4 0 100-8 4 4 0 000 8z"]);
-    case 'ELEVATOR_PITCH': return p(["M18 8a3 3 0 100-6 3 3 0 000 6z", "M6 15a3 3 0 100-6 3 3 0 000 6z"]);
-    case 'FUNNEL_MAP': return p(["M22 3H2l8 9.46V19l4 2v-8.54L22 3z"]);
-    case 'GHL_ARCHITECT': return p(["M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71", "M4 12h16"]);
-    case 'GHL_GROWTH_BOARDROOM': return p(["M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0-4 4v2", "M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M23 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"]);
-    case 'AGENCY_PLAYBOOK': return p(["M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5z"]);
-    case 'BILLING': return p(["M12 1v22", "M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"]);
-    case 'SETTINGS': return p(["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33"]);
-    case 'EXPORT_DATA': return p(["M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4", "M7 10l5 5 5-5", "M12 15V3"]);
-    case 'CALENDAR': return p(["M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z", "M16 2v4", "M8 2v4", "M3 10h18"]);
-    case 'TIMELINE': return p(["M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"]);
-    case 'TASK_MANAGER': return p(["M9 11l3 3L22 4", "M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"]);
-    case 'USAGE_STATS': return p(["M18 20V10", "M12 20V4", "M6 20v-7"]);
+    case 'SOLUTIONS_ARCHITECT': return p(["M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"]);
+    case 'GROWTH_ADVISORY': return p(["M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0-4 4v2"]);
     default: return p(["M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"]);
   }
 };
@@ -121,16 +63,16 @@ const SubModuleIcon = ({ id, active }: { id: SubModule; active: boolean }) => {
 const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: string; desc: string }[]>> = {
   RESEARCH: {
     "CORE ANALYTICS": [
-      { id: 'EXECUTIVE_DASHBOARD', label: 'Executive Dashboard', desc: 'Main operational center' },
-      { id: 'TRANSFORMATION_BLUEPRINT', label: 'Transformation Blueprint', desc: 'Capability framework' },
+      { id: 'EXECUTIVE_DASHBOARD', label: 'Agency Overview', desc: 'Main operational center' },
+      { id: 'SYSTEM_CAPABILITIES', label: 'System Capabilities', desc: 'Capability framework' },
       { id: 'USER_GUIDE', label: 'User Manual', desc: 'Feature documentation' },
       { id: 'MARKET_DISCOVERY', label: 'Lead Discovery', desc: 'Identify new opportunities' },
-      { id: 'AUTOMATED_SEARCH', label: 'Automated Search', desc: 'Autonomous identification' },
+      { id: 'AUTOMATED_SEARCH', label: 'Auto Analysis', desc: 'Autonomous identification' },
       { id: 'MARKET_TRENDS', label: 'Industry Monitor', desc: 'Real-time news' },
     ],
     "MANAGEMENT": [
-      { id: 'PROSPECT_DATABASE', label: 'Lead Database', desc: 'Contact repository' },
-      { id: 'STRATEGY_CENTER', label: 'Strategy Hub', desc: 'Portfolio audits' },
+      { id: 'PROSPECT_DATABASE', label: 'Lead Sourcing', desc: 'Contact repository' },
+      { id: 'STRATEGY_CENTER', label: 'Strategic Hub', desc: 'Portfolio audits' },
       { id: 'PIPELINE', label: 'Sales Pipeline', desc: 'Deal tracking' },
       { id: 'ANALYTICS_HUB', label: 'Market Intelligence', desc: 'Aggregate data' },
     ],
@@ -166,9 +108,9 @@ const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: str
   },
   OUTREACH: {
     "STRATEGY": [
-      { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Business Architect', desc: 'Full deployment' },
-      { id: 'GHL_GROWTH_BOARDROOM', label: 'Strategy Advisory', desc: 'Advisory Panel' },
-      { id: 'GHL_ARCHITECT', label: 'Solutions Planner', desc: 'Deployment roadmap' },
+      { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Campaign Architect', desc: 'Full deployment' },
+      { id: 'GROWTH_ADVISORY', label: 'Strategy Advisory', desc: 'Advisory Panel' },
+      { id: 'SOLUTIONS_ARCHITECT', label: 'Solutions Planner', desc: 'Deployment roadmap' },
       { id: 'PRESENTATION_BUILDER', label: 'Deck Architect', desc: 'Slide design' },
       { id: 'FUNNEL_MAP', label: 'Journey Mapping', desc: 'Conversion flow' },
     ],
@@ -212,7 +154,6 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [marketExpanded, setMarketExpanded] = useState(false);
-  const [isCustomInput, setIsCustomInput] = useState(false);
   const marketRef = useRef<HTMLDivElement>(null);
 
   const groups = MODULE_GROUPS[activeMode] || MODULE_GROUPS['RESEARCH'];
@@ -228,19 +169,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
     }
   };
 
-  const handleMarketChange = (val: string) => {
-    if (val === 'CUSTOM REGION') {
-      setIsCustomInput(true);
-    } else {
-      setTheater(val);
-      setIsCustomInput(false);
-      setMarketExpanded(false);
-    }
-  };
-
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block">
-      {/* FIXED HEADER - SUPREME Z-INDEX [100] */}
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block font-sans">
       <header className="fixed top-0 left-0 right-0 h-20 border-b z-[100] flex items-center bg-[#030712]/95 backdrop-blur-3xl border-slate-800 px-8 print:hidden">
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
@@ -248,7 +178,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
             </h1>
          </div>
 
-         <div className="hidden lg:flex items-center justify-center flex-[2] pointer-events-auto">
+         <div className="hidden lg:flex items-center justify-center flex-[2]">
             <nav className="flex items-center gap-1 p-1.5 rounded-full border shadow-2xl bg-[#0b1021] border-slate-800">
                {(Object.keys(MODULE_GROUPS) as MainMode[]).map((mode) => {
                   const isActive = activeMode === mode;
@@ -271,51 +201,16 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          </div>
 
          <div className="flex-1 flex items-center gap-4 justify-end">
-            <button 
-               onClick={onSearchClick}
-               className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
-            >
-               <span className="uppercase tracking-wider text-[9px]">NAV</span>
+            <button onClick={onSearchClick} className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white">
+               <span className="uppercase tracking-wider text-[9px]">COMMAND</span>
                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">⌘K</span>
             </button>
-
             <div ref={marketRef} className={`relative transition-all duration-300 ${marketExpanded ? 'w-64' : 'w-[100px]'}`}>
-                <div
-                   onClick={() => !marketExpanded && setMarketExpanded(true)}
-                   className={`flex items-center gap-3 px-4 h-11 rounded-full border transition-all bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden ${marketExpanded ? 'cursor-default' : 'cursor-pointer'}`}
-                >
+                <div onClick={() => !marketExpanded && setMarketExpanded(true)} className={`flex items-center gap-3 px-4 h-11 rounded-full border transition-all bg-[#0b1021] border-slate-800 hover:border-emerald-500/50 overflow-hidden ${marketExpanded ? 'cursor-default' : 'cursor-pointer'}`}>
                    {marketExpanded ? (
-                       isCustomInput ? (
-                         <div className="flex items-center w-full gap-2 animate-in fade-in slide-in-from-right-2">
-                           <input
-                              autoFocus
-                              value={theater}
-                              onChange={(e) => setTheater(e.target.value.toUpperCase())}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  setMarketExpanded(false);
-                                  setIsCustomInput(false);
-                                }
-                                if (e.key === 'Escape') {
-                                  setIsCustomInput(false);
-                                  setMarketExpanded(false);
-                                }
-                              }}
-                              placeholder="REGION..."
-                              className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-emerald-400 placeholder-slate-700"
-                           />
-                         </div>
-                       ) : (
-                         <select
-                            autoFocus
-                            value={theater}
-                            onChange={(e) => handleMarketChange(e.target.value)}
-                            onBlur={() => !isCustomInput && setMarketExpanded(false)}
-                            className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-white cursor-pointer"
-                         >
+                         <select autoFocus value={theater} onChange={(e) => { setTheater(e.target.value); setMarketExpanded(false); }} onBlur={() => setMarketExpanded(false)} className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-white cursor-pointer">
                             {STRATEGIC_CITIES.map(c => <option key={c.city} value={c.city} className="text-slate-900 bg-white">{c.city}</option>)}
                          </select>
-                       )
                    ) : (
                        <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">REGION</span>
                    )}
@@ -326,39 +221,27 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
       <div className="flex-1 flex overflow-hidden pt-20 print:block print:pt-0">
          <aside className={`flex-shrink-0 border-r flex flex-col z-[90] transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden relative ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
-            
-            {/* SIDEBAR TOGGLE - INTEGRATED AT TOP */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between h-16 shrink-0">
-                {isSidebarExpanded && <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">NAVIGATE</span>}
-                <button 
-                  onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-                  className={`w-10 h-10 rounded-xl border border-slate-800 flex items-center justify-center transition-all hover:bg-slate-800/50 group bg-[#05091a] shadow-xl ${!isSidebarExpanded ? 'mx-auto' : ''}`}
-                >
+                {isSidebarExpanded && <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">CAMPAIGN</span>}
+                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className={`w-10 h-10 rounded-xl border border-slate-800 flex items-center justify-center transition-all hover:bg-slate-800/50 group bg-[#05091a] shadow-xl ${!isSidebarExpanded ? 'mx-auto' : ''}`}>
                     <svg className={`w-3 h-3 text-slate-400 group-hover:text-emerald-500 transition-transform duration-500 ${!isSidebarExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
             </div>
-
             <div className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-20 space-y-8">
                {Object.entries(groups).map(([groupName, modules]) => (
                   <div key={groupName} className="mb-2">
                      {isSidebarExpanded && (
-                       <h3 className="sticky top-0 px-6 text-[10px] font-black text-white/40 uppercase tracking-[0.25em] mb-3 mt-1 border-b border-white/5 pb-2 bg-[#0b1021] z-10 backdrop-blur-md">{groupName}</h3>
+                       <h3 className="sticky top-0 px-6 text-[10px] font-black text-white/40 uppercase tracking-[0.25em] mb-3 mt-1 border-b border-white/5 pb-2 bg-[#0b1021] z-10">{groupName}</h3>
                      )}
                      <div className={`space-y-1 ${isSidebarExpanded ? 'px-4' : 'px-2'}`}>
                         {(modules as any[]).map(mod => {
                            const isActive = activeModule === mod.id;
                            return (
-                              <button
-                                 key={mod.id}
-                                 onClick={() => setActiveModule(mod.id)}
-                                 className={`w-full rounded-xl transition-all flex items-center group ${isSidebarExpanded ? 'px-3 py-2 justify-start gap-3' : 'p-3 justify-center'} ${isActive ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 shadow-md' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
-                              >
+                              <button key={mod.id} onClick={() => setActiveModule(mod.id)} className={`w-full rounded-xl transition-all flex items-center group ${isSidebarExpanded ? 'px-3 py-2 justify-start gap-3' : 'p-3 justify-center'} ${isActive ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}>
                                  <SubModuleIcon id={mod.id} active={isActive} />
-                                 {isSidebarExpanded && (
-                                   <span className="text-[10px] font-black uppercase truncate tracking-widest">{mod.label}</span>
-                                 )}
+                                 {isSidebarExpanded && <span className="text-[10px] font-black uppercase truncate tracking-widest">{mod.label}</span>}
                               </button>
                            );
                         })}
@@ -367,9 +250,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                ))}
             </div>
          </aside>
-
          <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0 print:block print:h-auto print:overflow-visible print:bg-white print:text-black print:p-0">
-            <div className={`fixed inset-0 pointer-events-none opacity-[0.02] bg-emerald-500/5 transition-all duration-1000`}></div>
             <div className="max-w-[1920px] mx-auto pb-32 print:pb-0 relative z-10">{children}</div>
          </main>
       </div>

@@ -102,7 +102,8 @@ const SUB_MODULES: Record<MainMode, { id: SubModule; label: string }[]> = {
   ],
   OUTREACH: [
     { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Orchestrator' },
-    { id: 'GHL_ARCHITECT', label: 'GHL Planner' },
+    // Comment: Changed 'GHL_ARCHITECT' to canonical 'SOLUTIONS_ARCHITECT' to fix SubModule type error
+    { id: 'SOLUTIONS_ARCHITECT', label: 'GHL Planner' },
     { id: 'PROPOSALS', label: 'Proposals' },
     { id: 'ROI_CALCULATOR', label: 'ROI Calc' },
     { id: 'SEQUENCER', label: 'Sequencer' },
@@ -178,7 +179,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <div className="flex items-center gap-6 w-64 justify-end">
                <div className="relative group">
                   <button className="p-4 rounded-2xl transition-all border-2 bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-600">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                   </button>
                   <div className="absolute right-0 top-full mt-2 w-48 bg-[#0b1021] border border-slate-800 rounded-xl shadow-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                      <button onClick={() => setLayoutMode('LEGACY')} className="w-full text-left px-4 py-3 text-[10px] font-bold text-emerald-400 bg-emerald-900/10 hover:bg-emerald-900/20 transition-colors border-b border-slate-800">LEGACY</button>

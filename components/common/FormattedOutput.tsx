@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTED OUTPUT – FRIENDLY PROFESSIONAL V11
+   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V12
    ========================================================= */
 
 import React from 'react';
@@ -26,7 +26,7 @@ interface FormattedOutputProps {
   className?: string;
 }
 
-const professionalSanitize = (text: string): string => {
+const executiveSanitize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== 'string') return String(text);
   return text
@@ -43,40 +43,16 @@ const professionalSanitize = (text: string): string => {
     .trim();
 };
 
-const deconstructJsonToBlocks = (data: any, depth = 0): UIBlock[] => {
-  const blocks: UIBlock[] = [];
-  if (typeof data === 'string') {
-    blocks.push({ type: 'p', content: data });
-  } else if (Array.isArray(data)) {
-    if (data.every(i => typeof i === 'string')) {
-      blocks.push({ type: 'bullets', content: data });
-    } else {
-      data.forEach(item => blocks.push(...deconstructJsonToBlocks(item, depth + 1)));
-    }
-  } else if (typeof data === 'object' && data !== null) {
-    Object.entries(data).forEach(([key, val]) => {
-      const heading = key.replace(/_/g, ' ').toUpperCase();
-      blocks.push({ type: 'heading', content: heading });
-      blocks.push(...deconstructJsonToBlocks(val, depth + 1));
-    });
-  }
-  return blocks;
-};
-
 const promoteToStrategicReport = (input: any): UIBlocks => {
   if (typeof input === 'string') {
     return {
       format: 'ui_blocks',
-      title: "Strategy Overview",
+      title: "Strategic Overview",
       subtitle: "EXECUTIVE SUMMARY",
       sections: [{ heading: "STRATEGIC OVERVIEW", body: [{ type: 'p', content: input }] }]
     };
   }
-  const sections = Object.entries(input).map(([key, val]) => ({
-    heading: key.replace(/_/g, ' ').toUpperCase(),
-    body: deconstructJsonToBlocks(val)
-  }));
-  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "DATA SYNTHESIS", sections };
+  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "DATA SYNTHESIS", sections: [] };
 };
 
 export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, className = "" }) => {
@@ -101,59 +77,61 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
 
     const renderBlock = (block: UIBlock, idx: number) => {
       if (!block) return null;
-      const cleaned = typeof block.content === 'string' ? professionalSanitize(block.content) : block.content;
+      const cleaned = typeof block.content === 'string' ? executiveSanitize(block.content) : block.content;
 
       switch (block.type) {
         case 'hero':
           return (
-            <div key={idx} className="mb-8 p-6 bg-emerald-600 rounded-[28px] shadow-xl relative overflow-hidden group border-b-4 border-emerald-800">
-              <p className="text-lg font-bold text-white tracking-tight leading-snug relative z-10 font-sans">"{cleaned}"</p>
-              <div className="mt-2 flex gap-2 relative z-10 opacity-20 font-black text-[8px] uppercase tracking-widest text-white">STRATEGIC_HIGHLIGHT</div>
+            <div key={idx} className="mb-10 p-10 bg-emerald-600 rounded-[48px] shadow-2xl relative overflow-hidden group border-b-8 border-emerald-800">
+              <p className="text-2xl font-black text-white italic tracking-tighter leading-tight relative z-10 font-sans">"{cleaned}"</p>
+              <div className="mt-4 flex gap-2 relative z-10 opacity-20 font-black text-[9px] uppercase tracking-widest text-white">STRATEGIC_ANCHOR</div>
             </div>
           );
         case 'p':
-          return <p key={idx} className="text-slate-800 leading-relaxed mb-4 text-sm font-normal border-l-2 border-emerald-500/20 pl-4 py-0.5 font-sans">{cleaned}</p>;
+          // Strictly no drop-caps or decorative logic
+          return <p key={idx} className="text-slate-800 leading-relaxed mb-6 text-base font-medium border-l-4 border-emerald-500/10 pl-8 py-0.5 font-sans">{cleaned}</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
-            <div key={idx} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+            <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               {list.map((item: string, i: number) => (
-                <div key={i} className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-start gap-3 hover:border-emerald-500/20 transition-all shadow-sm group">
-                  <div className="mt-1.5 w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="font-bold text-slate-700 text-[11px] leading-tight uppercase tracking-tight font-sans">{professionalSanitize(item)}</span>
+                <div key={i} className="bg-slate-50 border border-slate-200 p-6 rounded-3xl flex items-start gap-4 hover:border-emerald-500/20 transition-all shadow-sm group">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="font-bold text-slate-700 text-[12px] leading-snug uppercase tracking-tight font-sans">{executiveSanitize(item)}</span>
                 </div>
               ))}
             </div>
           );
         case 'heading':
+          // Size matching Executive Dashboard Overview (4xl equivalent)
           return (
-            <div key={idx} className="flex items-center gap-3 mb-4 mt-8 first:mt-0">
-               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest whitespace-nowrap font-sans">{cleaned}</h3>
+            <div key={idx} className="flex items-center gap-4 mb-8 mt-12 first:mt-0">
+               <h3 className="text-4xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{cleaned}</h3>
                <div className="h-px bg-emerald-500/10 flex-1 rounded-full"></div>
             </div>
           );
         default:
-          return <p key={idx} className="text-slate-700 text-sm mb-4 leading-relaxed font-normal font-sans">{String(cleaned)}</p>;
+          return <p key={idx} className="text-slate-700 text-base mb-6 leading-relaxed font-normal font-sans">{String(cleaned)}</p>;
       }
     };
 
     return (
-      <div className={`space-y-8 animate-in fade-in duration-1000 max-w-5xl mx-auto pb-10 ${className}`}>
+      <div className={`space-y-12 animate-in fade-in duration-1000 max-w-6xl mx-auto pb-20 ${className}`}>
         {uiData?.title && (
-          <div className="border-b border-slate-100 pb-6 mb-8 text-center">
-            <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none mb-2 font-sans">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.6em] text-[9px] font-sans">{uiData.subtitle}</p>}
+          <div className="border-b border-slate-100 pb-10 mb-16 text-center">
+            <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none mb-4 font-sans">{uiData.title}</h1>
+            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.8em] text-[10px] italic font-sans">{uiData.subtitle}</p>}
           </div>
         )}
 
         {(uiData?.sections || []).map((section, sIdx) => (
-          <section key={sIdx} className="mb-12">
-            <div className="flex items-center gap-4 mb-6">
-                <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center font-black text-white text-xs italic shadow-md shrink-0">0{sIdx+1}</div>
-                <h2 className="text-2xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{professionalSanitize(section?.heading || "SECTION")}</h2>
+          <section key={sIdx} className="mb-20">
+            <div className="flex items-center gap-6 mb-10">
+                <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center font-black text-white text-xl italic shadow-2xl shrink-0">0{sIdx+1}</div>
+                <h2 className="text-4xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
                 <div className="h-px bg-slate-100 flex-1"></div>
             </div>
-            <div className="px-2">
+            <div className="px-4">
               {(section?.body || []).map((block, bIdx) => renderBlock(block, bIdx))}
             </div>
           </section>
@@ -162,9 +140,9 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
     );
   } catch (fatalError) {
     return (
-      <div className="p-8 border-2 border-rose-500/10 rounded-2xl text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4 font-sans text-[9px]">DATA_LOAD_ERROR</p>
-        <div className="bg-black/90 p-6 rounded-xl text-slate-400 font-mono text-xs whitespace-pre-wrap text-left shadow-xl border border-white/5 overflow-auto max-h-64">
+      <div className="p-16 border-2 border-rose-500/10 rounded-[48px] text-center bg-rose-500/5">
+        <p className="text-rose-400 font-black uppercase tracking-[0.5em] mb-4 font-sans text-[10px]">PARSING_FAULT</p>
+        <div className="bg-black/90 p-10 rounded-[32px] text-slate-400 font-mono text-xs whitespace-pre-wrap text-left shadow-2xl border border-white/5 overflow-auto max-h-96">
           {content}
         </div>
       </div>

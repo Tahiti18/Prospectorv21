@@ -2,7 +2,7 @@ export type MainMode = 'RESEARCH' | 'DESIGN' | 'MEDIA' | 'OUTREACH' | 'ADMIN';
 
 export type SubModule = 
   | 'EXECUTIVE_DASHBOARD'
-  | 'TRANSFORMATION_BLUEPRINT'
+  | 'SYSTEM_CAPABILITIES'
   | 'USER_GUIDE'
   | 'MARKET_DISCOVERY'
   | 'AUTOMATED_SEARCH'
@@ -63,8 +63,8 @@ export type SubModule =
   | 'PROMPT_AI'
   | 'DASHBOARD'
   | 'ENTERPRISE_DASHBOARD'
-  | 'GHL_ARCHITECT'
-  | 'GHL_GROWTH_BOARDROOM'
+  | 'SOLUTIONS_ARCHITECT'
+  | 'GROWTH_ADVISORY'
   | 'EXECUTIVE_DOSSIER';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';
@@ -204,10 +204,6 @@ export interface Campaign {
 
 export type WorkspaceType = MainMode | string;
 
-/**
- * GOHIGHLEVEL AUTO-BUILDER V1.0 TYPES
- */
-
 export interface GhlOAuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -227,16 +223,16 @@ export interface IndigoTechnicalBlueprint {
     custom_fields: Array<{
       name: string;
       dataType: 'TEXT' | 'NUMBER' | 'DATE' | 'CHECKBOX' | 'SINGLE_SELECT';
-      key: string; // MUST BE STABLE/DETERMINISTIC
+      key: string; 
       options?: string[];
     }>;
-    tags: string[]; // Deterministic strings
+    tags: string[]; 
   };
   pipelines: Array<{
     name: string;
-    stages: string[]; // Deterministic order
+    stages: string[]; 
   }>;
-  workflows_manifest: string[]; // Planned but not yet auto-built via API
+  workflows_manifest: string[]; 
   qa_requirements: string[];
 }
 
@@ -257,7 +253,7 @@ export interface GHLBuildStatus {
   plan_hash: string;
   status: 'DRY_RUN' | 'EXECUTING' | 'SUCCESS' | 'FAILED';
   lastRunAt: number;
-  deployedResourceIds: Record<string, string>; // artifact_key -> ghl_id
+  deployedResourceIds: Record<string, string>; 
   logs: string[];
   error?: string;
 }
