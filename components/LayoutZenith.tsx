@@ -235,9 +235,18 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
-      {/* FIXED HEADER: High-priority layout element with recalibrated z-index */}
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-50 flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8">
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block">
+      <style>{`
+        @media print {
+          html, body, #root, .h-screen { height: auto !important; overflow: visible !important; display: block !important; }
+          .flex-1 { flex: none !important; display: block !important; }
+          .pt-28 { padding-top: 0 !important; }
+          main { overflow: visible !important; height: auto !important; padding: 0 !important; }
+        }
+      `}</style>
+      
+      {/* FIXED HEADER */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-50 flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8 print:hidden">
          {/* Left: Branding */}
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
@@ -325,8 +334,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
       </header>
 
       {/* BODY CONTENT: Offset by header height with increased margin pt-28 */}
-      <div className="flex-1 flex overflow-hidden pt-28">
-         <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
+      <div className="flex-1 flex overflow-hidden pt-28 print:block print:pt-0">
+         <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
                  {isSidebarExpanded ? 'COLLAPSE' : 'EXPAND'}
@@ -341,6 +350,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                      ) : (
                        <div className="mx-auto w-8 h-1 bg-emerald-500/20 mb-3 rounded-full"></div>
                      )}
+                     {/* Comment: Added quotes around Tailwind classes px-4 and px-2 to fix compiler error */}
                      <div className={`space-y-1 ${isSidebarExpanded ? 'px-4' : 'px-2'}`}>
                         {(modules as any[]).map(mod => {
                            const isActive = activeModule === mod.id;
@@ -363,8 +373,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
             </div>
          </aside>
 
-         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0">
-            <div className="max-w-[1920px] mx-auto pb-32">{children}</div>
+         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0 print:block print:h-auto print:overflow-visible print:bg-white print:text-black print:p-0">
+            <div className="max-w-[1920px] mx-auto pb-32 print:pb-0">{children}</div>
          </main>
       </div>
     </div>

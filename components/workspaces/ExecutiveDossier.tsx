@@ -76,26 +76,35 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
   return (
     <div className="bg-white text-slate-900 min-h-screen font-sans selection:bg-emerald-100 dossier-container">
       
-      {/* GLOBAL PDF ACTION BUTTON - Moved to fixed bottom right with high z-index */}
-      <div className="fixed bottom-12 right-12 z-[9999] print:hidden">
+      {/* GLOBAL PDF ACTION BAR */}
+      <div className="fixed bottom-12 right-12 z-[9999] print:hidden flex flex-col items-end gap-3">
+        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 p-6 rounded-[32px] shadow-2xl max-w-xs animate-in slide-in-from-bottom-4">
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">IPAD PDF PROTOCOL</p>
+            <p className="text-[9px] text-slate-400 leading-relaxed uppercase font-bold">
+              1. Tap the button below.<br/>
+              2. On the Print screen, <span className="text-white italic">pinch to zoom OUT</span> on the preview.<br/>
+              3. It will convert to a full Digital PDF.<br/>
+              4. Tap "Share" to Save to Files.
+            </p>
+        </div>
         <button 
           onClick={handlePrint}
           className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-6 rounded-[32px] text-[12px] font-black uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(16,185,129,0.6)] transition-all active:scale-95 flex items-center gap-4 border-b-8 border-emerald-800 group"
         >
           <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-          <span className="text-xl">📥</span> SAVE AS MASTER EXECUTIVE PDF
+          <span className="text-xl">📥</span> GENERATE 20-PAGE PDF
         </button>
       </div>
 
       <style>{`
-        /* PRINT ENGINE OVERHAUL */
+        /* ULTIMATE PRINT ENGINE V4 */
         @media print {
           @page { 
             size: A4; 
-            margin: 20mm 15mm; 
+            margin: 0mm; /* Full bleed handled by page padding */
           }
           
-          html, body, #root, .dossier-container {
+          html, body, .dossier-container {
             height: auto !important;
             overflow: visible !important;
             background: white !important;
@@ -106,43 +115,31 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
           .print-hidden { display: none !important; }
           
           .dossier-page { 
-            display: block !important;
-            page-break-after: always; 
-            min-height: auto !important;
-            height: auto !important;
-            padding: 0 !important;
-            margin-bottom: 20mm !important;
-            overflow: visible !important;
+            display: flex !important;
+            flex-direction: column !important;
+            page-break-after: always !important; 
+            height: 297mm !important; /* Force exact A4 pages */
+            width: 210mm !important;
+            padding: 25mm !important;
+            margin: 0 auto !important;
+            overflow: hidden !important;
+            position: relative !important;
+            box-sizing: border-box !important;
           }
 
           .section-break { 
-            page-break-before: always; 
-            padding-top: 10mm;
+            page-break-before: always !important; 
           }
 
-          /* Ensure grids and flex don't break across pages poorly */
-          .grid, .flex {
-            display: block !important;
-          }
-          
-          .grid > *, .flex > * {
-            margin-bottom: 20px !important;
-            page-break-inside: avoid;
-          }
-
-          h1, h2, h3, h4 { 
-            page-break-after: avoid; 
-          }
-
-          img, video {
-            max-width: 100% !important;
-            page-break-inside: avoid;
-          }
+          /* Reset grids for print flow */
+          .grid { display: grid !important; }
+          .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
           
           .bg-[#020617] { background: #020617 !important; -webkit-print-color-adjust: exact; color: white !important; }
-          .text-white { color: white !important; }
           .bg-emerald-600 { background: #059669 !important; -webkit-print-color-adjust: exact; }
           .bg-slate-50 { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
+          .text-white { color: white !important; }
+          .text-emerald-500 { color: #10b981 !important; }
         }
 
         .dossier-page { min-height: 100vh; padding: 5rem; position: relative; border-bottom: 1px solid #f1f5f9; }
@@ -189,13 +186,13 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* ASSETS MASTER REPOSITORY - Categorized as per User Request */}
+      {/* MASTER ASSETS HUB HEADER */}
       <section className="dossier-page section-break flex flex-col justify-center items-center text-center bg-slate-50">
         <h1 className="text-7xl font-black italic uppercase tracking-tighter text-slate-900">MASTER ASSET <span className="text-emerald-600">REPOSITORY</span></h1>
-        <p className="text-sm font-black uppercase tracking-[0.8em] text-slate-400 mt-6 italic">Verbatim Component Indices</p>
+        <p className="text-sm font-black uppercase tracking-[0.8em] text-slate-400 mt-6 italic">Verbatim Multi-Module Repository</p>
       </section>
 
-      {/* SECTION: CAMPAIGN ARCHITECT (Category 02) */}
+      {/* SECTION: CAMPAIGN ARCHITECT */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">02 // CAMPAIGN ARCHITECT</h2>
         <div className="space-y-12">
@@ -216,19 +213,13 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
                     <div key={i} className="p-10 bg-slate-50 border-2 border-slate-100 rounded-[40px] flex flex-col gap-6 shadow-sm">
                         <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-4 py-1.5 bg-white border-2 border-emerald-100 rounded-xl w-fit">{item.platform} // {item.type}</span>
                         <p className="text-sm font-medium text-slate-800 italic leading-relaxed border-l-4 border-emerald-500 pl-6">"{item.caption}"</p>
-                        {item.visualDirective && (
-                          <div className="mt-auto pt-4 border-t border-slate-200">
-                            <p className="text-[8px] font-black text-slate-400 uppercase">Visual Directive</p>
-                            <p className="text-[10px] text-slate-600 italic">"{item.visualDirective}"</p>
-                          </div>
-                        )}
                     </div>
                 ))}
             </div>
         </div>
       </section>
 
-      {/* SECTION: DECK ARCHITECT (Category 03) */}
+      {/* SECTION: DECK ARCHITECT */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">03 // DECK ARCHITECT</h2>
         <div className="grid grid-cols-2 gap-8">
@@ -253,7 +244,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* SECTION: JOURNEY MAPPER (Category 04) */}
+      {/* SECTION: JOURNEY MAPPER */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">04 // JOURNEY MAPPER</h2>
         <div className="space-y-10 max-w-4xl mx-auto">
@@ -267,19 +258,13 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
                             <span className="text-[9px] font-black bg-emerald-600 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-md">GOAL: {step.conversionGoal}</span>
                         </div>
                         <p className="text-sm text-slate-500 font-medium italic leading-relaxed">"{step.description}"</p>
-                        {step.frictionFix && (
-                           <div className="mt-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                              <span className="text-[8px] font-black text-emerald-600 uppercase block mb-1">AI_TRANSFORMATION_FIX</span>
-                              <p className="text-[10px] font-bold text-slate-700 uppercase italic">"{step.frictionFix}"</p>
-                           </div>
-                        )}
                     </div>
                 </div>
             ))}
         </div>
       </section>
 
-      {/* SECTION: PROPOSAL BUILDER (Category 05) */}
+      {/* SECTION: PROPOSAL BUILDER */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">05 // PROPOSAL BUILDER</h2>
         <div className="bg-slate-50 border-2 border-slate-100 p-16 rounded-[64px] shadow-inner">
@@ -287,7 +272,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* SECTION: ENGAGEMENT SEQUENCE (Category 06) */}
+      {/* SECTION: ENGAGEMENT SEQUENCE */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">06 // ENGAGEMENT SEQUENCE</h2>
         <div className="space-y-8">
@@ -311,7 +296,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* SECTION: PITCH GENERATOR (Category 07) */}
+      {/* SECTION: PITCH GENERATOR */}
       <section className="dossier-page section-break">
         <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">07 // PITCH GENERATOR</h2>
         <div className="bg-slate-50 border-2 border-slate-100 p-16 rounded-[64px] shadow-inner">
@@ -319,25 +304,7 @@ export const ExecutiveDossier: React.FC<{ lead: Lead }> = ({ lead }) => {
         </div>
       </section>
 
-      {/* SECTION: VISUAL ASSET ARCHIVE */}
-      <section className="dossier-page section-break">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.5em] mb-16 border-b-4 border-slate-900 pb-4 w-fit italic">08 // VISUAL ASSET ARCHIVE</h2>
-        <div className="grid grid-cols-2 gap-8">
-            {assets.filter(a => a.type === 'IMAGE').slice(0, 10).map((a, i) => (
-                <div key={i} className="aspect-[4/3] bg-slate-100 rounded-[32px] overflow-hidden relative group">
-                    <img src={a.data} className="w-full h-full object-cover" alt="Asset" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
-                        <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">{a.module}</span>
-                        <h4 className="text-white font-black uppercase italic tracking-tight">{a.title}</h4>
-                    </div>
-                </div>
-            ))}
-        </div>
-      </section>
-
-      {/* FINAL FOOTER */}
-      <section className="dossier-page section-break flex flex-col items-center justify-center text-center">
-             <div className="w-32 h-32 bg-[#020617] rounded-[40px] flex items-center justify-center text-6xl mb-12 shadow-2xl">P</div>
+      <section className="dossier-page flex flex-col items-center justify-center text-center">
              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[1em]">END OF STRATEGIC MANIFEST</p>
              <p className="text-[9px] font-mono text-slate-300 mt-6 uppercase tracking-widest italic">VERIFIED BY PROSPECTOR OS V3.2 // SECURE ARCHIVAL NODE</p>
       </section>
