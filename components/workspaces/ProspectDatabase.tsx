@@ -25,19 +25,20 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * Helper: Atomic Name Extraction
-   * Normalizes "Dubai, UAE" -> "DUBAI" or "New York, NY" -> "NEW YORK"
+   * ATOMIC PARSING: 
+   * Extracts the primary name from strings like "Dubai, UAE" or "New York, NY"
+   * ensures the dropdown is clean and unified.
    */
   const getAtomicValue = (val: any, mode: GroupBy): string => {
     if (typeof val !== 'string' || val.trim() === '') return 'UNCLASSIFIED';
     if (mode === 'city') {
-        // Split by comma and take the first part for clean city isolation
+        // Take everything before the first comma for clean city names
         return val.split(',')[0].trim().toUpperCase();
     }
     return val.trim().toUpperCase();
   };
 
-  // 1. SMART EXTRACTION: Finds all unique cleaned cities/niches represented in the 612 leads
+  // 1. DYNAMIC VALUE EXTRACTION: Finds every unique city/niche in the 612 records
   const representedValues = useMemo(() => {
     if (grouping === 'none') return [];
     const values = new Set<string>();
@@ -52,7 +53,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return Array.from(values).sort();
   }, [leads, grouping]);
 
-  // 2. Initial Filtering (Pipeline Status)
+  // 2. PRIMARY FILTER: Pipeline Status (Cold, Sent, etc.)
   const statusFilteredLeads = useMemo(() => {
     let filtered = leads;
     if (statusFilter !== 'ALL') {
@@ -61,7 +62,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return filtered;
   }, [leads, statusFilter]);
 
-  // 3. SECONDARY ISOLATION: Filters the list down to the specific chosen City/Niche
+  // 3. SECONDARY ISOLATION: Filters the list down to the specific chosen City or Niche
   const isolatedLeads = useMemo(() => {
     if (grouping === 'none' || subFilterValue === 'ALL') return statusFilteredLeads;
     return statusFilteredLeads.filter(l => {
@@ -70,7 +71,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [statusFilteredLeads, grouping, subFilterValue]);
 
-  // 4. Numerical and Alpha Sorting (No Tooltips)
+  // 4. SORTING ENGINE: Reliable numerical/alphabetical sorting
   const sortedLeads = useMemo(() => {
     return [...isolatedLeads].sort((a, b) => {
       // @ts-ignore
@@ -90,10 +91,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     });
   }, [isolatedLeads, sortConfig]);
 
-  // 5. Grouping logic for the UI headers
+  // 5. VIEW COMPILER: Decides if we show a flat list or grouped headers
   const groupedData = useMemo(() => {
-    // If isolating a single city, don't show the group header row
-    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'DATABASE LEDGER': sortedLeads };
+    if (grouping === 'none' || subFilterValue !== 'ALL') return { 'MASTER DATABASE': sortedLeads };
     
     const groups: Record<string, Lead[]> = {};
     sortedLeads.forEach(lead => {
@@ -113,8 +113,13 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleGroupingChange = (newGrouping: GroupBy) => {
-      setGrouping(newGrouping);
-      setSubFilterValue('ALL'); 
+      if (grouping === newGrouping) {
+          setGrouping('none');
+          setSubFilterValue('ALL');
+      } else {
+          setGrouping(newGrouping);
+          setSubFilterValue('ALL'); 
+      }
   };
 
   const toggleSelectAll = () => {
@@ -126,9 +131,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Permanently remove this target?")) {
+    if (confirm("Remove this target from the ledger?")) {
         db.deleteLead(id);
-        toast.info("Target removed.");
+        toast.info("Target purged.");
     }
   };
 
@@ -138,12 +143,12 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PROSPECTOR_DATABASE_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `PROSPECTOR_LEDGER_EXPORT_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("LEADS_EXPORTED");
+    toast.success("DATABASE_EXPORT_COMPLETE");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,18 +160,21 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
                 const results = db.upsertLeads(imported);
-                toast.success(`DEDUP_SYNC: +${results.added} NEW.`);
+                toast.success(`DEDUP_SYNC: +${results.added} NEW TARGETS.`);
+            } else {
+                toast.error("INVALID_JSON_ARRAY");
             }
         } catch (err) {
-            toast.error("INVALID_JSON");
+            toast.error("PARSE_FAILURE");
         }
     };
     reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const SortIcon = ({ col }: { col: keyof Lead }) => {
-    if (sortConfig.key !== col) return <span className="opacity-20 ml-2 text-[10px]">⇅</span>;
-    return <span className="text-emerald-500 ml-2 text-[10px] font-bold">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
+    if (sortConfig.key !== col) return <span className="opacity-10 ml-2 text-[10px]">⇅</span>;
+    return <span className="text-emerald-500 ml-2 text-[10px] font-black">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
   };
 
   return (
@@ -180,25 +188,24 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
         
         <div className="flex flex-wrap gap-4 items-center">
-          {/* ADVANCED ORGANIZE & ISOLATE PANEL */}
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl gap-8">
-             <div className="flex items-center gap-3 border-r border-slate-800 pr-8">
+          {/* ORGANIZE & ISOLATE HUB */}
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex items-center shadow-2xl gap-8">
+             <div className={`flex items-center gap-3 ${grouping !== 'none' ? 'border-r border-slate-800 pr-8' : ''}`}>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ORGANIZE BY:</span>
                 <div className="flex gap-1">
-                    <button onClick={() => handleGroupingChange('none')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'none' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>FLAT LIST</button>
-                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
-                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
+                    <button onClick={() => handleGroupingChange('city')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'city' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>CITY</button>
+                    <button onClick={() => handleGroupingChange('niche')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${grouping === 'niche' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>NICHE</button>
                 </div>
              </div>
 
-             {/* DYNAMIC ISOLATION DROP-DOWN (Atomic City Logic) */}
+             {/* DYNAMIC ISOLATION DROPDOWN */}
              {grouping !== 'none' && (
                 <div className="flex flex-col animate-in slide-in-from-left-4 duration-300">
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse">ISOLATE {grouping.toUpperCase()} TARGETS</span>
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 animate-pulse italic">ISOLATE TARGETS</span>
                     <select 
                         value={subFilterValue}
                         onChange={(e) => setSubFilterValue(e.target.value)}
-                        className="bg-[#020617] border-2 border-emerald-500/40 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[200px] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+                        className="bg-[#020617] border-2 border-emerald-500/30 rounded-xl px-4 py-2 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[220px] shadow-inner"
                     >
                         <option value="ALL">VIEW ALL REPRESENTED {grouping.toUpperCase()}S</option>
                         {representedValues.map(v => <option key={v} value={v}>{v}</option>)}
@@ -207,7 +214,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
              )}
           </div>
 
-          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-2xl px-6 py-3 flex items-center shadow-2xl">
+          <div className="bg-[#0b1021] border-2 border-slate-800 rounded-3xl px-6 py-3 flex items-center shadow-2xl">
              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-3">PIPELINE:</span>
              <select 
                value={statusFilter}
@@ -253,10 +260,9 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                     STATUS<SortIcon col="status" />
                 </th>
                 <th 
-                  onClick={() => handleSort('socialGap')} 
-                  className="cursor-pointer px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors group select-none"
+                  className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] select-none"
                 >
-                    VULNERABILITY GAP<SortIcon col="socialGap" />
+                    VULNERABILITY SIGNAL
                 </th>
                 <th 
                   onClick={() => handleSort('leadScore')} 
@@ -270,7 +276,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
             <tbody className="divide-y-2 divide-slate-800/50">
               {(Object.entries(groupedData) as [string, Lead[]][]).map(([groupName, groupLeads]) => (
                 <React.Fragment key={groupName}>
-                  {/* GROUP HEADERS (Only visible when "VIEW ALL" is active) */}
+                  {/* DYNAMIC GROUP HEADERS */}
                   {grouping !== 'none' && subFilterValue === 'ALL' && (
                     <tr className="bg-slate-900/50 border-y border-slate-800/50">
                        <td colSpan={7} className="px-8 py-4">
@@ -278,7 +284,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                              <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.2em]">{groupName}</span>
                              <div className="h-px bg-slate-800 flex-1 ml-4 opacity-30"></div>
-                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES FOUND</span>
+                             <span className="text-[10px] font-bold text-slate-600 ml-4 tracking-widest">{groupLeads.length} ENTITIES</span>
                           </div>
                        </td>
                     </tr>
@@ -322,7 +328,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               {sortedLeads.length === 0 && (
                 <tr>
                     <td colSpan={7} className="py-32 text-center text-slate-700 italic uppercase tracking-widest text-xs">
-                        DATABASE SEGMENT EMPTY. CHECK FILTERS.
+                        TARGET SEGMENT EMPTY. CHECK FILTERS.
                     </td>
                 </tr>
               )}
@@ -331,7 +337,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
         </div>
       </div>
 
-      {/* DATA MANAGEMENT FOOTER */}
+      {/* DATA CONTROLS FOOTER */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-12 p-10 bg-[#0b1021]/80 border-2 border-slate-800 rounded-[48px] shadow-2xl">
          <div className="flex gap-4">
             <button 
