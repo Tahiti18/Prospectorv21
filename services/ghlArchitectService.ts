@@ -35,7 +35,7 @@ async function callAgent(prompt: string, system: string, model: string): Promise
     body: JSON.stringify({
       model: model,
       messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
-      temperature: 0.85,
+      temperature: 0.8,
       max_tokens: 4000
     })
   });
@@ -53,7 +53,6 @@ export const executeNeuralBoardroom = async (
   rounds: number,
   onUpdate: (steps: BoardroomStep[]) => void
 ): Promise<string> => {
-  // Original technical boardroom logic preserved
   return ""; 
 };
 
@@ -81,8 +80,9 @@ export const executeGrowthBoardroom = async (
   const LAYMAN_PROTOCOL = `
     STRICT LAYMAN STRATEGY PROTOCOL:
     - ABSOLUTELY NO MARKDOWN (No stars **, no hashtags #, no underscores _).
-    - ABSOLUTELY NO CODE (No "API", "JSON", "Webhook", "Custom Fields", "Variables").
-    - FOCUS ON BUSINESS VALUE, CUSTOMER JOURNEY, AND REVENUE.
+    - ABSOLUTELY NO CODE references.
+    - STRUCTURE WITH CLEAR HEADINGS (All caps, no symbols).
+    - USE MULTIPLE STRAIGHT PARAGRAPHS FOR READABILITY.
     - SPEAK AS A LUXURY BUSINESS CONSULTANT TO A STAKEHOLDER.
     - KB: ${LAYMAN_KNOWLEDGE_BASE}
   `;
@@ -91,21 +91,21 @@ export const executeGrowthBoardroom = async (
     for (let r = 1; r <= rounds; r++) {
       // 1. Visionary
       steps[0].currentRound = r; steps[0].status = 'THINKING'; updateUI();
-      const visionOut = await callAgent(`ROUND ${r}/${rounds}: Vision for ${lead.businessName}. HISTORY: ${debateHistory || 'None'}. ${LAYMAN_PROTOCOL}`, "You are THE VISIONARY.", steps[0].modelId);
+      const visionOut = await callAgent(`ROUND ${r}/${rounds}: Establish the brand transformation vision for ${lead.businessName}. HISTORY: ${debateHistory || 'None'}. ${LAYMAN_PROTOCOL}`, "You are THE VISIONARY.", steps[0].modelId);
       steps[0].output += `\n\nROUND ${r}:\n${visionOut}`;
       debateHistory += `\nVISIONARY (R${r}): ${visionOut}`;
       steps[0].status = 'COMPLETED'; updateUI();
 
       // 2. Profit Hacker
       steps[1].currentRound = r; steps[1].status = 'THINKING'; updateUI();
-      const profitOut = await callAgent(`ROUND ${r}/${rounds}: Based on Vision: ${visionOut}, how do we maximize ROI for ${lead.businessName}? ${LAYMAN_PROTOCOL}`, "You are THE PROFIT HACKER.", steps[1].modelId);
+      const profitOut = await callAgent(`ROUND ${r}/${rounds}: Revenue optimization strategy based on Vision: ${visionOut}. ${LAYMAN_PROTOCOL}`, "You are THE PROFIT HACKER.", steps[1].modelId);
       steps[1].output += `\n\nROUND ${r}:\n${profitOut}`;
       debateHistory += `\nPROFIT HACKER (R${r}): ${profitOut}`;
       steps[1].status = 'COMPLETED'; updateUI();
 
       // 3. Ops Master
       steps[2].currentRound = r; steps[2].status = 'THINKING'; updateUI();
-      const opsOut = await callAgent(`ROUND ${r}/${rounds}: Based on Profit Strategy: ${profitOut}, how do we automate this to save time? ${LAYMAN_PROTOCOL}`, "You are THE OPS MASTER.", steps[2].modelId);
+      const opsOut = await callAgent(`ROUND ${r}/${rounds}: Operational automation plan based on current debate: ${debateHistory}. ${LAYMAN_PROTOCOL}`, "You are THE OPS MASTER.", steps[2].modelId);
       steps[2].output += `\n\nROUND ${r}:\n${opsOut}`;
       debateHistory += `\nOPS MASTER (R${r}): ${opsOut}`;
       steps[2].status = 'COMPLETED'; updateUI();
@@ -120,38 +120,38 @@ export const executeGrowthBoardroom = async (
     steps[3].status = 'THINKING'; updateUI();
     const finalPrompt = `
       DEBATE HISTORY: ${debateHistory}
-      TASK: As the Managing Director, synthesize this debate into the DEFINITIVE BUSINESS GROWTH PLAN for ${lead.businessName}.
+      TASK: As the Managing Director, synthesize this debate into the DEFINITIVE BUSINESS TRANSFORMATION PLAN for ${lead.businessName}.
       
-      REQUIREMENTS:
+      CRITICAL REQUIREMENTS:
+      - PROVIDE EXHAUSTIVE DETAIL. This must be a massive, comprehensive plan.
+      - EACH SECTION MUST HAVE AT LEAST 4 FULL PARAGRAPHS.
       - NO MARKDOWN SYMBOLS (No *, #, _, etc.).
-      - Use "heading" blocks for EMERALD green titles.
-      - Use "p" for clean paragraphs.
-      - Use "hero" for the overarching vision statement.
-      - Output strictly valid JSON in UI_BLOCKS format.
+      - USE "heading" BLOCKS FOR TITLES.
+      - USE "p" FOR CLEAN, STRAIGHT PARAGRAPHS.
+      - OUTPUT STRICTLY VALID JSON IN UI_BLOCKS FORMAT.
       
-      JSON SCHEMA:
+      FORMAT:
       {
         "format": "ui_blocks",
-        "title": "EXECUTIVE TRANSFORMATION PLAN",
+        "title": "DEFINITIVE TRANSFORMATION SCHEMATIC",
         "subtitle": "PREMIUM GROWTH ARCHITECTURE",
         "sections": [
-          { "heading": "THE DIGITAL GAP", "body": [ { "type": "p", "content": "Explain current business deficiencies clearly." } ] },
-          { "heading": "REVENUE ACCELERATION", "body": [ { "type": "hero", "content": "Master Vision Statement" }, { "type": "p", "content": "Detailed revenue strategy." } ] },
-          { "heading": "OPERATIONAL LIBERATION", "body": [ { "type": "p", "content": "Automation impacts on time and freedom." } ] },
-          { "heading": "POTENTIAL OUTCOMES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
+          { "heading": "THE DIGITAL GAP AND CURRENT DEFICIT", "body": [ { "type": "p", "content": "4+ detailed paragraphs here..." } ] },
+          { "heading": "REVENUE ACCELERATION PROTOCOL", "body": [ { "type": "hero", "content": "Master Vision Statement" }, { "type": "p", "content": "4+ detailed paragraphs here..." } ] },
+          { "heading": "OPERATIONAL LIBERATION ARCHITECTURE", "body": [ { "type": "p", "content": "4+ detailed paragraphs here..." } ] },
+          { "heading": "PROJECTED ECONOMIC OUTCOMES", "body": [ { "type": "p", "content": "4+ detailed paragraphs here..." } ] }
         ]
       }
     `;
     const finalOut = await callAgent(finalPrompt, "You are the Managing Director. Provide a massive, clean, client-ready growth plan in valid UI_BLOCKS JSON.", steps[3].modelId);
     
-    // Validate JSON
     try {
       JSON.parse(finalOut);
-      steps[3].output = "Plan synthesized successfully.";
+      steps[3].output = "Transformation blueprint synthesized successfully.";
       steps[3].status = 'COMPLETED';
     } catch (e) {
       steps[3].status = 'FAILED';
-      throw new Error("MD_SYNTHESIS_PARSING_FAILURE");
+      throw new Error("MD_SYNTHESIS_MALFORMED_JSON");
     }
 
     updateUI();
