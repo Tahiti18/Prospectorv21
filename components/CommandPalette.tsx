@@ -64,7 +64,7 @@ const Icon = ({ name }: { name: string }) => {
 };
 
 const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string; icon: string }[] = [
-  // --- RESEARCH ZONE ---
+  // ... module data stays the same ...
   { mode: 'RESEARCH', mod: 'EXECUTIVE_DASHBOARD', label: 'EXECUTIVE DASHBOARD', zone: 'RESEARCH ZONE', icon: 'chart' },
   { mode: 'RESEARCH', mod: 'MARKET_DISCOVERY', label: 'MARKET DISCOVERY', zone: 'RESEARCH ZONE', icon: 'discovery' },
   { mode: 'RESEARCH', mod: 'AUTOMATED_SEARCH', label: 'AUTOMATED SEARCH', zone: 'RESEARCH ZONE', icon: 'search' },
@@ -128,46 +128,11 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
 ];
 
 const ZONE_STYLES: Record<string, { headerBg: string; headerText: string; hoverBg: string; hoverText: string; iconBg: string; border: string }> = {
-  'RESEARCH ZONE': {
-    headerBg: 'bg-emerald-950/80',
-    headerText: 'text-emerald-400',
-    hoverBg: 'hover:bg-emerald-600/10',
-    hoverText: 'group-hover:text-emerald-400',
-    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
-    border: 'border-emerald-500/30'
-  },
-  'DESIGN ZONE': {
-    headerBg: 'bg-emerald-950/80',
-    headerText: 'text-emerald-400',
-    hoverBg: 'hover:bg-emerald-600/10',
-    hoverText: 'group-hover:text-emerald-400',
-    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
-    border: 'border-emerald-500/30'
-  },
-  'MEDIA ZONE': { 
-    headerBg: 'bg-emerald-950/80',
-    headerText: 'text-emerald-400',
-    hoverBg: 'hover:bg-emerald-600/10',
-    hoverText: 'group-hover:text-emerald-400',
-    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
-    border: 'border-emerald-500/30'
-  },
-  'OUTREACH ZONE': { 
-    headerBg: 'bg-emerald-950/80',
-    headerText: 'text-emerald-400',
-    hoverBg: 'hover:bg-emerald-600/10',
-    hoverText: 'group-hover:text-emerald-400',
-    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
-    border: 'border-emerald-500/30'
-  },
-  'ADMIN ZONE': { 
-    headerBg: 'bg-emerald-950/80',
-    headerText: 'text-emerald-400',
-    hoverBg: 'hover:bg-emerald-600/10',
-    hoverText: 'group-hover:text-emerald-400',
-    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
-    border: 'border-emerald-500/30'
-  }
+  'RESEARCH ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
+  'DESIGN ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
+  'MEDIA ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
+  'OUTREACH ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
+  'ADMIN ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' }
 };
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onSelect, theme }) => {
@@ -191,7 +156,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   const zones = Array.from(new Set(filteredItems.map(f => f.zone)));
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20">
+    <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl transition-opacity" onClick={onClose}></div>
       
       <div className={`relative w-full max-w-3xl border-2 border-slate-800 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh] ${theme === 'dark' ? 'bg-[#0b1021]' : 'bg-white'}`}>

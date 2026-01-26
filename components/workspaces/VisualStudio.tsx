@@ -88,9 +88,9 @@ export const VisualStudio: React.FC<VisualStudioProps> = ({ leads, lockedLead })
 
   return (
     <div className="max-w-[1550px] mx-auto py-6 space-y-10 animate-in fade-in duration-700">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start pt-2">
         <div className="space-y-2">
-          <h1 className="text-5xl font-black uppercase tracking-tighter text-white leading-none">
+          <h1 className="text-5xl font-black uppercase tracking-tighter text-white leading-tight">
             VISUAL <span className="text-emerald-500">STUDIO</span>
           </h1>
           <p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em]">
@@ -164,7 +164,7 @@ export const VisualStudio: React.FC<VisualStudioProps> = ({ leads, lockedLead })
                  <div className="flex flex-col items-center justify-center space-y-8">
                     <div className="w-20 h-20 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin"></div>
                     <div className="text-center space-y-2">
-                        <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.5em] animate-pulse">SYNTHESIZING MATRIX</p>
+                        <p className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.5em] animate-pulse">SYNTHESIZING MATRIX</p>
                         <p className="text-[9px] text-slate-600 uppercase tracking-widest italic">NEURAL PATH TRACING ACTIVE</p>
                     </div>
                  </div>

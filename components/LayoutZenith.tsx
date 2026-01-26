@@ -236,8 +236,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
-      {/* FIXED HEADER: High-priority layout element with maximized z-index */}
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[9999] flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8">
+      {/* FIXED HEADER: High-priority layout element with recalibrated z-index */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-50 flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8">
          {/* Left: Branding */}
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
@@ -324,8 +324,8 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
          </div>
       </header>
 
-      {/* BODY CONTENT: Offset by header height */}
-      <div className="flex-1 flex overflow-hidden pt-24">
+      {/* BODY CONTENT: Offset by header height with increased margin pt-28 */}
+      <div className="flex-1 flex overflow-hidden pt-28">
          <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
             <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
                <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
@@ -363,7 +363,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
             </div>
          </aside>
 
-         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12">
+         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0">
             <div className="max-w-[1920px] mx-auto pb-32">{children}</div>
          </main>
       </div>
