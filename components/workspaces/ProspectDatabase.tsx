@@ -35,18 +35,26 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return val.trim().toUpperCase();
   };
 
-  // 1. UNIQUE VALUE REGISTRY: Scans database for all available cities and niches
-  const uniqueCities = useMemo(() => {
+  // 1. CONTEXTUAL OPTION DISCOVERY (Cascading logic)
+  // Get cities available based on current Niche selection
+  const availableCities = useMemo(() => {
     const set = new Set<string>();
-    leads.forEach(l => set.add(getAtomicValue(l.city, 'city')));
+    leads.forEach(l => {
+      const matchNiche = nicheFilter === 'ALL' || getAtomicValue(l.niche, 'niche') === nicheFilter;
+      if (matchNiche) set.add(getAtomicValue(l.city, 'city'));
+    });
     return Array.from(set).sort();
-  }, [leads]);
+  }, [leads, nicheFilter]);
 
-  const uniqueNiches = useMemo(() => {
+  // Get niches available based on current City selection
+  const availableNiches = useMemo(() => {
     const set = new Set<string>();
-    leads.forEach(l => set.add(getAtomicValue(l.niche, 'niche')));
+    leads.forEach(l => {
+      const matchCity = cityFilter === 'ALL' || getAtomicValue(l.city, 'city') === cityFilter;
+      if (matchCity) set.add(getAtomicValue(l.niche, 'niche'));
+    });
     return Array.from(set).sort();
-  }, [leads]);
+  }, [leads, cityFilter]);
 
   // 2. STRIKE-READY FILTER CHAIN: Cumulative filtering
   const filteredLeads = useMemo(() => {
@@ -122,6 +130,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     a.href = url;
     a.download = `PROSPECTOR_LEDGER_EXPORT_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
+    a.href = url;
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
@@ -153,6 +162,17 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
     return <span className="text-emerald-500 ml-2 text-[10px] font-black">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
   };
 
+  // Helper to generate a clean intersection label for the header
+  const getStrikeZoneLabel = () => {
+    const parts = [];
+    if (cityFilter !== 'ALL') parts.push(cityFilter);
+    if (nicheFilter !== 'ALL') parts.push(nicheFilter);
+    if (statusFilter !== 'ALL') parts.push(statusFilter.toUpperCase());
+    
+    if (parts.length === 0) return "FULL DATABASE";
+    return parts.join(" + ");
+  };
+
   return (
     <div className="space-y-6 py-6 max-w-[1600px] mx-auto relative px-6 pb-40 animate-in fade-in duration-700">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
@@ -167,7 +187,7 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
               <span className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
                 <span className="text-slate-800">|</span>
                 <span className="text-emerald-500 bg-emerald-500/5 px-3 py-0.5 rounded border border-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                   ISOLATED STRIKE ZONE: {filteredLeads.length} TOTAL TARGETS
+                   {getStrikeZoneLabel()}: {filteredLeads.length} TARGETS
                 </span>
               </span>
             )}
@@ -185,12 +205,16 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                     onChange={(e) => setCityFilter(e.target.value)}
                     className="bg-[#020617] border-2 border-slate-800 rounded-xl px-4 py-1.5 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[160px] shadow-inner"
                 >
-                    <option value="ALL">ALL CITIES</option>
-                    {uniqueCities.map(v => <option key={v} value={v}>{v}</option>)}
+                    <option value="ALL">ALL CITIES ({leads.length})</option>
+                    {availableCities.map(v => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
                 </select>
              </div>
 
-             {/* ISOLATE NICHE */}
+             {/* ISOLATE NICHE - Now dynamically filtered by city selection */}
              <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ISOLATE NICHE</span>
                 <select 
@@ -199,7 +223,11 @@ export const ProspectDatabase: React.FC<{ leads: Lead[], lockedLeadId: string | 
                     className="bg-[#020617] border-2 border-slate-800 rounded-xl px-4 py-1.5 text-[10px] font-black text-white uppercase outline-none focus:border-emerald-500 cursor-pointer min-w-[160px] shadow-inner"
                 >
                     <option value="ALL">ALL NICHES</option>
-                    {uniqueNiches.map(v => <option key={v} value={v}>{v}</option>)}
+                    {availableNiches.map(v => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
                 </select>
              </div>
 
