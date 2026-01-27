@@ -23,6 +23,22 @@ function safeParse(raw: string | null): unknown {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+/**
+ * Normalizes URLs for fingerprinting (removes protocol, www, and trailing slashes)
+ */
+function normalizeUrl(url: string = ''): string {
+  return url
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/$/, '')
+    .trim();
+}
+
+function normalizeName(name: string = ''): string {
+  return name.toLowerCase().trim();
+}
+
 function normalizeRunsMap(maybeRuns: unknown): Record<string, AutomationRun> {
   if (!isRecord(maybeRuns)) return {};
   const out: Record<string, AutomationRun> = {};
@@ -95,7 +111,6 @@ export const db = {
 
   subscribe: (listener: Listener) => {
     listeners.add(listener);
-    // Immediately emit current state to new subscriber
     listener(db.getLeads());
     return () => { listeners.delete(listener); };
   },
@@ -113,9 +128,7 @@ export const db = {
     }
     try {
         localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
-        // Broadcast to all active listeners (App.tsx state)
         listeners.forEach(l => l([...leads]));
-        console.log(`[Persistence] ${leads.length} records committed to local storage.`);
     } catch (e: any) {
         console.error("Save Leads Failed", e);
         if (e.name === 'QuotaExceededError') {
@@ -124,27 +137,50 @@ export const db = {
     }
   },
 
-  upsertLeads: (newLeads: Lead[]) => {
+  /**
+   * HIGH-FIDELITY UPSERT ENGINE
+   * Implements multi-vector deduplication based on URL and Identity Fingerprints.
+   */
+  upsertLeads: (newLeads: Lead[]): { added: number, updated: number } => {
     const current = db.getLeads();
-    const currentMap = new Map(current.map(l => [l.id, l]));
+    const currentMap = new Map<string, Lead>();
     
-    newLeads.forEach(nl => {
-      // Use businessName + website as a secondary key if ID is generic
-      const existing = current.find(e => 
-        e.id === nl.id || 
-        (e.businessName === nl.businessName && e.websiteUrl === nl.websiteUrl)
-      );
+    // Create a lookup map for current leads using normalized URL as the primary key
+    current.forEach(l => {
+      const key = l.websiteUrl ? normalizeUrl(l.websiteUrl) : `name-${normalizeName(l.businessName)}-${normalizeName(l.city)}`;
+      currentMap.set(key, l);
+    });
 
-      if (existing) {
-        currentMap.set(existing.id, { ...existing, ...nl, id: existing.id });
+    let added = 0;
+    let updated = 0;
+
+    newLeads.forEach(nl => {
+      const key = nl.websiteUrl ? normalizeUrl(nl.websiteUrl) : `name-${normalizeName(nl.businessName)}-${normalizeName(nl.city)}`;
+      
+      if (currentMap.has(key)) {
+        // MERGE: Keep existing ID and non-destructive fields (notes, tags, etc)
+        const existing = currentMap.get(key)!;
+        currentMap.set(key, { 
+          ...nl, 
+          ...existing, // Prioritize existing CRM data like notes/tags
+          id: existing.id,
+          // Always take the newest contact info if provided
+          email: nl.email || existing.email,
+          phone: nl.phone || existing.phone,
+          outreachStatus: existing.outreachStatus || nl.outreachStatus || 'cold'
+        });
+        updated++;
       } else {
-        currentMap.set(nl.id, nl);
+        // NEW: Add to database
+        currentMap.set(key, nl);
+        added++;
       }
     });
 
-    const merged = Array.from(currentMap.values());
-    db.saveLeads(merged);
-    return merged;
+    const finalLeads = Array.from(currentMap.values());
+    db.saveLeads(finalLeads);
+    
+    return { added, updated };
   },
 
   deleteLead: (id: string) => {
