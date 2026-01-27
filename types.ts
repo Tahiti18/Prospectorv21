@@ -50,6 +50,7 @@ export type SubModule =
   | 'ACTIVITY_LOGS'
   | 'SETTINGS'
   | 'NEXUS_GRAPH'
+  | 'DATABASE'
   | 'TIMELINE'
   | 'TASK_MANAGER'
   | 'THEME'

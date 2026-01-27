@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V12
+   FORMATTED OUTPUT – EXECUTIVE CLEAN RENDERING V15
    ========================================================= */
 
 import React from 'react';
@@ -29,17 +29,22 @@ interface FormattedOutputProps {
 const executiveSanitize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== 'string') return String(text);
+  
   return text
     .replace(/^```json/gi, '')
     .replace(/^```/gi, '')
     .replace(/```$/gi, '')
-    .replace(/#/g, '')    
-    .replace(/\*/g, '')   
-    .replace(/__/g, '')   
-    .replace(/~~/g, '')   
-    .replace(/\[|\]/g, '') 
-    .replace(/---/g, '')   
-    .replace(/\s{2,}/g, ' ') 
+    // Aggressive markdown strip
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Strip double asterisks
+    .replace(/\*(.*?)\*/g, '$1')     // Strip single asterisks
+    .replace(/__(.*?)__/g, '$1')     // Strip double underscores
+    .replace(/_(.*?)_/g, '$1')       // Strip single underscores
+    .replace(/#{1,6}\s?/g, '')      // Strip all header hashes
+    .replace(/\[|\]/g, '')           // Strip brackets
+    .replace(/`{1,3}/g, '')          // Strip backticks
+    .replace(/~~/g, '')              // Strip strikethrough
+    .replace(/---\s?/g, '')          // Strip horizontal rules
+    .replace(/\s{2,}/g, ' ')         // Collapse multiple spaces
     .trim();
 };
 
@@ -47,12 +52,12 @@ const promoteToStrategicReport = (input: any): UIBlocks => {
   if (typeof input === 'string') {
     return {
       format: 'ui_blocks',
-      title: "Strategic Overview",
-      subtitle: "EXECUTIVE SUMMARY",
-      sections: [{ heading: "STRATEGIC OVERVIEW", body: [{ type: 'p', content: input }] }]
+      title: "Strategic Analysis",
+      subtitle: "DATA SYNTHESIS",
+      sections: [{ heading: "OVERVIEW", body: [{ type: 'p', content: input }] }]
     };
   }
-  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "DATA SYNTHESIS", sections: [] };
+  return { format: 'ui_blocks', title: "Strategy Session", subtitle: "NEURAL CORE", sections: [] };
 };
 
 export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, className = "" }) => {
@@ -77,6 +82,22 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
 
     const renderBlock = (block: UIBlock, idx: number) => {
       if (!block) return null;
+      
+      // Auto-detect if a paragraph block is acting as a markdown heading
+      if (block.type === 'p' && typeof block.content === 'string') {
+        const raw = block.content.trim();
+        if (raw.startsWith('**') && raw.endsWith('**')) {
+           return (
+            <div key={idx} className="flex items-center gap-4 mb-8 mt-12 first:mt-0">
+               <h3 className="text-4xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">
+                  {executiveSanitize(raw)}
+               </h3>
+               <div className="h-px bg-emerald-500/10 flex-1 rounded-full"></div>
+            </div>
+           );
+        }
+      }
+
       const cleaned = typeof block.content === 'string' ? executiveSanitize(block.content) : block.content;
 
       switch (block.type) {
@@ -84,12 +105,11 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
           return (
             <div key={idx} className="mb-10 p-10 bg-emerald-600 rounded-[48px] shadow-2xl relative overflow-hidden group border-b-8 border-emerald-800">
               <p className="text-2xl font-black text-white italic tracking-tighter leading-tight relative z-10 font-sans">"{cleaned}"</p>
-              <div className="mt-4 flex gap-2 relative z-10 opacity-20 font-black text-[9px] uppercase tracking-widest text-white">STRATEGIC_ANCHOR</div>
+              <div className="mt-4 flex gap-2 relative z-10 opacity-20 font-black text-[9px] uppercase tracking-widest text-white">STRATEGIC_PROTOCOL</div>
             </div>
           );
         case 'p':
-          // Strictly no drop-caps or decorative logic
-          return <p key={idx} className="text-slate-800 leading-relaxed mb-6 text-base font-medium border-l-4 border-emerald-500/10 pl-8 py-0.5 font-sans">{cleaned}</p>;
+          return <p key={idx} className="text-slate-800 leading-relaxed mb-8 text-base font-medium border-l-4 border-emerald-500/10 pl-8 py-1 font-sans">{cleaned}</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
@@ -103,7 +123,6 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
             </div>
           );
         case 'heading':
-          // Size matching Executive Dashboard Overview (4xl equivalent)
           return (
             <div key={idx} className="flex items-center gap-4 mb-8 mt-12 first:mt-0">
                <h3 className="text-4xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{cleaned}</h3>
@@ -116,35 +135,31 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
     };
 
     return (
-      <div className={`space-y-12 animate-in fade-in duration-1000 max-w-6xl mx-auto pb-20 ${className}`}>
-        {uiData?.title && (
-          <div className="border-b border-slate-100 pb-10 mb-16 text-center">
-            <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic leading-none mb-4 font-sans">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.8em] text-[10px] italic font-sans">{uiData.subtitle}</p>}
+      <div className={`space-y-12 animate-in fade-in duration-700 ${className}`}>
+        {(uiData?.title || uiData?.subtitle) && (
+          <div className="border-b-2 border-emerald-500/20 pb-8 mb-12">
+            {uiData.subtitle && <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2">{uiData.subtitle}</p>}
+            {uiData.title && <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic leading-none">{uiData.title}</h2>}
           </div>
         )}
 
-        {(uiData?.sections || []).map((section, sIdx) => (
-          <section key={sIdx} className="mb-20">
-            <div className="flex items-center gap-6 mb-10">
-                <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center font-black text-white text-xl italic shadow-2xl shrink-0">0{sIdx+1}</div>
-                <h2 className="text-4xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{executiveSanitize(section?.heading || "SEGMENT")}</h2>
-                <div className="h-px bg-slate-100 flex-1"></div>
+        {uiData?.sections.map((section, sIdx) => (
+          <div key={sIdx} className="space-y-6">
+            <div className="flex items-center gap-4 mb-8">
+              <h3 className="text-2xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap">{section.heading}</h3>
+              <div className="h-px bg-emerald-500/10 flex-1 rounded-full"></div>
             </div>
-            <div className="px-4">
-              {(section?.body || []).map((block, bIdx) => renderBlock(block, bIdx))}
+            <div className="space-y-4">
+              {section.body.map((block, bIdx) => renderBlock(block, bIdx))}
             </div>
-          </section>
+          </div>
         ))}
       </div>
     );
-  } catch (fatalError) {
+  } catch (e) {
     return (
-      <div className="p-16 border-2 border-rose-500/10 rounded-[48px] text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.5em] mb-4 font-sans text-[10px]">PARSING_FAULT</p>
-        <div className="bg-black/90 p-10 rounded-[32px] text-slate-400 font-mono text-xs whitespace-pre-wrap text-left shadow-2xl border border-white/5 overflow-auto max-h-96">
-          {content}
-        </div>
+      <div className={`whitespace-pre-wrap font-sans text-slate-700 leading-relaxed ${className}`}>
+        {executiveSanitize(content)}
       </div>
     );
   }
