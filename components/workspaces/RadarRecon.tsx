@@ -22,10 +22,11 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
     
     setLoading(true);
     try {
+      // Direct call - removed the 8s sleep which caused UX breakage
       const result = await generateLeads(theater, niche || 'High-Ticket Business', leadCount);
       
       if (!result.leads || result.leads.length === 0) {
-          toast.info("Market scan complete, but no new prospects identified in this vector.");
+          toast.info("Market scan complete, but no new targets identified in this vector.");
           return;
       }
 
@@ -35,7 +36,7 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
         status: 'cold',
         outreachStatus: 'cold',
         rank: l.rank || i + 1,
-        businessName: l.businessName || 'UNIDENTIFIED_PROSPECT',
+        businessName: l.businessName || 'UNIDENTIFIED_TARGET',
         websiteUrl: l.websiteUrl || '#',
         leadScore: l.leadScore || 50,
         assetGrade: l.assetGrade || 'C',
@@ -46,11 +47,11 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
       }));
 
       onLeadsGenerated(formattedLeads);
-      toast.success(`${formattedLeads.length} Prospects synchronized with Database.`);
+      toast.success(`${formattedLeads.length} Targets synchronized with Ledger.`);
       
     } catch (e: any) {
       console.error(e);
-      toast.error(`Analysis Link Interrupted: ${e.message || 'Check connection'}`);
+      toast.error(`Neural Link Interrupted: ${e.message || 'Check connection'}`);
     } finally {
       setLoading(false);
     }
@@ -61,8 +62,8 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
   return (
     <div className="max-w-4xl mx-auto py-12 space-y-12 animate-in fade-in duration-500">
       <div className="text-center">
-        <h2 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-4">Lead Discovery Initiation</h2>
-        <h1 className="text-4xl font-bold uppercase tracking-tight text-white leading-none">LEAD <span className="text-emerald-600 italic">DISCOVERY</span></h1>
+        <h2 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-4">Market Discovery Initiation</h2>
+        <h1 className="text-4xl font-bold uppercase tracking-tight text-white leading-none">LEAD <span className="text-emerald-600">DISCOVERY</span></h1>
         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-3">Active Market: {theater}</p>
       </div>
 
@@ -79,7 +80,7 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
             />
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Sample Size</label>
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Scan Volume</label>
             <div className="flex gap-2">
               {[6, 12, 18, 30].map(count => (
                 <button
@@ -102,7 +103,7 @@ export const RadarRecon: React.FC<RadarReconProps> = ({ theater, onLeadsGenerate
           className="w-full bg-emerald-600 hover:bg-emerald-500 py-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.3em] text-white transition-all shadow-xl shadow-emerald-600/20 active:scale-95 flex items-center justify-center gap-3 border border-emerald-400/20"
         >
           <span className="text-xl">📡</span>
-          START MARKET DISCOVERY
+          START MARKET SCAN
         </button>
       </div>
     </div>

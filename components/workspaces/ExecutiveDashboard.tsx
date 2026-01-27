@@ -54,15 +54,15 @@ export const ExecutiveDashboard: React.FC<DashboardProps> = ({ leads, market, on
 
   const stats = [
     { label: 'ACTIVE WORKFLOWS', status: activeWorkflows > 0 ? `${activeWorkflows} RUNNING` : 'IDLE', icon: 'WORKFLOWS', desc: "Ongoing automated agency tasks." },
-    { label: 'SAVED LEADS', status: `${leads.length} RECORDS`, icon: 'RECORDS', desc: "Total database volume." },
+    { label: 'SAVED PROSPECTS', status: `${leads.length} RECORDS`, icon: 'RECORDS', desc: "Total database volume." },
     { label: 'MESSAGES (24H)', status: `${outreachCount} SENT`, icon: 'SENT', desc: "Outreach activity." },
     { label: 'OPERATING COST', status: `$${sessionCost.toFixed(2)}`, icon: 'COST', desc: "Current session expenses." },
   ];
 
   const actions = [
-    { id: 'TRANSFORMATION_BLUEPRINT', mode: 'RESEARCH' as MainMode, title: 'TRANSFORMATION BLUEPRINT', desc: 'SYSTEM CAPABILITIES', icon: 'BLUEPRINT' },
-    { id: 'MARKET_DISCOVERY', mode: 'RESEARCH' as MainMode, title: 'LEAD DISCOVERY', desc: 'IDENTIFY NEW OPPORTUNITIES', icon: 'DISCOVERY' },
-    { id: 'PROSPECT_DATABASE', mode: 'RESEARCH' as MainMode, title: 'LEAD DATABASE', desc: 'VIEW MASTER LIST', icon: 'LEDGER' },
+    { id: 'TRANSFORMATION_BLUEPRINT', mode: 'RESEARCH' as MainMode, title: 'VIEW BLUEPRINT', desc: 'SYSTEM CAPABILITIES', icon: 'BLUEPRINT' },
+    { id: 'MARKET_DISCOVERY', mode: 'RESEARCH' as MainMode, title: 'SEARCH REGION', desc: 'FIND NEW CLIENTS', icon: 'DISCOVERY' },
+    { id: 'PROSPECT_DATABASE', mode: 'RESEARCH' as MainMode, title: 'CLIENT LEDGER', desc: 'VIEW DATABASE', icon: 'LEDGER' },
   ];
 
   return (
@@ -76,11 +76,11 @@ export const ExecutiveDashboard: React.FC<DashboardProps> = ({ leads, market, on
       <div className="text-center relative py-6">
         <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full mb-6">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-          <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.4em]">Agency Operational</span>
+          <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.4em]">Systems Operational</span>
         </div>
         
         <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
-          EXECUTIVE <span className="text-emerald-500 italic">DASHBOARD</span>
+          AGENCY <span className="text-emerald-500 italic">OVERVIEW</span>
         </h1>
         <p className="mt-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">ACTIVE MARKET: <span className="text-emerald-400 italic">{market}</span></p>
       </div>

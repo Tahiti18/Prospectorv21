@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { Lead, OutreachStatus } from '../../types';
 import { AutomationOrchestrator } from '../../services/automation/orchestrator';
@@ -13,6 +14,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<OutreachStatus | 'ALL'>('ALL');
   
+  // NEW: Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showHyperLaunch, setShowHyperLaunch] = useState(false);
 
@@ -63,6 +65,8 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
     }
   };
 
+  // --- DATA MANAGEMENT HANDLERS ---
+
   const handleExport = () => {
     const dataStr = JSON.stringify(leads, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -85,6 +89,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
+                // Unified deduplication engine call
                 const results = db.upsertLeads(imported);
                 toast.success(`DEDUP SYNC: Added ${results.added} new, Merged ${results.updated} duplicates.`);
             } else {
@@ -173,7 +178,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
                     STATUS <span className={`text-emerald-500 transition-opacity ${sortConfig.key === 'status' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                   </div>
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] select-none whitespace-nowrap">ENGAGEMENT SIGNAL</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] select-none whitespace-nowrap">SOCIAL GAP / SIGNAL</th>
                 <th onClick={() => handleSort('leadScore')} className="cursor-pointer px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors select-none text-right whitespace-nowrap group">
                   <div className="flex items-center gap-2 justify-end">
                     SCORE <span className={`text-emerald-500 transition-opacity ${sortConfig.key === 'leadScore' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
@@ -203,7 +208,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-0.5 rounded">{lead.city}</span>
                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{lead.niche}</span>
                         </div>
-                        {lead.locked && <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest mt-1.5 flex items-center gap-1 animate-pulse"><span>🔒</span> LOCKED BY PROCESS {lead.lockedByRunId?.slice(0,4)}</span>}
+                        {lead.locked && <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest mt-1.5 flex items-center gap-1 animate-pulse"><span>🔒</span> LOCKED BY PROTOCOL {lead.lockedByRunId?.slice(0,4)}</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -238,7 +243,9 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
         </div>
       </div>
       
+      {/* STATIC CONTROL BAR (Replaces Floating Footer) */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8 p-6 bg-[#0b1021] border border-slate-800 rounded-[24px] shadow-lg">
+         {/* Left: Import/Export */}
          <div className="flex gap-4">
             <button 
               onClick={() => fileInputRef.current?.click()}
@@ -256,6 +263,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
             </button>
          </div>
 
+         {/* Right: Save All */}
          <div>
             <button 
               onClick={handleSaveAll}
@@ -275,6 +283,7 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
         onComplete={() => {
             setShowHyperLaunch(false);
             setSelectedIds(new Set());
+            // Implicit reload or refresh via polling will catch updates
         }}
       />
     </div>
