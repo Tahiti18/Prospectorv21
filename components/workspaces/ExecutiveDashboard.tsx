@@ -39,8 +39,8 @@ export const ExecutiveDashboard: React.FC<DashboardProps> = ({ leads, market, on
       const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
       setOutreachCount(logs.filter(l => l.timestamp > oneDayAgo).length);
 
-      const merged = [...runs.slice(0, 5).map(r => ({ type: 'PROCESS', msg: `WORKFLOW ${r.status}: ${r.leadName}`, time: r.createdAt })),
-                      ...logs.slice(0, 5).map(l => ({ type: 'ACTION', msg: `${l.channel.toUpperCase()} SENT: ${l.to || 'Unknown'}`, time: l.timestamp }))]
+      const merged = [...runs.slice(0, 5).map(r => ({ type: 'AUTO', msg: `WORKFLOW ${r.status}: ${r.leadName}`, time: r.createdAt })),
+                      ...logs.slice(0, 5).map(l => ({ type: 'COMM', msg: `${l.channel.toUpperCase()} SENT: ${l.to || 'Unknown'}`, time: l.timestamp }))]
                       .sort((a,b) => b.time - a.time).slice(0, 6);
       setRecentLogs(merged);
     };
@@ -54,33 +54,33 @@ export const ExecutiveDashboard: React.FC<DashboardProps> = ({ leads, market, on
 
   const stats = [
     { label: 'ACTIVE WORKFLOWS', status: activeWorkflows > 0 ? `${activeWorkflows} RUNNING` : 'IDLE', icon: 'WORKFLOWS', desc: "Ongoing automated agency tasks." },
-    { label: 'SAVED PROSPECTS', status: `${leads.length} RECORDS`, icon: 'RECORDS', desc: "Total database volume." },
+    { label: 'SAVED LEADS', status: `${leads.length} RECORDS`, icon: 'RECORDS', desc: "Total database volume." },
     { label: 'MESSAGES (24H)', status: `${outreachCount} SENT`, icon: 'SENT', desc: "Outreach activity." },
     { label: 'OPERATING COST', status: `$${sessionCost.toFixed(2)}`, icon: 'COST', desc: "Current session expenses." },
   ];
 
   const actions = [
-    { id: 'SYSTEM_CAPABILITIES', mode: 'RESEARCH' as MainMode, title: 'VIEW BLUEPRINT', desc: 'SYSTEM CAPABILITIES', icon: 'BLUEPRINT' },
-    { id: 'MARKET_DISCOVERY', mode: 'RESEARCH' as MainMode, title: 'SEARCH REGION', desc: 'FIND NEW CLIENTS', icon: 'DISCOVERY' },
-    { id: 'PROSPECT_DATABASE', mode: 'RESEARCH' as MainMode, title: 'VIEW LEDGER', desc: 'MASTER PROSPECT LIST', icon: 'LEDGER' },
+    { id: 'TRANSFORMATION_BLUEPRINT', mode: 'RESEARCH' as MainMode, title: 'TRANSFORMATION BLUEPRINT', desc: 'SYSTEM CAPABILITIES', icon: 'BLUEPRINT' },
+    { id: 'MARKET_DISCOVERY', mode: 'RESEARCH' as MainMode, title: 'LEAD DISCOVERY', desc: 'IDENTIFY NEW OPPORTUNITIES', icon: 'DISCOVERY' },
+    { id: 'PROSPECT_DATABASE', mode: 'RESEARCH' as MainMode, title: 'LEAD DATABASE', desc: 'VIEW MASTER LIST', icon: 'LEDGER' },
   ];
 
   return (
     <div className="space-y-12 py-4 max-w-6xl mx-auto animate-in fade-in duration-700 relative pb-20">
       <div className="absolute top-0 right-0 z-20">
           <div className="flex items-center gap-3 px-6 py-2.5 rounded-full border border-emerald-500/20 bg-emerald-950/20 shadow-md">
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">WALLET: ${balance.toFixed(2)}</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">BALANCE: ${balance.toFixed(2)}</span>
           </div>
       </div>
 
       <div className="text-center relative py-6">
-        <div className="inline-flex items-center gap-3 px-6 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-full mb-6">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em]">AGENCY SYSTEMS SYNCHRONIZED</span>
+        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full mb-6">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+          <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.4em]">Agency Operational</span>
         </div>
         
         <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
-          AGENCY <span className="text-emerald-500 italic">OVERVIEW</span>
+          EXECUTIVE <span className="text-emerald-500 italic">DASHBOARD</span>
         </h1>
         <p className="mt-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">ACTIVE MARKET: <span className="text-emerald-400 italic">{market}</span></p>
       </div>
@@ -107,11 +107,11 @@ export const ExecutiveDashboard: React.FC<DashboardProps> = ({ leads, market, on
             </h3>
             <div className="flex-1 space-y-4">
                {recentLogs.length === 0 ? (
-                  <div className="h-full flex items-center justify-center opacity-20 text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">SYSTEM_IDLE: NO RECENT ACTIVITY</div>
+                  <div className="h-full flex items-center justify-center opacity-20 text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">SYSTEM_STANDBY</div>
                ) : (
                   recentLogs.map((log, i) => (
                      <div key={i} className="flex items-center gap-4 p-4 bg-slate-900/40 rounded-2xl border border-slate-800/50 hover:border-emerald-500/30 transition-all group">
-                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded border ${log.type === 'PROCESS' ? 'bg-indigo-950/40 text-indigo-400 border-indigo-500/20' : 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20'}`}>{log.type}</span>
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded border ${log.type === 'AUTO' ? 'bg-indigo-950/40 text-indigo-400 border-indigo-500/20' : 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20'}`}>{log.type}</span>
                         <span className="text-[10px] font-bold text-slate-300 truncate flex-1 uppercase tracking-tight">{log.msg}</span>
                         <span className="text-[8px] font-black text-slate-600 uppercase italic">{new Date(log.time).toLocaleTimeString()}</span>
                      </div>

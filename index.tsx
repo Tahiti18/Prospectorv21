@@ -17,7 +17,7 @@ import { VideoPitch } from './components/workspaces/VideoPitch';
 import { BillingNode } from './components/workspaces/BillingNode';
 import { ScoringRubricView } from './components/workspaces/ScoringRubricView';
 import { UserGuide } from './components/workspaces/UserGuide';
-import { SystemCapabilities } from './components/workspaces/SystemCapabilities';
+import { TransformationBlueprint } from './components/workspaces/TransformationBlueprint';
 import { Heatmap } from './components/workspaces/Heatmap';
 import { NexusGraph } from './components/workspaces/NexusGraph';
 import { TimelineNode } from './components/workspaces/TimelineNode';
@@ -73,6 +73,7 @@ const App = () => {
   const [layoutMode, setLayoutMode] = useState('ZENITH');
 
   useEffect(() => {
+    console.log("[RUNTIME] Establishing OS Strategic Sync...");
     const unsub = db.subscribe((updatedLeads) => {
       setLeads(updatedLeads);
     });
@@ -83,6 +84,7 @@ const App = () => {
         }
     };
     window.addEventListener('navigate', handleGlobalNav);
+
     return () => {
         unsub();
         window.removeEventListener('navigate', handleGlobalNav);
@@ -96,6 +98,10 @@ const App = () => {
     setActiveModule(mod);
   };
 
+  const handleLeadsGenerated = (newLeads: Lead[]) => {
+    // Synchronization handled by db listener
+  };
+
   const handleUpdateLead = (id: string, updates: Partial<Lead>) => {
     const updated = leads.map(l => l.id === id ? { ...l, ...updates } : l);
     db.saveLeads(updated);
@@ -103,11 +109,13 @@ const App = () => {
 
   const renderContent = () => {
     switch (activeModule) {
+      // RESEARCH
       case 'EXECUTIVE_DASHBOARD': return <ExecutiveDashboard leads={leads} market={activeMarket} onNavigate={handleNavigate} />;
-      case 'SYSTEM_CAPABILITIES': return <SystemCapabilities onNavigate={handleNavigate} />;
+      case 'ENTERPRISE_DASHBOARD': return <ExecutiveDashboard leads={leads} market={activeMarket} onNavigate={handleNavigate} />;
+      case 'TRANSFORMATION_BLUEPRINT': return <TransformationBlueprint onNavigate={handleNavigate} />;
       case 'USER_GUIDE': return <UserGuide onNavigate={handleNavigate} />;
-      case 'MARKET_DISCOVERY': return <MarketDiscovery market={activeMarket} onLeadsGenerated={() => {}} />;
-      case 'AUTOMATED_SEARCH' : return <AutoCrawl theater={activeMarket} onNewLeads={() => {}} />;
+      case 'MARKET_DISCOVERY': return <MarketDiscovery market={activeMarket} onLeadsGenerated={handleLeadsGenerated} />;
+      case 'AUTOMATED_SEARCH' : return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
       case 'MARKET_TRENDS': return <ViralPulse lead={lockedLead} />;
       case 'PROSPECT_DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'STRATEGY_CENTER': return <StrategyCenter lead={lockedLead} onUpdateLead={handleUpdateLead} onNavigate={handleNavigate} />;
@@ -120,6 +128,7 @@ const App = () => {
       case 'CONTENT_ANALYSIS': return <ArticleIntel lead={lockedLead} />;
       case 'EXECUTIVE_DOSSIER': return lockedLead ? <ExecutiveDossier lead={lockedLead} /> : <div>No Lead Selected</div>;
 
+      // DESIGN
       case 'VISUAL_STUDIO': return <VisualStudio leads={leads} lockedLead={lockedLead} />;
       case 'BRAND_DNA': return <BrandDNA lead={lockedLead} onUpdateLead={handleUpdateLead} />;
       case 'MOCKUPS_4K': return <Mockups4K lead={lockedLead} />;
@@ -127,6 +136,7 @@ const App = () => {
       case 'CONTENT_IDEATION': return <FlashSpark lead={lockedLead} />;
       case 'ASSET_LIBRARY': return <AssetLibrary />;
 
+      // MEDIA
       case 'VIDEO_PRODUCTION': return <VideoPitch lead={lockedLead} />;
       case 'VIDEO_AUDIT': return <VideoAudit lead={lockedLead} />;
       case 'VIDEO_INSIGHTS': return <CinemaIntel lead={lockedLead} />;
@@ -134,6 +144,7 @@ const App = () => {
       case 'SONIC_STUDIO': return <SonicStudio lead={lockedLead} />;
       case 'MEETING_NOTES': return <LiveScribe />;
 
+      // OUTREACH
       case 'CAMPAIGN_ORCHESTRATOR': return <BusinessOrchestrator leads={leads} lockedLead={lockedLead} onNavigate={handleNavigate} onLockLead={setLockedLeadId} onUpdateLead={handleUpdateLead} theater={activeMarket} />;
       case 'PROPOSALS': return <ProposalDrafting lead={lockedLead} />;
       case 'ROI_CALCULATOR': return <ROICalc leads={leads} />;
@@ -145,9 +156,10 @@ const App = () => {
       case 'AI_CONCIERGE': return <AIConcierge lead={lockedLead} />;
       case 'ELEVATOR_PITCH': return <PitchGen lead={lockedLead} />;
       case 'FUNNEL_MAP': return <FunnelMap lead={lockedLead} />;
-      case 'SOLUTIONS_ARCHITECT': return <GHLArchitect lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
-      case 'GROWTH_ADVISORY': return <GHLGrowthBoardroom lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
+      case 'GHL_ARCHITECT': return <GHLArchitect lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
+      case 'GHL_GROWTH_BOARDROOM': return <GHLGrowthBoardroom lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
 
+      // ADMIN
       case 'AGENCY_PLAYBOOK': return <ScoringRubricView />;
       case 'IDENTITY': return <IdentityNode />;
       case 'BILLING': return <BillingNode />;
@@ -162,6 +174,7 @@ const App = () => {
       case 'NEXUS_GRAPH': return <NexusGraph leads={leads} />;
       case 'DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'TASK_MANAGER': return <TaskManager lead={lockedLead} />;
+      case 'CALENDAR': return <ActivityLogs />; 
       case 'FACT_CHECK': return <FactCheck lead={lockedLead} />;
       case 'TRANSLATOR': return <TranslatorNode />;
       

@@ -98,8 +98,7 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
 
   // --- OUTREACH ZONE ---
   { mode: 'OUTREACH', mod: 'CAMPAIGN_ORCHESTRATOR', label: 'CAMPAIGN ARCHITECT', zone: 'OUTREACH ZONE', icon: 'manual' },
-  // Comment: Changed 'GHL_GROWTH_BOARDROOM' to canonical 'GROWTH_ADVISORY' to fix SubModule type error
-  { mode: 'OUTREACH', mod: 'GROWTH_ADVISORY', label: 'GROWTH BOARDROOM', zone: 'OUTREACH ZONE', icon: 'chat' },
+  { mode: 'OUTREACH', mod: 'GHL_GROWTH_BOARDROOM', label: 'GROWTH BOARDROOM', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'PROPOSALS', label: 'PROPOSAL BUILDER', zone: 'OUTREACH ZONE', icon: 'file' },
   { mode: 'OUTREACH', mod: 'ROI_CALCULATOR', label: 'VALUE PROJECTOR', zone: 'OUTREACH ZONE', icon: 'calc' },
   { mode: 'OUTREACH', mod: 'SEQUENCER', label: 'ENGAGEMENT SEQUENCE', zone: 'OUTREACH ZONE', icon: 'architect' },
@@ -110,8 +109,7 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
   { mode: 'OUTREACH', mod: 'AI_CONCIERGE', label: 'NEURAL AGENT', zone: 'OUTREACH ZONE', icon: 'concierge' },
   { mode: 'OUTREACH', mod: 'ELEVATOR_PITCH', label: 'PITCH GENERATOR', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'FUNNEL_MAP', label: 'FUNNEL MAPPER', zone: 'OUTREACH ZONE', icon: 'funnel' },
-  // Comment: Changed 'GHL_ARCHITECT' to canonical 'SOLUTIONS_ARCHITECT' to fix SubModule type error
-  { mode: 'OUTREACH', mod: 'SOLUTIONS_ARCHITECT', label: 'GHL PLANNER', zone: 'OUTREACH ZONE', icon: 'architect' },
+  { mode: 'OUTREACH', mod: 'GHL_ARCHITECT', label: 'GHL PLANNER', zone: 'OUTREACH ZONE', icon: 'architect' },
 
   // --- ADMIN ZONE ---
   { mode: 'ADMIN', mod: 'AGENCY_PLAYBOOK', label: 'AGENCY PLAYBOOK', zone: 'ADMIN ZONE', icon: 'manual' },
@@ -171,7 +169,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           </div>
           <input
             autoFocus
-            className={`w-full bg-transparent placeholder-slate-600 text-2xl outline-none font-black uppercase tracking-tight ${theme === 'dark' ? text-white : 'text-slate-900'}`}
+            className={`w-full bg-transparent placeholder-slate-600 text-2xl outline-none font-black uppercase tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
             placeholder="SEARCH SYSTEM DIRECTORY..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
