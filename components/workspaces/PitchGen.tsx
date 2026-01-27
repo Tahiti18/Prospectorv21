@@ -8,7 +8,6 @@ import { Lead } from '../../types';
 import { generatePitch } from '../../services/geminiService';
 import { FormattedOutput } from '../common/FormattedOutput';
 import { toast } from '../../services/toastManager';
-import { dossierStorage } from '../../services/dossierStorage';
 
 interface PitchGenProps {
   lead?: Lead;
@@ -18,16 +17,8 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
   const [pitch, setPitch] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadPitch = async (force = false) => {
+  const loadPitch = async () => {
     if (!lead) return;
-    
-    // Check for existing dossier data first to avoid manual trigger wait
-    const dossier = dossierStorage.getByLead(lead.id);
-    if (!force && dossier && dossier.data.pitch) {
-        setPitch(JSON.stringify(dossier.data.pitch));
-        return;
-    }
-
     setIsLoading(true);
     setPitch(null);
     toast.neural("PITCH: Crafting Psychological Conversion Scripts...");
@@ -81,7 +72,7 @@ export const PitchGen: React.FC<PitchGenProps> = ({ lead }) => {
         </div>
         <div className="flex gap-4">
             <button 
-                onClick={() => loadPitch(true)}
+                onClick={loadPitch}
                 disabled={isLoading}
                 className="bg-slate-900 border border-slate-800 text-slate-400 hover:text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
             >

@@ -21,15 +21,13 @@ interface BusinessOrchestratorProps {
   onNavigate: (mode: MainMode, mod: SubModule) => void;
   onLockLead: (id: string) => void;
   onUpdateLead: (id: string, updates: Partial<Lead>) => void;
-  theater: string;
 }
 
-export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead, theater }) => {
+export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ leads, lockedLead, onNavigate, onLockLead, onUpdateLead }) => {
   const [selectedLeadId, setSelectedLeadId] = useState<string>(lockedLead?.id || '');
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualName, setManualName] = useState('');
   const [manualUrl, setManualUrl] = useState('');
-  const [manualCity, setManualCity] = useState(theater || ''); // New state for explicit city entry
   
   const [packageData, setPackageData] = useState<any>(null);
   const [currentDossier, setCurrentDossier] = useState<StrategicDossier | null>(null);
@@ -38,24 +36,12 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
   const [activeTab, setActiveTab] = useState<'strategy' | 'narrative' | 'content' | 'outreach' | 'visual' | 'funnel'>('strategy');
   const [isOutreachOpen, setIsOutreachOpen] = useState(false);
   
-  // Sync manual city with theater when switching to manual mode if it's empty
-  useEffect(() => {
-    if (isManualMode && !manualCity) {
-      setManualCity(theater);
-    }
-  }, [isManualMode, theater]);
-
   // Local target calculation
   const targetLead = useMemo(() => {
     if (isManualMode) {
       if (!manualName || !manualUrl) return null;
-      
-      const existing = leads.find(l => {
-          if (!l.websiteUrl) return false;
-          const n1 = l.websiteUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-          const n2 = manualUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-          return n1 === n2;
-      });
+      // We check if a lead with this URL already exists in our list
+      const existing = leads.find(l => l.websiteUrl === manualUrl);
       if (existing) return existing;
 
       return {
@@ -63,7 +49,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
         businessName: manualName,
         websiteUrl: manualUrl,
         niche: 'Manual Entry',
-        city: manualCity || theater || 'Global', // Use explicit manual city
+        city: 'Global',
         rank: 0,
         leadScore: 95,
         assetGrade: 'A',
@@ -73,7 +59,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
       } as Lead;
     }
     return leads.find(l => l.id === (selectedLeadId || lockedLead?.id));
-  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, manualCity, lockedLead, theater]);
+  }, [leads, selectedLeadId, isManualMode, manualName, manualUrl, lockedLead]);
   
   const leadAssets = useMemo(() => {
     if (!targetLead) return [];
@@ -95,7 +81,7 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
 
   const handleOrchestrate = async () => {
     if (!targetLead) {
-        toast.info(isManualMode ? "Identity, Website and Location required." : "Business selection required.");
+        toast.info(isManualMode ? "Identity and Website required." : "Business selection required.");
         return;
     }
 
@@ -103,24 +89,21 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
     setPackageData(null); 
     
     try {
-      let finalLead = targetLead;
-
+      // 1. If in manual mode, we MUST persist and lock this target globally so other modules function
       if (isManualMode) {
         toast.neural("PROTOCOL: Persisting custom business to ledger...");
-        const result = db.upsertLeads([targetLead]);
-        finalLead = result.upsertedLeads[0];
-        
-        onLockLead(finalLead.id); 
-        setSelectedLeadId(finalLead.id);
-        setIsManualMode(false); 
+        db.upsertLeads([targetLead]);
+        onLockLead(targetLead.id); // Triggers global system lock
+        setSelectedLeadId(targetLead.id);
+        setIsManualMode(false); // Switch back to ledger mode now that it's in the DB
       } else {
-        onLockLead(targetLead.id); 
+        onLockLead(targetLead.id); // Ensure existing lead is also locked
       }
 
-      toast.neural(`BUILDER: Initiating Neural Synthesis for ${finalLead.businessName}...`);
-      const result = await orchestrateBusinessPackage(finalLead, leadAssets);
+      toast.neural(`BUILDER: Initiating Neural Synthesis for ${targetLead.businessName}...`);
+      const result = await orchestrateBusinessPackage(targetLead, leadAssets);
       
-      const saved = dossierStorage.save(finalLead, result, leadAssets.map(a => a.id));
+      const saved = dossierStorage.save(targetLead, result, leadAssets.map(a => a.id));
       setPackageData(result);
       setCurrentDossier(saved);
       toast.success("BUILDER: Strategic Intelligence Mesh Synchronized globally.");
@@ -193,23 +176,6 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
             SECURED STRATEGY SYNTHESIS HUB
           </p>
         </div>
-        <div className="flex gap-4">
-            {packageData && (
-                <button 
-                  onClick={() => onNavigate('RESEARCH', 'EXECUTIVE_DOSSIER')}
-                  className="bg-white text-black hover:bg-emerald-500 hover:text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 border-b-4 border-slate-300"
-                >
-                  📄 EXPORT EXECUTIVE PACKAGE
-                </button>
-            )}
-            <button 
-                onClick={handleOrchestrate}
-                disabled={isOrchestrating || (!isManualMode && !targetLead)}
-                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 border-b-4 border-emerald-800"
-            >
-                {isOrchestrating ? 'SYNTHESIZING...' : 'INITIATE CAMPAIGN BUILD'}
-            </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -250,15 +216,6 @@ export const BusinessOrchestrator: React.FC<BusinessOrchestratorProps> = ({ lead
                         onChange={(e) => setManualUrl(e.target.value)}
                         placeholder="https://example.com"
                         className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all placeholder-slate-700 shadow-inner"
-                      />
-                   </div>
-                   <div className="space-y-3">
-                      <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">LOCATION (CITY/STATE)</label>
-                      <input 
-                        value={manualCity}
-                        onChange={(e) => setManualCity(e.target.value)}
-                        placeholder="CITY, STATE..."
-                        className="w-full bg-[#020617] border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all uppercase placeholder-slate-700 shadow-inner"
                       />
                    </div>
                 </div>

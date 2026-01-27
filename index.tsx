@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LayoutZenith } from './components/LayoutZenith';
@@ -59,9 +60,6 @@ import { TaskManager } from './components/workspaces/TaskManager';
 import { FactCheck } from './components/workspaces/FactCheck';
 import { TranslatorNode } from './components/workspaces/TranslatorNode';
 import { VideoAudit } from './components/workspaces/VideoAudit';
-import { ExecutiveDossier } from './components/workspaces/ExecutiveDossier';
-import { GHLArchitect } from './components/workspaces/GHLArchitect';
-import { GHLGrowthBoardroom } from './components/workspaces/GHLGrowthBoardroom';
 
 const App = () => {
   const [activeMode, setActiveMode] = useState<MainMode>('RESEARCH');
@@ -77,18 +75,7 @@ const App = () => {
     const unsub = db.subscribe((updatedLeads) => {
       setLeads(updatedLeads);
     });
-
-    const handleGlobalNav = (e: any) => {
-        if (e.detail?.mode && e.detail?.module) {
-            handleNavigate(e.detail.mode, e.detail.module);
-        }
-    };
-    window.addEventListener('navigate', handleGlobalNav);
-
-    return () => {
-        unsub();
-        window.removeEventListener('navigate', handleGlobalNav);
-    };
+    return () => unsub();
   }, []);
 
   const lockedLead = useMemo(() => leads.find(l => l.id === lockedLeadId), [leads, lockedLeadId]);
@@ -115,7 +102,7 @@ const App = () => {
       case 'TRANSFORMATION_BLUEPRINT': return <TransformationBlueprint onNavigate={handleNavigate} />;
       case 'USER_GUIDE': return <UserGuide onNavigate={handleNavigate} />;
       case 'MARKET_DISCOVERY': return <MarketDiscovery market={activeMarket} onLeadsGenerated={handleLeadsGenerated} />;
-      case 'AUTOMATED_SEARCH' : return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
+      case 'AUTOMATED_SEARCH': return <AutoCrawl theater={activeMarket} onNewLeads={handleLeadsGenerated} />;
       case 'MARKET_TRENDS': return <ViralPulse lead={lockedLead} />;
       case 'PROSPECT_DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'STRATEGY_CENTER': return <StrategyCenter lead={lockedLead} onUpdateLead={handleUpdateLead} onNavigate={handleNavigate} />;
@@ -126,7 +113,6 @@ const App = () => {
       case 'STRATEGIC_REASONING': return <DeepLogic lead={lockedLead} />;
       case 'HEATMAP': return <Heatmap leads={leads} market={activeMarket} />;
       case 'CONTENT_ANALYSIS': return <ArticleIntel lead={lockedLead} />;
-      case 'EXECUTIVE_DOSSIER': return lockedLead ? <ExecutiveDossier lead={lockedLead} /> : <div>No Lead Selected</div>;
 
       // DESIGN
       case 'VISUAL_STUDIO': return <VisualStudio leads={leads} lockedLead={lockedLead} />;
@@ -145,7 +131,7 @@ const App = () => {
       case 'MEETING_NOTES': return <LiveScribe />;
 
       // OUTREACH
-      case 'CAMPAIGN_ORCHESTRATOR': return <BusinessOrchestrator leads={leads} lockedLead={lockedLead} onNavigate={handleNavigate} onLockLead={setLockedLeadId} onUpdateLead={handleUpdateLead} theater={activeMarket} />;
+      case 'CAMPAIGN_ORCHESTRATOR': return <BusinessOrchestrator leads={leads} lockedLead={lockedLead} onNavigate={handleNavigate} onLockLead={setLockedLeadId} onUpdateLead={handleUpdateLead} />;
       case 'PROPOSALS': return <ProposalDrafting lead={lockedLead} />;
       case 'ROI_CALCULATOR': return <ROICalc leads={leads} />;
       case 'SEQUENCER': return <Sequencer lead={lockedLead} />;
@@ -156,8 +142,6 @@ const App = () => {
       case 'AI_CONCIERGE': return <AIConcierge lead={lockedLead} />;
       case 'ELEVATOR_PITCH': return <PitchGen lead={lockedLead} />;
       case 'FUNNEL_MAP': return <FunnelMap lead={lockedLead} />;
-      case 'GHL_ARCHITECT': return <GHLArchitect lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
-      case 'GHL_GROWTH_BOARDROOM': return <GHLGrowthBoardroom lead={lockedLead} leads={leads} onLockLead={setLockedLeadId} />;
 
       // ADMIN
       case 'AGENCY_PLAYBOOK': return <ScoringRubricView />;
@@ -172,7 +156,6 @@ const App = () => {
       case 'ACTIVITY_LOGS': return <ActivityLogs />;
       case 'TIMELINE': return <TimelineNode />;
       case 'NEXUS_GRAPH': return <NexusGraph leads={leads} />;
-      case 'DATABASE': return <ProspectDatabase leads={leads} lockedLeadId={lockedLeadId} onLockLead={setLockedLeadId} onInspect={(id) => { setLockedLeadId(id); handleNavigate('RESEARCH', 'STRATEGY_CENTER'); }} />;
       case 'TASK_MANAGER': return <TaskManager lead={lockedLead} />;
       case 'CALENDAR': return <ActivityLogs />; 
       case 'FACT_CHECK': return <FactCheck lead={lockedLead} />;

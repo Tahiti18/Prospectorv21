@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MainMode, SubModule } from '../types';
 
@@ -63,7 +64,7 @@ const Icon = ({ name }: { name: string }) => {
 };
 
 const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string; icon: string }[] = [
-  // ... module data stays the same ...
+  // --- RESEARCH ZONE ---
   { mode: 'RESEARCH', mod: 'EXECUTIVE_DASHBOARD', label: 'EXECUTIVE DASHBOARD', zone: 'RESEARCH ZONE', icon: 'chart' },
   { mode: 'RESEARCH', mod: 'MARKET_DISCOVERY', label: 'MARKET DISCOVERY', zone: 'RESEARCH ZONE', icon: 'discovery' },
   { mode: 'RESEARCH', mod: 'AUTOMATED_SEARCH', label: 'AUTOMATED SEARCH', zone: 'RESEARCH ZONE', icon: 'search' },
@@ -98,7 +99,6 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
 
   // --- OUTREACH ZONE ---
   { mode: 'OUTREACH', mod: 'CAMPAIGN_ORCHESTRATOR', label: 'CAMPAIGN ARCHITECT', zone: 'OUTREACH ZONE', icon: 'manual' },
-  { mode: 'OUTREACH', mod: 'GHL_GROWTH_BOARDROOM', label: 'GROWTH BOARDROOM', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'PROPOSALS', label: 'PROPOSAL BUILDER', zone: 'OUTREACH ZONE', icon: 'file' },
   { mode: 'OUTREACH', mod: 'ROI_CALCULATOR', label: 'VALUE PROJECTOR', zone: 'OUTREACH ZONE', icon: 'calc' },
   { mode: 'OUTREACH', mod: 'SEQUENCER', label: 'ENGAGEMENT SEQUENCE', zone: 'OUTREACH ZONE', icon: 'architect' },
@@ -109,7 +109,6 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
   { mode: 'OUTREACH', mod: 'AI_CONCIERGE', label: 'NEURAL AGENT', zone: 'OUTREACH ZONE', icon: 'concierge' },
   { mode: 'OUTREACH', mod: 'ELEVATOR_PITCH', label: 'PITCH GENERATOR', zone: 'OUTREACH ZONE', icon: 'chat' },
   { mode: 'OUTREACH', mod: 'FUNNEL_MAP', label: 'FUNNEL MAPPER', zone: 'OUTREACH ZONE', icon: 'funnel' },
-  { mode: 'OUTREACH', mod: 'GHL_ARCHITECT', label: 'GHL PLANNER', zone: 'OUTREACH ZONE', icon: 'architect' },
 
   // --- ADMIN ZONE ---
   { mode: 'ADMIN', mod: 'AGENCY_PLAYBOOK', label: 'AGENCY PLAYBOOK', zone: 'ADMIN ZONE', icon: 'manual' },
@@ -129,11 +128,46 @@ const MODULE_DATA: { mode: MainMode; mod: SubModule; label: string; zone: string
 ];
 
 const ZONE_STYLES: Record<string, { headerBg: string; headerText: string; hoverBg: string; hoverText: string; iconBg: string; border: string }> = {
-  'RESEARCH ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
-  'DESIGN ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
-  'MEDIA ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
-  'OUTREACH ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' },
-  'ADMIN ZONE': { headerBg: 'bg-emerald-950/80', headerText: 'text-emerald-400', hoverBg: 'hover:bg-emerald-600/10', hoverText: 'group-hover:text-emerald-400', iconBg: 'group-hover:bg-emerald-600 group-hover:text-white', border: 'border-emerald-500/30' }
+  'RESEARCH ZONE': {
+    headerBg: 'bg-emerald-950/80',
+    headerText: 'text-emerald-400',
+    hoverBg: 'hover:bg-emerald-600/10',
+    hoverText: 'group-hover:text-emerald-400',
+    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
+    border: 'border-emerald-500/30'
+  },
+  'DESIGN ZONE': {
+    headerBg: 'bg-emerald-950/80',
+    headerText: 'text-emerald-400',
+    hoverBg: 'hover:bg-emerald-600/10',
+    hoverText: 'group-hover:text-emerald-400',
+    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
+    border: 'border-emerald-500/30'
+  },
+  'MEDIA ZONE': { 
+    headerBg: 'bg-emerald-950/80',
+    headerText: 'text-emerald-400',
+    hoverBg: 'hover:bg-emerald-600/10',
+    hoverText: 'group-hover:text-emerald-400',
+    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
+    border: 'border-emerald-500/30'
+  },
+  'OUTREACH ZONE': { 
+    headerBg: 'bg-emerald-950/80',
+    headerText: 'text-emerald-400',
+    hoverBg: 'hover:bg-emerald-600/10',
+    hoverText: 'group-hover:text-emerald-400',
+    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
+    border: 'border-emerald-500/30'
+  },
+  'ADMIN ZONE': { 
+    headerBg: 'bg-emerald-950/80',
+    headerText: 'text-emerald-400',
+    hoverBg: 'hover:bg-emerald-600/10',
+    hoverText: 'group-hover:text-emerald-400',
+    iconBg: 'group-hover:bg-emerald-600 group-hover:text-white',
+    border: 'border-emerald-500/30'
+  }
 };
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onSelect, theme }) => {
@@ -157,7 +191,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   const zones = Array.from(new Set(filteredItems.map(f => f.zone)));
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl transition-opacity" onClick={onClose}></div>
       
       <div className={`relative w-full max-w-3xl border-2 border-slate-800 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh] ${theme === 'dark' ? 'bg-[#0b1021]' : 'bg-white'}`}>

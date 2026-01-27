@@ -68,7 +68,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content, side = 'top
         onMouseEnter={handleMouseEnter} 
         onMouseLeave={handleMouseLeave}
         className={`inline-flex items-center justify-center cursor-help ${className}`}
-        // Removed stopPropagation to allow parent elements to receive click events (e.g. sorting)
+        onClick={(e) => e.stopPropagation()} // Prevent triggering parent button click
       >
         {children}
       </div>

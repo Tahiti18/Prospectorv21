@@ -1,3 +1,4 @@
+
 export type MainMode = 'RESEARCH' | 'DESIGN' | 'MEDIA' | 'OUTREACH' | 'ADMIN';
 
 export type SubModule = 
@@ -62,10 +63,7 @@ export type SubModule =
   | 'ANALYTICS'
   | 'PROMPT_AI'
   | 'DASHBOARD'
-  | 'ENTERPRISE_DASHBOARD'
-  | 'GHL_ARCHITECT'
-  | 'GHL_GROWTH_BOARDROOM'
-  | 'EXECUTIVE_DOSSIER';
+  | 'ENTERPRISE_DASHBOARD';
 
 export type OutreachStatus = 'cold' | 'queued' | 'sent' | 'opened' | 'replied' | 'booked' | 'won' | 'lost' | 'paused';
 export type OutreachChannel = 'email' | 'linkedin' | 'call' | 'sms' | 'whatsapp';
@@ -77,7 +75,6 @@ export interface Lead {
   websiteUrl: string;
   niche: string;
   city: string;
-  country?: string;
   rank: number;
   phone?: string;
   email?: string;
@@ -203,61 +200,3 @@ export interface Campaign {
 }
 
 export type WorkspaceType = MainMode | string;
-
-/**
- * GOHIGHLEVEL AUTO-BUILDER V1.0 TYPES
- */
-
-export interface GhlOAuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-  locationId: string;
-  scopes: string[];
-}
-
-export interface IndigoTechnicalBlueprint {
-  schema_version: string;
-  location_id?: string;
-  meta: {
-    plan_hash: string;
-    target_business: string;
-  };
-  data_model: {
-    custom_fields: Array<{
-      name: string;
-      dataType: 'TEXT' | 'NUMBER' | 'DATE' | 'CHECKBOX' | 'SINGLE_SELECT';
-      key: string; // MUST BE STABLE/DETERMINISTIC
-      options?: string[];
-    }>;
-    tags: string[]; // Deterministic strings
-  };
-  pipelines: Array<{
-    name: string;
-    stages: string[]; // Deterministic order
-  }>;
-  workflows_manifest: string[]; // Planned but not yet auto-built via API
-  qa_requirements: string[];
-}
-
-export interface AutoBuilderDryRunStep {
-  step_number: number;
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH';
-  endpoint: string;
-  payload: any;
-  idempotency_key: string;
-  description: string;
-  depends_on: string[];
-  expected_status: number[];
-}
-
-export interface GHLBuildStatus {
-  run_id: string;
-  locationId: string;
-  plan_hash: string;
-  status: 'DRY_RUN' | 'EXECUTING' | 'SUCCESS' | 'FAILED';
-  lastRunAt: number;
-  deployedResourceIds: Record<string, string>; // artifact_key -> ghl_id
-  logs: string[];
-  error?: string;
-}

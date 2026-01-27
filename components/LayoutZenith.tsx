@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { MainMode, SubModule } from '../types';
 import { Tooltip } from './workspaces/Tooltip';
@@ -16,7 +17,7 @@ interface LayoutProps {
 }
 
 const STRATEGIC_CITIES = [
-  { city: "CUSTOM REGION", rank: 0 },
+  { city: "CUSTOM CITY", rank: 0 },
   { city: "NEW YORK, USA", rank: 1 },
   { city: "LONDON, UK", rank: 2 },
   { city: "DUBAI, UAE", rank: 3 },
@@ -57,7 +58,6 @@ const ModeIcon = ({ id, active }: { id: MainMode, active: boolean }) => {
     case 'MEDIA': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>; 
     case 'OUTREACH': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>; 
     case 'ADMIN': return <svg className={`w-4 h-4 ${cn}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>; 
-    default: return null;
   }
 }
 
@@ -104,8 +104,6 @@ const SubModuleIcon = ({ id, active }: { id: SubModule; active: boolean }) => {
     case 'AI_CONCIERGE': return p(["M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2", "M12 7a4 4 0 100-8 4 4 0 000 8z"]);
     case 'ELEVATOR_PITCH': return p(["M18 8a3 3 0 100-6 3 3 0 000 6z", "M6 15a3 3 0 100-6 3 3 0 000 6z"]);
     case 'FUNNEL_MAP': return p(["M22 3H2l8 9.46V19l4 2v-8.54L22 3z"]);
-    case 'GHL_ARCHITECT': return p(["M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71", "M4 12h16"]);
-    case 'GHL_GROWTH_BOARDROOM': return p(["M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2", "M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M23 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"]);
     case 'AGENCY_PLAYBOOK': return p(["M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5z"]);
     case 'BILLING': return p(["M12 1v22", "M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"]);
     case 'SETTINGS': return p(["M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33"]);
@@ -120,89 +118,87 @@ const SubModuleIcon = ({ id, active }: { id: SubModule; active: boolean }) => {
 
 const MODULE_GROUPS: Record<MainMode, Record<string, { id: SubModule; label: string; desc: string }[]>> = {
   RESEARCH: {
-    "CORE ANALYTICS": [
-      { id: 'EXECUTIVE_DASHBOARD', label: 'Agency Overview', desc: 'Main operational center' },
-      { id: 'TRANSFORMATION_BLUEPRINT', label: 'Solutions Matrix', desc: 'Capability framework' },
-      { id: 'USER_GUIDE', label: 'User Manual', desc: 'Feature documentation' },
-      { id: 'MARKET_DISCOVERY', label: 'Lead Sourcing', desc: 'Find new prospects' },
-      { id: 'AUTOMATED_SEARCH', label: 'Auto Analysis', desc: 'Continuous scan' },
-      { id: 'MARKET_TRENDS', label: 'Industry Monitor', desc: 'Real-time news' },
+    "CORE INTELLIGENCE": [
+      { id: 'EXECUTIVE_DASHBOARD', label: 'Executive Dashboard', desc: 'Main operational overview' },
+      { id: 'TRANSFORMATION_BLUEPRINT', label: 'Capability Matrix', desc: 'Full-scale marketing blueprint' },
+      { id: 'USER_GUIDE', label: 'User Guide', desc: 'Exhaustive feature directory' },
+      { id: 'MARKET_DISCOVERY', label: 'Lead Discovery', desc: 'Locate high-value prospects' },
+      { id: 'AUTOMATED_SEARCH', label: 'Automated Search', desc: 'Autonomous lead identification' },
+      { id: 'MARKET_TRENDS', label: 'Market Trends', desc: 'Real-time industry insights' },
     ],
-    "MANAGEMENT": [
-      { id: 'PROSPECT_DATABASE', label: 'Business Ledger', desc: 'Contact repository' },
-      { id: 'STRATEGY_CENTER', label: 'Strategic Hub', desc: 'Portfolio audits' },
-      { id: 'PIPELINE', label: 'Sales Pipeline', desc: 'Deal tracking' },
-      { id: 'ANALYTICS_HUB', label: 'Market Intelligence', desc: 'Aggregate data' },
+    "CRM & STRATEGY": [
+      { id: 'PROSPECT_DATABASE', label: 'Prospect Database', desc: 'Master contact ledger' },
+      { id: 'STRATEGY_CENTER', label: 'Strategy Hub', desc: 'Deep-dive business audits' },
+      { id: 'PIPELINE', label: 'Growth Pipeline', desc: 'Opportunity lifecycle tracking' },
+      { id: 'ANALYTICS_HUB', label: 'Business Analytics', desc: 'Aggregate performance data' },
     ],
-    "TOOLS": [
-      { id: 'BENCHMARK', label: 'Analysis Center', desc: 'Competitive deconstruction' },
-      { id: 'VISUAL_ANALYSIS', label: 'Aesthetic Audit', desc: 'Design review' },
-      { id: 'STRATEGIC_REASONING', label: 'Logic Lab', desc: 'Strategic problem solving' },
+    "ANALYSIS TOOLS": [
+      { id: 'BENCHMARK', label: 'Market Reverse-Eng', desc: 'Cross-industry comparison' },
+      { id: 'VISUAL_ANALYSIS', label: 'Visual Audit', desc: 'Website and asset review' },
+      { id: 'STRATEGIC_REASONING', label: 'Strategic Logic', desc: 'Advanced problem solving' },
     ]
   },
   DESIGN: {
-    "CREATIVE CENTER": [
-      { id: 'VISUAL_STUDIO', label: 'Asset Lab', desc: 'Identity generation' },
-      { id: 'BRAND_DNA', label: 'Identity Profile', desc: 'Style extraction' },
-      { id: 'MOCKUPS_4K', label: 'Visualization', desc: 'Professional renders' },
+    "BRAND STUDIO": [
+      { id: 'VISUAL_STUDIO', label: 'Visual Studio', desc: 'Identity asset generation' },
+      { id: 'BRAND_DNA', label: 'Brand DNA', desc: 'Core style extraction' },
+      { id: 'MOCKUPS_4K', label: 'High-Res Mockups', desc: 'Commercial visualization' },
     ],
-    "CONTENT": [
-      { id: 'PRODUCT_SYNTHESIS', label: 'Offer Design', desc: 'Solution architecture' },
-      { id: 'CONTENT_IDEATION', label: 'Creative Sparks', desc: 'Campaign hooks' },
-      { id: 'ASSET_LIBRARY', label: 'Media Archive', desc: 'Digital vault' },
+    "ASSETS": [
+      { id: 'PRODUCT_SYNTHESIS', label: 'Offer Synthesis', desc: 'Solution architecture' },
+      { id: 'CONTENT_IDEATION', label: 'Flash Spark', desc: 'Campaign concept hooks' },
+      { id: 'ASSET_LIBRARY', label: 'Asset Library', desc: 'Central media repository' },
     ]
   },
   MEDIA: {
-    "PRODUCTION": [
-      { id: 'VIDEO_PRODUCTION', label: 'Video Studio', desc: 'Ad synthesis' },
-      { id: 'VIDEO_AUDIT', label: 'Media Review', desc: 'Presence audit' },
-      { id: 'VIDEO_INSIGHTS', label: 'Content Lab', desc: 'Temporal analysis' },
-      { id: 'MOTION_LAB', label: 'Storyboarding', desc: 'Dynamic planning' },
+    "VIDEO PRODUCTION": [
+      { id: 'VIDEO_PRODUCTION', label: 'Video Studio', desc: 'Cinematic ad synthesis' },
+      { id: 'VIDEO_AUDIT', label: 'Video Audit', desc: 'Digital presence review' },
+      { id: 'VIDEO_INSIGHTS', label: 'Media Insights', desc: 'Content performance analysis' },
+      { id: 'MOTION_LAB', label: 'Motion Lab', desc: 'Dynamic storyboard architecture' },
     ],
     "AUDIO": [
-      { id: 'SONIC_STUDIO', label: 'Audio Engineering', desc: 'Voice/Music sync' },
-      { id: 'MEETING_NOTES', label: 'Transcription', desc: 'Action items' },
+      { id: 'SONIC_STUDIO', label: 'Sonic Studio', desc: 'Voice and music engineering' },
+      { id: 'MEETING_NOTES', label: 'Executive Scribe', desc: 'Meeting summary and tasks' },
     ]
   },
   OUTREACH: {
-    "STRATEGY": [
-      { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Business Architect', desc: 'Full deployment' },
-      { id: 'GHL_GROWTH_BOARDROOM', label: 'Strategy Advisory', desc: 'Advisory Panel' },
-      { id: 'GHL_ARCHITECT', label: 'Solutions Planner', desc: 'Deployment roadmap' },
-      { id: 'PRESENTATION_BUILDER', label: 'Deck Architect', desc: 'Slide design' },
-      { id: 'FUNNEL_MAP', label: 'Journey Mapping', desc: 'Conversion flow' },
+    "CAMPAIGN": [
+      { id: 'CAMPAIGN_ORCHESTRATOR', label: 'Campaign Architect', desc: 'End-to-end deployment' },
+      { id: 'PRESENTATION_BUILDER', label: 'Deck Architect', desc: 'Presentation design' },
+      { id: 'FUNNEL_MAP', label: 'Journey Mapper', desc: 'Conversion path visual' },
     ],
-    "ENGAGEMENT": [
-      { id: 'PROPOSALS', label: 'Agreement Builder', desc: 'Closing portal' },
-      { id: 'SEQUENCER', label: 'Outreach Manager', desc: 'Sequence schedule' },
-      { id: 'ELEVATOR_PITCH', label: 'Value Scripting', desc: 'Introduction tools' },
-      { id: 'SALES_COACH', label: 'Sales Director', desc: 'Tactical guidance' },
+    "EXECUTION": [
+      { id: 'PROPOSALS', label: 'Proposal Builder', desc: 'Strategic agreement design' },
+      { id: 'SEQUENCER', label: 'Engagement Sequence', desc: 'Multi-touch outreach' },
+      { id: 'ELEVATOR_PITCH', label: 'Pitch Generator', desc: 'Concise value scripts' },
+      { id: 'SALES_COACH', label: 'Strategic Coach', desc: 'Negotiation assistance' },
     ],
-    "PLANNING": [
-      { id: 'ROI_CALCULATOR', label: 'Value Analysis', desc: 'Growth projections' },
-      { id: 'DEMO_SANDBOX', label: 'Market Simulator', desc: 'Scenario testing' },
-      { id: 'AI_CONCIERGE', label: 'Client Relations', desc: 'Automated response' },
+    "MODELING": [
+      { id: 'ROI_CALCULATOR', label: 'Value Projector', desc: 'ROI and growth modeling' },
+      { id: 'DEMO_SANDBOX', label: 'Growth Simulator', desc: 'Scenario analysis' },
+      { id: 'AI_CONCIERGE', label: 'Neural Agent', desc: 'Autonomous POC demos' },
     ]
   },
   ADMIN: {
     "OPERATIONS": [
-      { id: 'AGENCY_PLAYBOOK', label: 'Standard SOPs', desc: 'Internal playbook' },
-      { id: 'IDENTITY', label: 'Agency Profile', desc: 'Workplace branding' },
-      { id: 'BILLING', label: 'Financial Hub', desc: 'Resource management' },
-      { id: 'AFFILIATE', label: 'Partner Program', desc: 'Growth network' },
+      { id: 'AGENCY_PLAYBOOK', label: 'Agency Playbook', desc: 'Operational SOPs' },
+      { id: 'IDENTITY', label: 'Agency Profile', desc: 'Workspace branding' },
+      { id: 'BILLING', label: 'Financials', desc: 'Resource management' },
+      { id: 'AFFILIATE', label: 'Partners', desc: 'Growth network management' },
     ],
     "SYSTEM": [
-      { id: 'SETTINGS', label: 'Configurations', desc: 'Global settings' },
-      { id: 'SYSTEM_CONFIG', label: 'Platform Core', desc: 'Technical tuning' },
-      { id: 'THEME', label: 'Interface Style', desc: 'UI aesthetic' },
-      { id: 'USAGE_STATS', label: 'Resource Logs', desc: 'Consumption metrics' },
+      { id: 'SETTINGS', label: 'System Settings', desc: 'Global configuration' },
+      { id: 'SYSTEM_CONFIG', label: 'Core Config', desc: 'Technical tuning' },
+      { id: 'THEME', label: 'Interface Theme', desc: 'UI aesthetic controls' },
+      { id: 'USAGE_STATS', label: 'Resource Stats', desc: 'Usage and token tracking' },
     ],
-    "HISTORY": [
-        { id: 'EXPORT_DATA', label: 'Data Hub', desc: 'Portability' },
-        { id: 'ACTIVITY_LOGS', label: 'Log Stream', desc: 'Execution trace' },
-        { id: 'TIMELINE', label: 'Historical Flow', desc: 'Event sequence' },
-        { id: 'NEXUS_GRAPH', label: 'Entity Mapping', desc: 'Lead network' },
-        { id: 'TASK_MANAGER', label: 'Action Ledger', desc: 'Checklists' },
+    "REPORTING": [
+        { id: 'EXPORT_DATA', label: 'Data Management', desc: 'Portability and backups' },
+        { id: 'ACTIVITY_LOGS', label: 'Activity Logs', desc: 'Operational history' },
+        { id: 'TIMELINE', label: 'Project Timeline', desc: 'Workflow visualization' },
+        { id: 'NEXUS_GRAPH', label: 'Nexus Graph', desc: 'Entity relationship map' },
+        { id: 'TASK_MANAGER', label: 'Task Manager', desc: 'Operational checklists' },
     ]
   }
 };
@@ -229,7 +225,7 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
   };
 
   const handleMarketChange = (val: string) => {
-    if (val === 'CUSTOM REGION') {
+    if (val === 'CUSTOM CITY') {
       setIsCustomInput(true);
     } else {
       setTheater(val);
@@ -239,15 +235,17 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100 print:h-auto print:overflow-visible print:block">
-      {/* FIXED HEADER - SUPREME Z-INDEX TO PREVENT OVERLAP */}
-      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[100] flex items-center bg-[#030712]/95 backdrop-blur-3xl border-slate-800 px-8 print:hidden">
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#020617] text-slate-100">
+      {/* FIXED HEADER: High-priority layout element with maximized z-index */}
+      <header className="fixed top-0 left-0 right-0 h-20 border-b z-[9999] flex items-center bg-[#030712]/95 backdrop-blur-2xl border-slate-800 px-8">
+         {/* Left: Branding */}
          <div className="flex-1 flex items-center">
             <h1 className="text-xl font-black tracking-tight leading-none text-white uppercase">
                PROSPECTOR <span className="text-emerald-500 italic">OS</span>
             </h1>
          </div>
 
+         {/* Center: Main Categories */}
          <div className="hidden lg:flex items-center justify-center flex-[2] pointer-events-auto">
             <nav className="flex items-center gap-1 p-1.5 rounded-full border shadow-2xl bg-[#0b1021] border-slate-800">
                {(Object.keys(MODULE_GROUPS) as MainMode[]).map((mode) => {
@@ -270,12 +268,13 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
             </nav>
          </div>
 
+         {/* Right: Actions */}
          <div className="flex-1 flex items-center gap-4 justify-end">
             <button 
                onClick={onSearchClick}
                className="hidden sm:flex items-center gap-3 px-4 h-11 rounded-2xl border text-xs font-bold transition-all bg-[#0b1021] border-slate-800 text-slate-400 hover:text-white"
             >
-               <span className="uppercase tracking-wider text-[9px]">NAV</span>
+               <span className="uppercase tracking-wider text-[9px]">COMMAND</span>
                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">⌘K</span>
             </button>
 
@@ -301,9 +300,10 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                                   setMarketExpanded(false);
                                 }
                               }}
-                              placeholder="REGION..."
+                              placeholder="ENTER CITY..."
                               className="bg-transparent text-[10px] font-bold uppercase focus:outline-none w-full text-emerald-400 placeholder-slate-700"
                            />
+                           <button onClick={() => { setIsCustomInput(false); setMarketExpanded(false); }} className="text-slate-600 hover:text-white text-lg leading-none">×</button>
                          </div>
                        ) : (
                          <select
@@ -317,20 +317,29 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                          </select>
                        )
                    ) : (
-                       <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">REGION</span>
+                       <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-widest leading-none w-full text-center">MARKET</span>
                    )}
                 </div>
             </div>
          </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden pt-20 print:block print:pt-0">
-         <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 print:hidden relative ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
+      {/* BODY CONTENT: Offset by header height */}
+      <div className="flex-1 flex overflow-hidden pt-24">
+         <aside className={`flex-shrink-0 border-r flex flex-col z-40 transition-all duration-300 bg-[#0b1021] border-slate-800 ${isSidebarExpanded ? 'w-[260px]' : 'w-[80px]'}`}>
+            <div className="p-4 border-b-2 border-emerald-500/20 flex items-center justify-center shrink-0">
+               <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-2 rounded-lg hover:bg-slate-800 text-emerald-500/50 w-full text-center text-[10px] font-black uppercase tracking-widest">
+                 {isSidebarExpanded ? 'COLLAPSE' : 'EXPAND'}
+               </button>
+            </div>
+
             <div className="flex-1 overflow-y-auto custom-scrollbar pt-8 pb-40 space-y-10">
                {Object.entries(groups).map(([groupName, modules]) => (
                   <div key={groupName} className="mb-2">
-                     {isSidebarExpanded && (
-                       <h3 className="sticky top-0 px-6 text-[10px] font-black text-white/40 uppercase tracking-[0.25em] mb-4 mt-2 border-b border-white/5 pb-2 bg-[#0b1021] z-10 backdrop-blur-md">{groupName}</h3>
+                     {isSidebarExpanded ? (
+                       <h3 className="px-6 text-[11px] font-black text-white uppercase tracking-[0.25em] mb-4 mt-2 border-b-2 border-emerald-500/30 pb-2">{groupName}</h3>
+                     ) : (
+                       <div className="mx-auto w-8 h-1 bg-emerald-500/20 mb-3 rounded-full"></div>
                      )}
                      <div className={`space-y-1 ${isSidebarExpanded ? 'px-4' : 'px-2'}`}>
                         {(modules as any[]).map(mod => {
@@ -352,23 +361,10 @@ export const LayoutZenith: React.FC<LayoutProps> = ({
                   </div>
                ))}
             </div>
-
-            {/* EXPAND/RETRACT BUTTON - RESTORED */}
-            <div className="absolute bottom-6 left-0 right-0 px-6">
-                <button 
-                  onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-                  className={`w-full h-11 rounded-2xl border-2 border-slate-800 flex items-center justify-center transition-all hover:bg-slate-800/50 group bg-[#05091a] shadow-2xl`}
-                >
-                    <svg className={`w-4 h-4 text-slate-500 group-hover:text-emerald-500 transition-transform duration-500 ${!isSidebarExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-            </div>
          </aside>
 
-         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12 z-0 print:block print:h-auto print:overflow-visible print:bg-white print:text-black print:p-0">
-            <div className={`fixed inset-0 pointer-events-none opacity-[0.02] bg-emerald-500/5 transition-all duration-1000`}></div>
-            <div className="max-w-[1920px] mx-auto pb-32 print:pb-0 relative z-10">{children}</div>
+         <main className="flex-1 h-full overflow-y-auto custom-scrollbar relative bg-[#020617] p-8 md:p-12">
+            <div className="max-w-[1920px] mx-auto pb-32">{children}</div>
          </main>
       </div>
     </div>

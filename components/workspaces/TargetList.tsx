@@ -89,9 +89,12 @@ export const TargetList: React.FC<{ leads: Lead[], lockedLeadId: string | null, 
         try {
             const imported = JSON.parse(ev.target?.result as string);
             if (Array.isArray(imported)) {
-                // Unified deduplication engine call
-                const results = db.upsertLeads(imported);
-                toast.success(`DEDUP SYNC: Added ${results.added} new, Merged ${results.updated} duplicates.`);
+                // Merge logic: append new, keep existing if ID matches
+                const currentIds = new Set(leads.map(l => l.id));
+                const newLeads = imported.filter((l: any) => !currentIds.has(l.id));
+                const merged = [...leads, ...newLeads];
+                db.saveLeads(merged);
+                toast.success(`Imported ${newLeads.length} new leads.`);
             } else {
                 toast.error("Invalid file format. Expected JSON array.");
             }

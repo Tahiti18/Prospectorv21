@@ -4,7 +4,6 @@ import { Lead } from '../../types';
 import { generateProposalDraft } from '../../services/geminiService';
 import { FormattedOutput } from '../common/FormattedOutput';
 import { toast } from '../../services/toastManager';
-import { dossierStorage } from '../../services/dossierStorage';
 
 interface ProposalDraftingProps {
   lead?: Lead;
@@ -14,16 +13,8 @@ export const ProposalDrafting: React.FC<ProposalDraftingProps> = ({ lead }) => {
   const [draft, setDraft] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadDraft = async (force = false) => {
+  const loadDraft = async () => {
     if (!lead) return;
-    
-    // Check for existing dossier data first to avoid manual trigger wait
-    const dossier = dossierStorage.getByLead(lead.id);
-    if (!force && dossier && dossier.data.proposal) {
-        setDraft(JSON.stringify(dossier.data.proposal));
-        return;
-    }
-
     setIsLoading(true);
     toast.neural("PROPOSAL: Synthesizing High-Ticket Transformation Plan...");
     try {
@@ -59,7 +50,7 @@ export const ProposalDrafting: React.FC<ProposalDraftingProps> = ({ lead }) => {
         </div>
         <div className="flex gap-4">
            <button 
-             onClick={() => loadDraft(true)}
+             onClick={loadDraft}
              disabled={isLoading}
              className="px-6 py-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
            >

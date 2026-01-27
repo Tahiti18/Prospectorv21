@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTED OUTPUT – PROFESSIONAL CLEAN RENDERING V10
+   FORMATTED OUTPUT – EXECUTIVE RENDERING V2
    ========================================================= */
 
 import React from 'react';
@@ -26,25 +26,18 @@ interface FormattedOutputProps {
   className?: string;
 }
 
-const professionalSanitize = (text: string): string => {
+const executiveSanitize = (text: string): string => {
   if (!text) return "";
   if (typeof text !== 'string') return String(text);
   return text
-    .replace(/^```json/gi, '')
-    .replace(/^```/gi, '')
-    .replace(/```$/gi, '')
-    .replace(/#/g, '')    
-    .replace(/\*/g, '')   
-    .replace(/__/g, '')   
-    .replace(/~~/g, '')   
-    .replace(/\[|\]/g, '') 
-    .replace(/---/g, '')   
-    .replace(/\s{2,}/g, ' ') 
+    .replace(/```json/gi, '')
+    .replace(/```/gi, '')
     .trim();
 };
 
 const deconstructJsonToBlocks = (data: any, depth = 0): UIBlock[] => {
   const blocks: UIBlock[] = [];
+  
   if (typeof data === 'string') {
     blocks.push({ type: 'p', content: data });
   } else if (Array.isArray(data)) {
@@ -60,6 +53,7 @@ const deconstructJsonToBlocks = (data: any, depth = 0): UIBlock[] => {
       blocks.push(...deconstructJsonToBlocks(val, depth + 1));
     });
   }
+  
   return blocks;
 };
 
@@ -67,16 +61,24 @@ const promoteToStrategicReport = (input: any): UIBlocks => {
   if (typeof input === 'string') {
     return {
       format: 'ui_blocks',
-      title: "Strategy Overview",
-      subtitle: "EXECUTIVE SUMMARY",
+      title: "Intelligence Briefing",
+      subtitle: "NEURAL SYNTHESIS",
       sections: [{ heading: "STRATEGIC OVERVIEW", body: [{ type: 'p', content: input }] }]
     };
   }
+
+  // Deconstruct object keys into sections
   const sections = Object.entries(input).map(([key, val]) => ({
     heading: key.replace(/_/g, ' ').toUpperCase(),
     body: deconstructJsonToBlocks(val)
   }));
-  return { format: 'ui_blocks', title: "Project Analysis", subtitle: "DATA SYNTHESIS", sections };
+
+  return {
+    format: 'ui_blocks',
+    title: "Project Analysis",
+    subtitle: "STRUCTURAL DECONSTRUCTION",
+    sections
+  };
 };
 
 export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, className = "" }) => {
@@ -85,11 +87,10 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
   try {
     let uiData: UIBlocks | null = null;
     const trimmed = content.trim();
-    const cleanJsonStr = trimmed.replace(/^```json/, '').replace(/```$/, '').trim();
 
-    if (cleanJsonStr.startsWith('{') || cleanJsonStr.startsWith('[')) {
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
       try {
-        const parsed = JSON.parse(cleanJsonStr);
+        const parsed = JSON.parse(trimmed);
         if (parsed.sections) uiData = parsed;
         else uiData = promoteToStrategicReport(parsed);
       } catch (e) {
@@ -101,57 +102,59 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
 
     const renderBlock = (block: UIBlock, idx: number) => {
       if (!block) return null;
-      const cleaned = typeof block.content === 'string' ? professionalSanitize(block.content) : block.content;
+      const cleaned = typeof block.content === 'string' ? executiveSanitize(block.content) : block.content;
 
       switch (block.type) {
         case 'hero':
           return (
-            <div key={idx} className="mb-10 p-8 bg-emerald-600 rounded-[32px] shadow-xl relative overflow-hidden group border-b-8 border-emerald-800">
-              <p className="text-xl font-bold text-white tracking-tight leading-tight relative z-10 font-sans">"{cleaned}"</p>
-              <div className="mt-3 flex gap-2 relative z-10 opacity-20 font-black text-[8px] uppercase tracking-widest text-white">STRATEGIC_ANCHOR</div>
+            <div key={idx} className="mb-12 p-12 bg-emerald-600 rounded-[40px] shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:scale-125 transition-transform duration-1000"></div>
+              <p className="text-3xl font-black text-white italic tracking-tight leading-none relative z-10 uppercase">"{cleaned}"</p>
+              <div className="mt-4 flex gap-2 relative z-10 opacity-60">
+                <div className="w-1 h-1 rounded-full bg-white"></div>
+                <div className="w-1 h-1 rounded-full bg-white"></div>
+                <div className="w-1 h-1 rounded-full bg-white"></div>
+              </div>
             </div>
           );
         case 'p':
-          return <p key={idx} className="text-slate-800 leading-relaxed mb-6 text-base font-normal border-l-4 border-emerald-500/10 pl-6 py-0.5 font-sans">{cleaned}</p>;
+          return <p key={idx} className="text-slate-300 leading-relaxed mb-8 text-lg font-medium opacity-90 border-l-4 border-slate-800 pl-8 py-2 italic font-serif">"{cleaned}"</p>;
         case 'bullets':
           const list = Array.isArray(block.content) ? block.content : [];
           return (
-            <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <div key={idx} className="grid grid-cols-1 gap-4 mb-12">
               {list.map((item: string, i: number) => (
-                <div key={i} className="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex items-start gap-3 hover:border-emerald-500/20 transition-all shadow-sm group">
-                  <div className="mt-1.5 w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="font-bold text-slate-700 text-[12px] leading-snug uppercase tracking-tight font-sans">{professionalSanitize(item)}</span>
+                <div key={i} className="bg-slate-900 border border-slate-800 p-6 rounded-[24px] flex items-start gap-4 hover:border-emerald-500/30 transition-all shadow-sm">
+                  <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  <span className="font-bold text-slate-200 uppercase tracking-wide text-xs">{item}</span>
                 </div>
               ))}
             </div>
           );
         case 'heading':
-          return (
-            <div key={idx} className="flex items-center gap-4 mb-6 mt-10 first:mt-0">
-               <h3 className="text-base font-black text-emerald-600 uppercase tracking-widest italic whitespace-nowrap font-sans">{cleaned}</h3>
-               <div className="h-px bg-emerald-500/10 flex-1 rounded-full"></div>
-            </div>
-          );
+          return <h3 key={idx} className="text-xl font-black text-emerald-500 uppercase tracking-tighter italic mb-6 mt-12 border-b border-emerald-900/30 pb-3 flex items-center gap-4">
+            <span className="w-8 h-[2px] bg-emerald-500/30"></span>
+            {cleaned}
+          </h3>;
         default:
-          return <p key={idx} className="text-slate-700 text-base mb-6 leading-relaxed font-normal font-sans">{String(cleaned)}</p>;
+          return <p key={idx} className="text-slate-400 text-sm mb-4 leading-relaxed italic">{String(cleaned)}</p>;
       }
     };
 
     return (
-      <div className={`space-y-10 animate-in fade-in duration-1000 max-w-5xl mx-auto pb-20 ${className}`}>
+      <div className={`space-y-12 animate-in fade-in duration-700 max-w-4xl mx-auto ${className}`}>
         {uiData?.title && (
-          <div className="border-b border-slate-100 pb-8 mb-12 text-center">
-            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter italic leading-none mb-3 font-sans">{uiData.title}</h1>
-            {uiData.subtitle && <p className="text-emerald-600 font-black uppercase tracking-[0.5em] text-[9px] font-sans">{uiData.subtitle}</p>}
+          <div className="border-b-2 border-slate-800 pb-8 mb-12">
+            <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none mb-3">{uiData.title}</h1>
+            {uiData.subtitle && <p className="text-emerald-500 font-black uppercase tracking-[0.5em] text-[9px] italic">{uiData.subtitle}</p>}
           </div>
         )}
 
         {(uiData?.sections || []).map((section, sIdx) => (
-          <section key={sIdx} className="mb-16">
-            <div className="flex items-center gap-4 mb-8">
-                <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-white text-base italic shadow-lg shrink-0">0{sIdx+1}</div>
-                <h2 className="text-xl font-black text-emerald-600 uppercase tracking-tighter italic whitespace-nowrap font-sans">{professionalSanitize(section?.heading || "SEGMENT")}</h2>
-                <div className="h-px bg-slate-100 flex-1"></div>
+          <section key={sIdx} className="mb-20">
+            <div className="flex items-center gap-6 mb-10">
+                <h2 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em] italic whitespace-nowrap bg-emerald-900/10 px-4 py-1.5 rounded-lg border border-emerald-500/20">{section?.heading || "SEGMENT"}</h2>
+                <div className="h-[1px] bg-slate-800 flex-1"></div>
             </div>
             <div className="px-2">
               {(section?.body || []).map((block, bIdx) => renderBlock(block, bIdx))}
@@ -162,9 +165,9 @@ export const FormattedOutput: React.FC<FormattedOutputProps> = ({ content, class
     );
   } catch (fatalError) {
     return (
-      <div className="p-12 border-2 border-rose-500/10 rounded-[32px] text-center bg-rose-500/5">
-        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4 font-sans text-[10px]">ANALYSIS_FAULT</p>
-        <div className="bg-black/90 p-8 rounded-[24px] text-slate-400 font-mono text-xs whitespace-pre-wrap text-left shadow-xl border border-white/5 overflow-auto max-h-64">
+      <div className="p-12 border-2 border-dashed border-rose-500/20 rounded-[40px] text-center bg-rose-500/5">
+        <p className="text-rose-400 font-black uppercase tracking-[0.4em] mb-4">NEURAL RENDERING EXCEPTION</p>
+        <div className="bg-black/50 p-8 rounded-3xl text-slate-400 font-mono text-[11px] whitespace-pre-wrap text-left">
           {content}
         </div>
       </div>

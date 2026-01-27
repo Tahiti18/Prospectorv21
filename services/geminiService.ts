@@ -1,11 +1,10 @@
+
 /* =========================================================
-   OPENROUTER SERVICE – POMELLI OS V26 (PROFESSIONAL CORE)
+   OPENROUTER SERVICE – POMELLI OS V25 (ELITE STRATEGIC CORE)
    ========================================================= */
 
 import { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity } from "../types";
 import { deductCost } from "./computeTracker";
-
-export { deductCost };
 
 export type { Lead, AssetRecord, BenchmarkReport, VeoConfig, GeminiResult, EngineResult, BrandIdentity };
 
@@ -42,7 +41,7 @@ export function getStoredKeys() {
 export function setStoredKeys(orKey: string, kieKey: string) {
   if (orKey) localStorage.setItem('pomelli_os_or_key', orKey);
   if (kieKey) localStorage.setItem('pomelli_os_kie_key', kieKey);
-  pushLog("SYSTEM_KEY_COMMIT: Authorization updated.");
+  pushLog("INFRASTRUCTURE_KEY_COMMIT: Keys updated.");
   return true;
 }
 
@@ -70,7 +69,7 @@ export function saveAsset(
   };
   SESSION_ASSETS.push(asset);
   assetListeners.forEach(l => l([...SESSION_ASSETS]));
-  pushLog(`DATA_SYNC: [${type}] ${title}`);
+  pushLog(`ASSET_SAVED: [${type}] ${title}`);
   return asset;
 }
 
@@ -120,14 +119,12 @@ function extractJSON(text: string): any {
   return null;
 }
 
-async function callOpenRouter(prompt: string, systemInstruction?: string, modelOverride?: string): Promise<GeminiResult<string>> {
+async function callOpenRouter(prompt: string, systemInstruction?: string): Promise<GeminiResult<string>> {
   try {
     const keys = getStoredKeys();
     const apiKey = keys.openRouter || process.env.API_KEY;
 
-    if (!apiKey) throw new Error("AUTHORIZATION_REQUIRED: Set API key in Settings.");
-
-    const model = modelOverride || DEFAULT_MODEL;
+    if (!apiKey) throw new Error("AUTHORIZATION_REQUIRED: Set OpenRouter key in Settings.");
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -138,11 +135,11 @@ async function callOpenRouter(prompt: string, systemInstruction?: string, modelO
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: model,
+        model: DEFAULT_MODEL,
         messages: [
           { 
             role: "system", 
-            content: systemInstruction || "You are Prospector OS, a senior business consultant. Output raw JSON when requested. Be professional and avoid gimmicks. NO military slang." 
+            content: systemInstruction || "You are Prospector OS, a world-class strategic agency consultant. Output ONLY raw JSON when requested. Every single field must be filled with high-density, professional, and targeted business detail. Never use placeholders or empty strings." 
           },
           { role: "user", content: prompt }
         ],
@@ -154,11 +151,11 @@ async function callOpenRouter(prompt: string, systemInstruction?: string, modelO
     if (data.error) throw new Error(data.error.message || "OpenRouter error");
 
     const text = data.choices[0].message.content;
-    deductCost(model, (prompt.length + text.length));
+    deductCost(DEFAULT_MODEL, (prompt.length + text.length));
     
     return { ok: true, text: text, raw: data };
   } catch (e: any) {
-    pushLog(`NEURAL_FAULT: ${e.message}`);
+    pushLog(`SYSTEM_FAULT: ${e.message}`);
     return { ok: false, text: "", raw: null, error: { message: e.message } };
   }
 }
@@ -168,34 +165,37 @@ async function callOpenRouter(prompt: string, systemInstruction?: string, modelO
    ========================================================= */
 
 export async function generateLeads(market: string, niche: string, count: number): Promise<EngineResult> {
-  pushLog(`MARKET_ANALYSIS: Searching ${market} for ${niche} prospects...`);
+  pushLog(`RESEARCH: Performing exhaustive market analysis of ${market} for ${niche} prospects...`);
   const prompt = `Identify ${count} real-world, high-ticket businesses in ${market} (${niche}). 
   Return EXACT JSON: 
   { 
     "leads": [{ 
       "businessName": "Real Name", 
       "websiteUrl": "Actual URL", 
-      "niche": "Category", 
-      "city": "City", 
-      "phone": "Format", 
-      "email": "Format", 
+      "niche": "Specific Category", 
+      "city": "Specific City", 
+      "phone": "Real Format", 
+      "email": "Valid Format", 
       "leadScore": 0-100, 
       "assetGrade": "A/B/C", 
-      "socialGap": "Professional audit of social deficiency", 
-      "visualProof": "Description of visual weakness", 
-      "bestAngle": "The growth strategy angle", 
+      "socialGap": "Deep qualitative audit of their digital presence deficiencies", 
+      "visualProof": "Description of current visual brand weakness", 
+      "bestAngle": "The specific high-ticket AI growth angle", 
       "rank": 1 
     }], 
     "rubric": { 
-      "visual": "Criteria", "social": "Criteria", "highTicket": "Criteria", "reachability": "Criteria", 
-      "grades": { "A": "Elite", "B": "Viable", "C": "Legacy" } 
+      "visual": "Criteria for 40pts", 
+      "social": "Criteria for 30pts", 
+      "highTicket": "Criteria for 20pts", 
+      "reachability": "Criteria for 10pts", 
+      "grades": { "A": "Definition", "B": "Definition", "C": "Definition" } 
     }, 
     "assets": { 
-      "emailOpeners": ["Opener 1", "Opener 2"], 
-      "fullEmail": "Template", 
-      "callOpener": "Script", 
-      "voicemail": "Script", 
-      "smsFollowup": "Script" 
+      "emailOpeners": ["Deeply personalized opener 1", "Deeply personalized opener 2"], 
+      "fullEmail": "Professional cold email template", 
+      "callOpener": "20s professional verbal script", 
+      "voicemail": "Curiosity hook voicemail", 
+      "smsFollowup": "High-intent SMS script" 
     } 
   }`;
   const result = await callOpenRouter(prompt);
@@ -204,43 +204,53 @@ export async function generateLeads(market: string, niche: string, count: number
 }
 
 export async function groundedLeadSearch(query: string, market: string, count: number): Promise<EngineResult> {
-  pushLog(`SEARCH: Performing analysis for ${query}...`);
+  pushLog(`INTELLIGENCE: Executing multi-channel research for ${query}...`);
   return await generateLeads(market, query, count);
 }
 
 export async function generateEmailVariations(lead: Lead): Promise<{ subject: string, body: string }[]> {
-  pushLog(`ANALYSIS: Drafting engagement variations for ${lead.businessName}...`);
-  const prompt = `Generate 3 professional email variations for ${lead.businessName}. NO military slang. Return JSON array of {subject, body}.`;
+  pushLog(`STUDIO: Architecting A/B engagement variations for ${lead.businessName}...`);
+  const prompt = `Generate 3 distinct, high-impact professional cold email variations for ${lead.businessName}. 
+  Variation 1: Authority Driven. Variation 2: Opportunity Driven. Variation 3: Direct Visual Solution.
+  Return JSON array of {subject, body}.`;
   const result = await callOpenRouter(prompt);
   return extractJSON(result.text) || [];
 }
 
 export async function architectFunnel(lead: Lead): Promise<any[]> {
-  pushLog(`STRATEGY: Mapping client journey for ${lead.businessName}...`);
-  const prompt = `Architect a 7-stage client journey for ${lead.businessName}. NO military slang. 
-  Return ONLY a JSON array: [ { "stage": 1, "title": "Stage Name", "description": "Description", "conversionGoal": "Action", "frictionFix": "Solution" } ]`;
+  pushLog(`GEOMETRY: Designing 7-stage conversion journey for ${lead.businessName}...`);
+  const prompt = `Architect an exhaustive 7-stage High-Ticket AI Transformation Journey for ${lead.businessName}. 
+  Stages must be: 1. Awareness, 2. Discovery, 3. Education, 4. Conversion, 5. Commitment, 6. Onboarding, 7. Advocacy.
+  Return ONLY a JSON array: [ { "stage": 1, "title": "Stage Name", "description": "100-word tactical description", "conversionGoal": "Specific Action", "frictionFix": "How AI eliminates current hurdles" } ]`;
   const result = await callOpenRouter(prompt);
   const data = extractJSON(result.text);
   return Array.isArray(data) ? data : [];
 }
 
 export async function architectPitchDeck(lead: Lead): Promise<any> {
-  pushLog(`DEVELOPMENT: Planning strategy deck for ${lead.businessName}...`);
-  const prompt = `Create a 7-slide business strategy for ${lead.businessName}. NO military slang. 
-  Return ONLY JSON: { "slides": [ { "title": "Slide Title", "bullets": ["Point 1", "Point 2"], "category": "ANALYSIS/STRATEGY", "insight": "Key insight" } ] }`;
+  pushLog(`DECK: Engineering 7-slide strategic presentation for ${lead.businessName}...`);
+  const prompt = `Create an elite 7-slide strategy deck architecture for ${lead.businessName}.
+  Slides: 1. Executive Vision, 2. Current Digital Audit, 3. Market Benchmarking, 4. AI Transformation Visuals, 5. Authority Projection, 6. Economic Value (ROI), 7. Implementation Roadmap.
+  Return ONLY JSON: { "slides": [ { "title": "Slide Title", "bullets": ["High-density point 1", "High-density point 2", "High-density point 3"], "category": "VISION/AUDIT/BENCHMARK/TECH/MARKET/ROI/PLAN", "insight": "A sharp strategic 'kicker' statement for each slide" } ] }`;
   const result = await callOpenRouter(prompt);
   return extractJSON(result.text) || { slides: [] };
 }
 
 export async function generateProposalDraft(lead: Lead): Promise<string> {
-  pushLog(`PROPOSAL: Drafting executive blueprint for ${lead.businessName}...`);
-  const prompt = `Create a professional proposal for ${lead.businessName}. Use UI_BLOCKS format. NO military slang. 
+  pushLog(`PROPOSAL: Constructing executive strategy plan for ${lead.businessName}...`);
+  const prompt = `Create a massive, professional high-ticket agency proposal for ${lead.businessName}. 
+  You must synthesize their social gap ("${lead.socialGap}") and current digital presence into a transformative multi-section plan.
+  Use the UI_BLOCKS format.
+  Sections: 1. Strategic Digital Audit (Exposing Gaps), 2. AI Transformation Logic, 3. Multi-Channel Engagement Infrastructure, 4. Revenue & ROI Projections, 5. Implementation Timeline.
+  Structure: 
   { 
     "format": "ui_blocks", 
-    "title": "BUSINESS GROWTH PLAN", 
+    "title": "EXECUTIVE STRATEGY PLAN", 
+    "subtitle": "GROWTH ROADMAP FOR ${lead.businessName.toUpperCase()}",
     "sections": [ 
-      { "heading": "CURRENT PERFORMANCE AUDIT", "body": [{ "type": "p", "content": "Analysis..." }] },
-      { "heading": "IMPLEMENTATION ROADMAP", "body": [{ "type": "p", "content": "Process..." }] }
+      { "heading": "DIGITAL AUTHORITY AUDIT", "body": [{ "type": "p", "content": "Deep qualitative audit of their current market presence" }, { "type": "bullets", "content": ["Structural Gap 1", "Structural Gap 2", "Structural Gap 3"] }] },
+      { "heading": "AI TRANSFORMATION ROADMAP", "body": [{ "type": "hero", "content": "The High-Ticket Visual Vision" }, { "type": "p", "content": "Step-by-step implementation of AI systems" }] },
+      { "heading": "PROJECTED REVENUE IMPACT", "body": [{ "type": "p", "content": "Detailed ROI analysis and market projection based on AI automation" }] }
     ] 
   }`;
   const result = await callOpenRouter(prompt);
@@ -248,272 +258,151 @@ export async function generateProposalDraft(lead: Lead): Promise<string> {
 }
 
 export async function generateOutreachSequence(lead: Lead): Promise<any[]> {
-  pushLog(`ENGAGEMENT: Planning outreach sequence for ${lead.businessName}...`);
-  const prompt = `Draft a 25-day sequence for ${lead.businessName}. NO military slang. 
-  Return ONLY a JSON array: { "day": number, "channel": "EMAIL"|"LINKEDIN", "purpose": "Goal", "subject": "Subject", "body": "Copy" }`;
+  pushLog(`SEQUENCE: Engineering 25-day multi-channel engagement roadmap for ${lead.businessName}...`);
+  const prompt = `Draft a comprehensive 25-day engagement sequence for ${lead.businessName}. 
+  Requirement: EXACTLY 7 high-impact emails spaced strategically (Days 1, 3, 5, 8, 14, 20, 25).
+  Also include 2 LinkedIn touchpoints and 1 SMS follow-up.
+  Return ONLY a JSON array where each object is: { "day": number, "channel": "EMAIL"|"LINKEDIN"|"SMS", "purpose": "Strategic Goal", "subject": "High-CTR Subject Line", "body": "Exhaustive, professional, non-intrusive high-ticket copy" }`;
   const result = await callOpenRouter(prompt);
   const data = extractJSON(result.text);
   return Array.isArray(data) ? data : [];
 }
 
 export async function generatePitch(lead: Lead): Promise<string> {
-  pushLog(`PITCH: Drafting script set for ${lead.businessName}...`);
-  const prompt = `Generate scripts for ${lead.businessName}. Use UI_BLOCKS. NO military slang.`;
+  pushLog(`PITCH: Synthesizing 3-part professional script set for ${lead.businessName}...`);
+  const prompt = `Generate a comprehensive 3-part script set for ${lead.businessName} to use during sales interactions.
+  You must synthesize their specific niche (${lead.niche}) and the identified gaps into the scripts.
+  Include: 
+  1. The 30-Second Elevator Hook (Pattern Interrupt).
+  2. The Discovery Session Flow (5 psychological questions to expose pain).
+  3. The Objection Handling Matrix (Addressing Cost, Time, and Risk).
+  Use the UI_BLOCKS format.
+  Structure: 
+  { "format": "ui_blocks", "title": "PITCH ARCHITECTURE", "sections": [ 
+    { "heading": "THE PATTERN INTERRUPT (30s)", "body": [{ "type": "hero", "content": "The Scripted Hook" }, { "type": "p", "content": "Delivery notes and tonal guidance" }] },
+    { "heading": "DISCOVERY SESSION FLOW", "body": [{ "type": "bullets", "content": ["Question 1: Pain Exposure", "Question 2: Vision Mapping", "Question 3: Friction Detection"] }] },
+    { "heading": "OBJECTION HANDLING MATRIX", "body": [{ "type": "p", "content": "Tactical responses for price and implementation hesitation" }] }
+  ] }`;
   const result = await callOpenRouter(prompt);
   return result.text;
 }
 
+/* =========================================================
+   GRANULAR RE-SYNTHESIS HANDLERS
+   ========================================================= */
+
+export async function resynthesizeNarrative(lead: Lead): Promise<string> {
+  pushLog(`RE-SYNTHESIS: Re-drafting Executive Narrative for ${lead.businessName}...`);
+  const prompt = `Generate a new, professional 300-word executive summary for ${lead.businessName} explaining why they must implement AI marketing today. Focus on urgency and ROI. Return ONLY the text.`;
+  const result = await callOpenRouter(prompt);
+  return result.text;
+}
+
+export async function resynthesizeVisuals(lead: Lead): Promise<any> {
+  pushLog(`RE-SYNTHESIS: Re-calculating Visual Aesthetics for ${lead.businessName}...`);
+  const prompt = `Generate a professional visual brand direction for ${lead.businessName}. Return JSON: { "brandMood": "string", "colorPalette": [{ "hex": "string", "color": "name" }], "typography": { "heading": "string", "body": "string" }, "aiImagePrompts": [{ "use_case": "Primary", "prompt": "Exhaustive prompt" }] }`;
+  const result = await callOpenRouter(prompt);
+  return extractJSON(result.text);
+}
+
 export async function orchestrateBusinessPackage(lead: Lead, assets: AssetRecord[]): Promise<any> {
-  pushLog(`SYNTHESIS: Compiling strategic dossier for ${lead.businessName}...`);
-  const prompt = `Compile a full business strategy for ${lead.businessName}. NO military slang. NO placeholders. Return JSON with 'narrative', 'presentation', 'outreach', 'funnel', 'contentPack', 'visualDirection', 'proposal', 'pitch'.`;
+  pushLog(`GENERATOR: Packaging 25-day strategic blueprint for ${lead.businessName}...`);
+  const prompt = `Perform exhaustive strategic architecture for ${lead.businessName}. 
+  Analyze their digital presence and synthesize a complete agency service package.
+  Return EXACT JSON with NO empty fields:
+  { 
+    "narrative": "300-word executive summary on why this transformation is essential", 
+    "presentation": { 
+      "title": "THE ${lead.businessName.toUpperCase()} TRANSFORMATION", 
+      "slides": [
+        { "title": "Vision", "bullets": ["Point A", "Point B", "Point C"], "category": "VISION", "insight": "Strategic insight" },
+        { "title": "Audit", "bullets": ["Point A", "Point B", "Point C"], "category": "AUDIT", "insight": "Strategic insight" },
+        { "title": "Visuals", "bullets": ["Point A", "Point B", "Point C"], "category": "DESIGN", "insight": "Strategic insight" },
+        { "title": "Tech", "bullets": ["Point A", "Point B", "Point C"], "category": "TECH", "insight": "Strategic insight" },
+        { "title": "Market", "bullets": ["Point A", "Point B", "Point C"], "category": "MARKET", "insight": "Strategic insight" },
+        { "title": "ROI", "bullets": ["Point A", "Point B", "Point C"], "category": "ROI", "insight": "Strategic insight" },
+        { "title": "Roadmap", "bullets": ["Point A", "Point B", "Point C"], "category": "PLAN", "insight": "Strategic insight" }
+      ] 
+    }, 
+    "outreach": { 
+      "emailSequence": [
+        { "day": 1, "purpose": "Introduction", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 3, "purpose": "Value Offer", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 5, "purpose": "Case Study", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 10, "purpose": "Insight Sharing", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 15, "purpose": "The Offer", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 20, "purpose": "Follow-up", "subject": "Subject", "body": "Full Detail Body" },
+        { "day": 25, "purpose": "Final Note", "subject": "Subject", "body": "Full Detail Body" }
+      ], 
+      "linkedinSequence": [{ "day": 4, "type": "DM", "message": "Professional DM" }, { "day": 12, "type": "DM", "message": "Professional DM" }], 
+      "callScript": { "opener": "Scripted opener", "hook": "Value hook", "closing": "Closing ask" } 
+    }, 
+    "funnel": [
+      { "title": "Stage 1", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 2", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 3", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 4", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 5", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 6", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" },
+      { "title": "Stage 7", "description": "Desc", "conversionGoal": "Goal", "frictionFix": "AI Fix" }
+    ], 
+    "contentPack": [{ "platform": "Instagram", "type": "REEL", "caption": "Viral caption", "visualDirective": "Art direction" }], 
+    "visualDirection": { 
+      "brandMood": "Exhaustive brand mood description", 
+      "colorPalette": [{ "hex": "#HEX", "color": "Name" }], 
+      "typography": { "heading": "Font Name", "body": "Font Name" }, 
+      "aiImagePrompts": [{ "use_case": "Primary", "prompt": "Exhaustive 4K prompt" }] 
+    } 
+  }`;
   const result = await callOpenRouter(prompt);
   return result.ok ? extractJSON(result.text) : null;
 }
 
-export async function resynthesizeNarrative(lead: Lead): Promise<string> {
-  pushLog(`REFRESH: Updating narrative for ${lead.businessName}...`);
-  const result = await orchestrateBusinessPackage(lead, []);
-  return result?.narrative || "";
-}
-
-export async function resynthesizeVisuals(lead: Lead): Promise<any> {
-  pushLog(`REFRESH: Updating visuals for ${lead.businessName}...`);
-  const result = await orchestrateBusinessPackage(lead, []);
-  return result?.visualDirection || null;
-}
-
-export async function fetchViralPulseData(niche: string): Promise<any[]> {
-    pushLog(`TRENDS: Analyzing signals for ${niche}...`);
-    const prompt = `Provide 4 trends for ${niche}. Return JSON: [{"label": "Trend", "val": 0-150, "type": "up"|"down"}]`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text) || [];
-}
-
-export async function queryRealtimeAgent(query: string): Promise<{ text: string; sources?: any[] }> {
-    pushLog(`ANALYSIS: Searching live data for: ${query}...`);
-    const result = await callOpenRouter(query);
-    return { 
-        text: result.text, 
-        sources: (result.raw as any)?.grounding_metadata?.chunks || [] 
-    };
-}
-
-export async function analyzeVideoUrl(url: string, prompt: string, leadId?: string): Promise<string> {
-    pushLog(`ANALYSIS: Deconstructing video: ${url}...`);
-    const finalPrompt = `Analyze video: ${url}. Instructions: ${prompt}. Use UI_BLOCKS. NO military slang.`;
-    const result = await callOpenRouter(finalPrompt);
-    return result.text;
-}
-
-export async function critiqueVideoPresence(lead: Lead): Promise<string> {
-    pushLog(`AUDIT: Evaluating video ecosystem for ${lead.businessName}...`);
-    const prompt = `Audit video presence for ${lead.businessName}. NO military slang. Return markdown.`;
-    const result = await callOpenRouter(prompt);
-    return result.text;
-}
-
-export async function synthesizeArticle(source: string, mode: string): Promise<string> {
-    pushLog(`SYNTHESIS: Summarizing source...`);
-    const prompt = `Summarize source: ${source}. Mode: ${mode}. NO military slang. Return markdown.`;
-    const result = await callOpenRouter(prompt);
-    return result.text;
-}
-
-export async function analyzeVisual(base64: string, mimeType: string, prompt: string): Promise<string> {
-    pushLog(`VISION: Analyzing image plate...`);
-    const finalPrompt = `Analyze image. ${prompt}. NO military slang.`;
-    const result = await callOpenRouter(finalPrompt);
-    return result.text;
-}
-
-export async function generateMockup(name: string, niche: string, leadId?: string): Promise<string> {
-    pushLog(`CREATIVE: Rendering commercial preview for ${name}...`);
-    const prompt = `A premium professional mockup for ${name}. Luxury aesthetic.`;
-    const mockUrl = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000";
-    saveAsset('IMAGE', `MOCKUP: ${name}`, mockUrl, 'CREATIVE_LAB', leadId);
-    return mockUrl;
-}
-
-export async function openRouterChat(prompt: string, system?: string): Promise<string> {
-    const result = await callOpenRouter(prompt, system);
-    return result.text;
-}
-
-export async function fetchLiveIntel(lead: Lead, module: string): Promise<BenchmarkReport> {
-    pushLog(`ANALYSIS: Fetching intelligence for ${lead.businessName}...`);
-    const prompt = `Benchmark ${lead.businessName}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text) || { missionSummary: "Error", visualStack: [], sonicStack: [], featureGap: "", businessModel: "", designSystem: "", deepArchitecture: "", sources: [] };
-}
-
-export async function generateAffiliateProgram(niche: string): Promise<any> {
-    pushLog(`PARTNER: Designing program for ${niche}...`);
-    const prompt = `Create affiliate program for ${niche}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function generateROIReport(ltv: number, volume: number, conv: number): Promise<string> {
-    pushLog(`ANALYSIS: Projecting ROI (LTV: ${ltv})...`);
-    const prompt = `Project ROI for AI services. LTV: ${ltv}, Vol: ${volume}. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return result.text;
-}
-
-export async function fetchTokenStats(): Promise<any> {
-    return {
-        available: 4200000,
-        recentOps: [
-            { op: 'MEDIA_RENDER', id: '0x88FF', cost: '150K' },
-            { op: 'STRATEGY_GEN', id: '0x22AB', cost: '12K' }
-        ]
-    };
-}
-
-export async function generateVideoPayload(prompt: string, leadId?: string, startImage?: string, endImage?: string, config?: VeoConfig): Promise<string> {
-    pushLog(`MEDIA: Initiating video synthesis...`);
-    return `TASK_${Date.now()}`;
-}
-
-export async function enhanceVideoPrompt(prompt: string): Promise<string> {
-    const res = await callOpenRouter(`Enhance video prompt: ${prompt}. NO military slang.`);
-    return res.text;
-}
-
-export async function synthesizeProduct(lead: Lead): Promise<any> {
-    pushLog(`DEVELOPMENT: Designing offer for ${lead.businessName}...`);
-    const prompt = `Design offer for ${lead.businessName}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function extractBrandDNA(lead: Lead, url: string): Promise<BrandIdentity> {
-    pushLog(`ANALYSIS: Extracting identity from ${url}...`);
-    const prompt = `Extract brand DNA from ${url}. Return JSON.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function generateVisual(prompt: string, lead: Lead, sourceImage?: string): Promise<string> {
-    pushLog(`CREATIVE: Rendering asset...`);
-    const mockUrl = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000";
-    saveAsset('IMAGE', `VISUAL: ${lead.businessName}`, mockUrl, 'CREATIVE_LAB', lead.id);
-    return mockUrl;
-}
-
-export async function loggedGenerateContent(args: { module: string; contents: string; config?: any }): Promise<string> {
-    pushLog(`ANALYSIS: [${args.module}] Initiating analysis...`);
-    const result = await callOpenRouter(args.contents, args.config?.systemInstruction);
-    if (result.ok) {
-        pushLog(`SUCCESS: [${args.module}] Analysis complete.`);
-        return result.text;
-    }
-    throw new Error(result.error?.message || "Analysis failed");
-}
-
-export async function performFactCheck(lead: Lead, claim: string): Promise<any> {
-    pushLog(`AUDIT: Verifying claim for ${lead.businessName}...`);
-    const prompt = `Verify claim: "${claim}" for ${lead.businessName}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function generateAgencyIdentity(niche: string, region: string): Promise<any> {
-    pushLog(`IDENTITY: Forging agency profile...`);
-    const prompt = `Generate agency profile for ${niche} in ${region}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function enhanceStrategicPrompt(prompt: string): Promise<string> {
-    const res = await callOpenRouter(`Enhance strategy prompt: ${prompt}. NO military slang.`);
-    return res.text;
-}
-
-export async function generatePlaybookStrategy(niche: string): Promise<any> {
-    pushLog(`DEVELOPMENT: Designing SOPs for ${niche}...`);
-    const prompt = `Generate business SOPs for ${niche}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function analyzeLedger(leads: Lead[]): Promise<{ risk: string; opportunity: string }> {
-    pushLog(`ANALYSIS: Evaluating portfolio...`);
-    const prompt = `Analyze leads. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text) || { risk: "Low coverage", opportunity: "Emerging niche detected" };
-}
-
-export async function crawlTheaterSignals(sector: string, signal: string): Promise<Lead[]> {
-    pushLog(`ANALYSIS: Scanning ${sector} for ${signal}...`);
-    const res = await generateLeads(sector, signal, 4);
-    return res.leads;
-}
-
-export async function identifySubRegions(theater: string): Promise<string[]> {
-    return [theater + " North", theater + " South", theater + " Central"];
-}
-
-export async function generateMotionLabConcept(lead: Lead): Promise<any> {
-    pushLog(`CREATIVE: Designing video storyboard for ${lead.businessName}...`);
-    const prompt = `Design storyboard for ${lead.businessName}. Return JSON. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text);
-}
-
-export async function testModelPerformance(model: string, prompt: string): Promise<string> {
-    const res = await callOpenRouter(prompt, undefined, model);
-    return res.text;
-}
-
-export async function generateNurtureDialogue(lead: Lead, scenario: string): Promise<any[]> {
-    pushLog(`CONCIERGE: Simulating dialogue for ${lead.businessName}...`);
-    const prompt = `Simulate chat for ${lead.businessName}. Scenario: ${scenario}. Return JSON array. NO military slang.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text) || [];
-}
-
-export async function simulateSandbox(lead: Lead, ltv: number, volume: number): Promise<string> {
-    pushLog(`ANALYSIS: Calculating growth for ${lead.businessName}...`);
-    const prompt = `Simulate growth. LTV ${ltv}, Vol ${volume}. NO military slang. Return markdown.`;
-    const result = await callOpenRouter(prompt);
-    return result.text;
-}
-
-export async function translateTactical(text: string, lang: string): Promise<string> {
-    pushLog(`LOCALIZATION: Translating to ${lang}...`);
-    const prompt = `Translate outreach copy to ${lang}: ${text}`;
-    const result = await callOpenRouter(prompt);
-    return result.text;
-}
-
-export async function generateFlashSparks(lead: Lead): Promise<string[]> {
-    pushLog(`CREATIVE: Generating content hooks for ${lead.businessName}...`);
-    const prompt = `Generate 6 hooks for ${lead.businessName}. NO military slang. Return JSON array.`;
-    const result = await callOpenRouter(prompt);
-    return extractJSON(result.text) || [];
-}
-
-export async function generateAudioPitch(script: string, voice: string, leadId?: string): Promise<string> {
-    pushLog(`MEDIA: Rendering audio pitch (Voice: ${voice})...`);
-    const mockUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-    saveAsset('AUDIO', `PITCH: ${voice}`, mockUrl, 'MEDIA_LAB', leadId);
-    return mockUrl;
-}
-
-export async function fetchBenchmarkData(lead: Lead): Promise<BenchmarkReport> {
-    return await fetchLiveIntel(lead, 'BENCHMARK');
-}
-
-export async function generateROIReport_Old(ltv: number, leads: number, conv: number): Promise<string> {
-    return await generateROIReport(ltv, leads, conv);
-}
-
+// STUBS
 export async function generateTaskMatrix(lead: Lead): Promise<any[]> { 
     return [
-        { id: '1', task: 'Review Content Analysis', status: 'pending' },
-        { id: '2', task: 'Approve Brand Asset Directive', status: 'pending' },
-        { id: '3', task: 'Initialize Email Automation', status: 'pending' },
-        { id: '4', task: 'Finalize Interactive Proposal', status: 'pending' }
-    ];
+        { id: '1', task: 'Review Brand Audit Gaps', status: 'pending' },
+        { id: '2', task: 'Approve 4K Visual Guidelines', status: 'pending' },
+        { id: '3', task: 'Finalize Pricing Architecture', status: 'pending' },
+        { id: '4', task: 'Execute Day 1 Outreach Initiative', status: 'pending' }
+    ]; 
 }
+export async function generateVisual(prompt: string, lead: Lead, sourceImage?: string): Promise<string | undefined> { return undefined; }
+export async function generateMockup(name: string, niche: string, leadId: string): Promise<string> { return ""; }
+export async function generateFlashSparks(lead: Lead): Promise<string[]> { return ["Marketing Hook 1", "AI Insight 2", "Business Opportunity 3"]; }
+export async function generateROIReport(ltv: number, leads: number, conv: number): Promise<string> { return "ROI Analysis complete."; }
+export async function generateNurtureDialogue(lead: Lead, scenario: string): Promise<any[]> { return []; }
+export async function synthesizeProduct(lead: Lead): Promise<any> { return { productName: "AI TRANSFORMATION", pricePoint: "$15,000", features: ["Component A"] }; }
+export async function openRouterChat(prompt: string, system?: string): Promise<string> { 
+    const res = await callOpenRouter(prompt, system);
+    return res.text;
+}
+export async function performFactCheck(lead: Lead, claim: string): Promise<any> { return { status: "Verified", evidence: "No issues detected.", sources: [] }; }
+export async function translateTactical(text: string, lang: string): Promise<string> { return text; }
+export async function analyzeVisual(base64: string, mimeType: string, prompt: string): Promise<string> { return "Visual audit complete."; }
+export async function analyzeVideoUrl(url: string, mission: string, leadId?: string): Promise<string> { return "Video analysis complete."; }
+export async function generateVideoPayload(prompt: string, leadId?: string, image?: string, lastFrame?: string, config?: VeoConfig): Promise<string> { return ""; }
+export async function enhanceVideoPrompt(prompt: string): Promise<string> { return prompt; }
+export async function generateMotionLabConcept(lead: Lead): Promise<any> { return { title: "Motion Concept", scenes: [] }; }
+export async function generateAgencyIdentity(niche: string, region: string): Promise<any> { return { name: "Prospector Agency" }; }
+export async function fetchViralPulseData(niche: string): Promise<any[]> { return []; }
+export async function queryRealtimeAgent(prompt: string): Promise<{ text: string, sources: any[] }> { return { text: "", sources: [] }; }
+export async function testModelPerformance(model: string, prompt: string): Promise<string> { return ""; }
+export async function loggedGenerateContent(params: { module: string; contents: string | any; config?: any; }): Promise<string> { 
+    const res = await callOpenRouter(params.contents);
+    return res.text;
+  }
+export async function generateAffiliateProgram(niche: string): Promise<any> { return {}; }
+export async function synthesizeArticle(source: string, mode: string): Promise<string> { return ""; }
+export async function crawlTheaterSignals(sector: string, signal: string): Promise<Lead[]> { return []; }
+export async function identifySubRegions(theater: string): Promise<string[]> { return []; }
+export async function simulateSandbox(lead: Lead, ltv: number, volume: number): Promise<string> { return ""; }
+export async function generatePlaybookStrategy(niche: string): Promise<any> { return {}; }
+export async function fetchTokenStats(): Promise<any> { return {}; }
+export async function critiqueVideoPresence(lead: Lead): Promise<string> { return ""; }
+export async function generateAudioPitch(script: string, voice: string, leadId?: string): Promise<string> { return ""; }
+export async function enhanceStrategicPrompt(prompt: string): Promise<string> { return prompt; }
+export async function fetchLiveIntel(lead: Lead, module: string): Promise<BenchmarkReport> { return {} as any; }
+export async function analyzeLedger(leads: Lead[]): Promise<{ risk: string; opportunity: string }> { return { risk: "", opportunity: "" }; }
+export async function fetchBenchmarkData(lead: Lead): Promise<BenchmarkReport> { return {} as any; }
+export async function extractBrandDNA(lead: Lead, url: string): Promise<BrandIdentity> { return {} as any; }

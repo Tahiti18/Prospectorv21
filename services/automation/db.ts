@@ -1,16 +1,15 @@
+
 import { AutomationRun, isAutomationRun } from './types';
-// Comment: Fix error: Module '"../../types"' has no exported member 'GHLCredentials'. Replaced with 'GhlOAuthTokens'.
-import { Lead, GhlOAuthTokens, GHLBuildStatus } from '../../types';
+import { Lead } from '../../types';
 import { toast } from '../toastManager';
 
 const DB_KEY = 'pomelli_automation_db_v1';
 const STORAGE_KEY_LEADS = 'pomelli_os_leads_v14_final';
 const MUTEX_KEY = 'pomelli_automation_mutex_v1';
-const GHL_CRED_KEY = 'indigo_ghl_creds_v1';
-const GHL_BUILD_STATE_KEY = 'indigo_ghl_build_state_v1';
 
 type DbV1 = { version: 1; runs: Record<string, AutomationRun> };
 
+// Event Bus for Leads
 type Listener = (leads: Lead[]) => void;
 const listeners = new Set<Listener>();
 
@@ -22,19 +21,6 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 function safeParse(raw: string | null): unknown {
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
-}
-
-function normalizeUrl(url: string = ''): string {
-  return url
-    .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/^www\./, '')
-    .replace(/\/$/, '')
-    .trim();
-}
-
-function normalizeName(name: string = ''): string {
-  return name.toLowerCase().trim();
 }
 
 function normalizeRunsMap(maybeRuns: unknown): Record<string, AutomationRun> {
@@ -109,6 +95,7 @@ export const db = {
 
   subscribe: (listener: Listener) => {
     listeners.add(listener);
+    // Immediately emit current state to new subscriber
     listener(db.getLeads());
     return () => { listeners.delete(listener); };
   },
@@ -126,7 +113,9 @@ export const db = {
     }
     try {
         localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
+        // Broadcast to all active listeners (App.tsx state)
         listeners.forEach(l => l([...leads]));
+        console.log(`[Persistence] ${leads.length} records committed to local storage.`);
     } catch (e: any) {
         console.error("Save Leads Failed", e);
         if (e.name === 'QuotaExceededError') {
@@ -135,46 +124,27 @@ export const db = {
     }
   },
 
-  upsertLeads: (newLeads: Lead[]): { added: number, updated: number, upsertedLeads: Lead[] } => {
+  upsertLeads: (newLeads: Lead[]) => {
     const current = db.getLeads();
-    const currentMap = new Map<string, Lead>();
+    const currentMap = new Map(current.map(l => [l.id, l]));
     
-    current.forEach(l => {
-      const key = l.websiteUrl ? normalizeUrl(l.websiteUrl) : `name-${normalizeName(l.businessName)}-${normalizeName(l.city)}`;
-      currentMap.set(key, l);
-    });
-
-    let added = 0;
-    let updated = 0;
-    const upsertedLeads: Lead[] = [];
-
     newLeads.forEach(nl => {
-      const key = nl.websiteUrl ? normalizeUrl(nl.websiteUrl) : `name-${normalizeName(nl.businessName)}-${normalizeName(nl.city)}`;
-      
-      if (currentMap.has(key)) {
-        const existing = currentMap.get(key)!;
-        const merged: Lead = { 
-          ...nl, 
-          ...existing, 
-          id: existing.id,
-          email: nl.email || existing.email,
-          phone: nl.phone || existing.phone,
-          outreachStatus: existing.outreachStatus || nl.outreachStatus || 'cold'
-        };
-        currentMap.set(key, merged);
-        upsertedLeads.push(merged);
-        updated++;
+      // Use businessName + website as a secondary key if ID is generic
+      const existing = current.find(e => 
+        e.id === nl.id || 
+        (e.businessName === nl.businessName && e.websiteUrl === nl.websiteUrl)
+      );
+
+      if (existing) {
+        currentMap.set(existing.id, { ...existing, ...nl, id: existing.id });
       } else {
-        currentMap.set(key, nl);
-        upsertedLeads.push(nl);
-        added++;
+        currentMap.set(nl.id, nl);
       }
     });
 
-    const finalLeads = Array.from(currentMap.values());
-    db.saveLeads(finalLeads);
-    
-    return { added, updated, upsertedLeads };
+    const merged = Array.from(currentMap.values());
+    db.saveLeads(merged);
+    return merged;
   },
 
   deleteLead: (id: string) => {
@@ -227,28 +197,5 @@ export const db = {
     localStorage.removeItem(DB_KEY);
     localStorage.removeItem(MUTEX_KEY);
     toast.success("Automation Database Cleared.");
-  },
-
-  // --- GHL SPECIFIC STORAGE ---
-
-  // Comment: Replaced non-existent GHLCredentials with GhlOAuthTokens
-  getGHLCreds: (): GhlOAuthTokens | null => {
-    return safeParse(localStorage.getItem(GHL_CRED_KEY)) as GhlOAuthTokens | null;
-  },
-
-  // Comment: Replaced non-existent GHLCredentials with GhlOAuthTokens
-  saveGHLCreds: (creds: GhlOAuthTokens) => {
-    localStorage.setItem(GHL_CRED_KEY, JSON.stringify(creds));
-  },
-
-  getGHLBuildStatus: (locationId: string): GHLBuildStatus | null => {
-    const all = safeParse(localStorage.getItem(GHL_BUILD_STATE_KEY)) as Record<string, GHLBuildStatus> | null;
-    return all ? all[locationId] : null;
-  },
-
-  saveGHLBuildStatus: (locationId: string, status: GHLBuildStatus) => {
-    const all = (safeParse(localStorage.getItem(GHL_BUILD_STATE_KEY)) || {}) as Record<string, GHLBuildStatus>;
-    all[locationId] = status;
-    localStorage.setItem(GHL_BUILD_STATE_KEY, JSON.stringify(all));
   }
 };
