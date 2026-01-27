@@ -69,12 +69,13 @@ export const executeGrowthBoardroom = async (
   updateUI();
 
   const PROFESSIONAL_PROTOCOL = `
-    STRICT BUSINESS STRATEGY PROTOCOL (BANNED SYNTAX):
-    - ABSOLUTELY NO MARKDOWN. NO stars (**), NO hashtags (#), NO underscores (_), NO backticks (\`).
-    - NEVER use double asterisks for bolding. Use standard sentence case or all caps for emphasis.
-    - NEVER use hashtags for headings. 
-    - USE STANDARD BUSINESS TERMS ONLY (No "Mission", "Target", "Cortex").
-    - OUTPUT CLEAN, PROFESSIONAL PARAGRAPHS.
+    STRICT BUSINESS STRATEGY PROTOCOL:
+    - NO MILITARY OR TECH SLANG (No "Mission", "Target", "Recon", "Inference", "Payload", "Cortex").
+    - USE STANDARD BUSINESS TERMS (Prospect, Client, Strategy, Implementation, Efficiency).
+    - ABSOLUTELY NO MARKDOWN (No stars **, no hashtags #, no underscores _).
+    - NO decorative characters or giant capital letters at start of sentences.
+    - STRUCTURE WITH PLAIN TEXT HEADINGS.
+    - USE STRAIGHT, PROFESSIONAL PARAGRAPHS.
     - SPEAK AS A SENIOR MANAGEMENT CONSULTANT.
     - KB: ${BUSINESS_KNOWLEDGE_BASE}
   `;
@@ -82,19 +83,19 @@ export const executeGrowthBoardroom = async (
   try {
     for (let r = 1; r <= rounds; r++) {
       steps[0].currentRound = r; steps[0].status = 'ANALYZING'; updateUI();
-      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist. Use pure text without any markdown symbols.", steps[0].modelId);
+      const visionOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Brand strategy for ${lead.businessName}. ${PROFESSIONAL_PROTOCOL}`, "You are a Brand Strategist.", steps[0].modelId);
       steps[0].output += `\n\nROUND ${r}:\n${visionOut}`;
       debateHistory += `\nBRAND STRATEGIST (R${r}): ${visionOut}`;
       steps[0].status = 'COMPLETED'; updateUI();
 
       steps[1].currentRound = r; steps[1].status = 'ANALYZING'; updateUI();
-      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue optimization based on: ${visionOut}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst. Use pure text without any markdown symbols.", steps[1].modelId);
+      const profitOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Revenue optimization based on: ${visionOut}. ${PROFESSIONAL_PROTOCOL}`, "You are a Revenue Analyst.", steps[1].modelId);
       steps[1].output += `\n\nROUND ${r}:\n${profitOut}`;
       debateHistory += `\nREVENUE ANALYST (R${r}): ${profitOut}`;
       steps[1].status = 'COMPLETED'; updateUI();
 
       steps[2].currentRound = r; steps[2].status = 'ANALYZING'; updateUI();
-      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan based on: ${debateHistory}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director. Use pure text without any markdown symbols.", steps[2].modelId);
+      const opsOut = await callAgent(`ANALYSIS ROUND ${r}/${rounds}: Operations plan based on: ${debateHistory}. ${PROFESSIONAL_PROTOCOL}`, "You are a Systems Director.", steps[2].modelId);
       steps[2].output += `\n\nROUND ${r}:\n${opsOut}`;
       debateHistory += `\nSYSTEMS DIRECTOR (R${r}): ${opsOut}`;
       steps[2].status = 'COMPLETED'; updateUI();
@@ -110,10 +111,10 @@ export const executeGrowthBoardroom = async (
       HISTORY: ${debateHistory}
       TASK: Synthesize the definitive BUSINESS TRANSFORMATION PLAN for ${lead.businessName}.
       
-      CRITICAL OUTPUT REQUIREMENTS:
-      - MINIMUM 4 PARAGRAPHS PER SECTION. Provide exhaustive detail.
-      - NO MARKDOWN SYMBOLS (No **, *, #, _, \`).
-      - USE "heading" BLOCKS FOR ALL TITLES.
+      CRITICAL REQUIREMENTS:
+      - PROVIDE EXHAUSTIVE DETAIL. Min 4 full paragraphs per section.
+      - NO MILITARY SLANG. NO MARKDOWN. NO STARS. NO HASHTAGS.
+      - USE "heading" BLOCKS FOR TITLES.
       - USE "p" FOR CLEAN PARAGRAPHS.
       - OUTPUT STRICTLY VALID JSON IN UI_BLOCKS FORMAT.
       
@@ -123,23 +124,18 @@ export const executeGrowthBoardroom = async (
         "title": "BUSINESS TRANSFORMATION PLAN",
         "subtitle": "PREMIUM GROWTH ARCHITECTURE",
         "sections": [
-          { "heading": "STRATEGIC AUDIT", "body": [ { "type": "p", "content": "Detailed paragraphs here..." } ] },
-          { "heading": "REVENUE GROWTH PROTOCOL", "body": [ { "type": "hero", "content": "Master Vision" }, { "type": "p", "content": "Detailed paragraphs here..." } ] },
-          { "heading": "OPERATIONAL EXCELLENCE", "body": [ { "type": "p", "content": "Detailed paragraphs here..." } ] }
+          { "heading": "I. STRATEGIC AUDIT", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "II. REVENUE GROWTH PROTOCOL", "body": [ { "type": "hero", "content": "Master Vision" }, { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "III. OPERATIONAL EXCELLENCE", "body": [ { "type": "p", "content": "4+ detailed paragraphs..." } ] },
+          { "heading": "IV. EXPECTED OUTCOMES", "body": [ { "type": "bullets", "content": ["Outcome 1", "Outcome 2"] } ] }
         ]
       }
     `;
-    const finalOut = await callAgent(finalPrompt, "You are the Managing Director. Ensure no markdown symbols leak into the JSON strings.", steps[3].modelId);
+    const finalOut = await callAgent(finalPrompt, "You are the Managing Director.", steps[3].modelId);
     
-    try {
-      JSON.parse(finalOut);
-      steps[3].output = "Synthesis complete.";
-      steps[3].status = 'COMPLETED';
-    } catch(e) {
-      steps[3].status = 'FAILED';
-      throw new Error("MALFORMED_SYNTHESIS_RETRY_REQUIRED");
-    }
-
+    JSON.parse(finalOut);
+    steps[3].output = "Synthesis complete.";
+    steps[3].status = 'COMPLETED';
     updateUI();
     return finalOut;
 

@@ -59,6 +59,7 @@ export const SystemCapabilities: React.FC<SystemCapabilitiesProps> = ({ onNaviga
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
               <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em]">Official System Registry</span>
            </div>
+           {/* Size matching Agency Overview */}
            <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
              SYSTEM <span className="text-emerald-500 italic">CAPABILITIES</span>
            </h1>
@@ -95,7 +96,7 @@ export const SystemCapabilities: React.FC<SystemCapabilitiesProps> = ({ onNaviga
             <div className="flex-1 space-y-10">
                <div className="space-y-4">
                   <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] block">PROTOCOL 0{i+1}</span>
-                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none italic">{cap.title}</h2>
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">{cap.title}</h2>
                </div>
                <div className="space-y-8">
                   {cap.points.map((point, pi) => (
